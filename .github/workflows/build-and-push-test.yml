@@ -10,20 +10,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
 
+  login:
     runs-on: ubuntu-latest
+    steps:
+      -
+        name: Login to ACR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.ACR_URI }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
+  build:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [10.x]
-
     steps:
     - uses: actions/checkout@v2
       with:
         ref: test
-    - name: Login to ACR
-      run: echo ${{ secrets.ACR_PASSWORD }} | docker login -u ${{ secrets.ACR_USERNAME }} --password-stdin ${{ secrets.ACR_URI }}
+    #- name: Login to ACR
+    #  run: echo ${{ secrets.ACR_PASSWORD }} | docker login -u ${{ secrets.ACR_USERNAME }} --password-stdin ${{ secrets.ACR_URI }}
     - name: Build the new Docker image and uniquely tag
       run: docker build . --tag ${{ secrets.ACR_URI }}/data-dictionary_test:${{ github.sha }}
     - name: Push the new Docker image
