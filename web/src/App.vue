@@ -49,15 +49,6 @@
         ></v-progress-circular>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <!-- <v-label dark>License Year:</v-label>
-      <v-select
-        v-model="licenseYear"
-        smaller
-        :items="licenseYears"
-        dense
-        style="margin-left: 15px; max-width: 150px; margin-right: 20px"
-        hide-details
-      ></v-select> -->
 
       <div v-if="isAuthenticated">
         <span>{{ username }}</span>

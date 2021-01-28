@@ -21,7 +21,7 @@ const actions = {
     async loadProfile({ commit }) {
         await axios.get(PROFILE_URL)
             .then(resp => {
-                commit("setProfile", resp.data);
+                commit("setProfile", resp.data.data);
             }).catch(() => {
                 commit("clearUser");
             });

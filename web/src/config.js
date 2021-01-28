@@ -1,4 +1,3 @@
-
 export const applicationName = "Spatial Data Dictionary";
 export const applicationIcon = "mdi-cash-register";
 export const hasSidebar = true;
@@ -11,12 +10,12 @@ export const sections = [
         icon: "mdi-view-dashboard"
     },
     {
-        name: "Basic Form",
+        name: "Entities",
         url: "/form",
         icon: "mdi-book-open-variant"
     },
     {
-        name: "Data grid",
+        name: "Attributes",
         url: "/grid",
         icon: "mdi-table-large"
     }
