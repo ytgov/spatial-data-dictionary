@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  login:
+  build-image-for-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
