@@ -11,7 +11,7 @@ WORKDIR /home/node/app
 COPY --chown=node:node api/package*.json ./
 COPY --chown=node:node api/.env* ./
 
-ENV NODE_ENV=production
+ENV NODE_ENV=test
 USER node
 RUN npm install && npm cache clean --force --loglevel=error
 COPY --chown=node:node api ./
@@ -20,6 +20,7 @@ RUN npm run build
 EXPOSE 3000
 
 WORKDIR /home/node/web
+ENV NODE_ENV=production
 RUN npm run build:docker
 
 WORKDIR /home/node/app
