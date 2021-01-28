@@ -15,7 +15,7 @@ dotenv.config({ path: path });
 
 console.log("LOADING CONFIG:", path)
 
-export const API_PORT = process.env.API_PORT;
+export const API_PORT = process.env.API_PORT || "3000";
 export const FRONTEND_URL = process.env.FRONTEND_URL || "";
 export const NODE_ENV = process.env.NODE_ENV;
 
