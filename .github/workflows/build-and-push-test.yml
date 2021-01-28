@@ -13,6 +13,9 @@ jobs:
 
   login:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x]
     steps:
       -
         name: Login to ACR
@@ -21,23 +24,15 @@ jobs:
           registry: ${{ secrets.ACR_URI }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [10.x]
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: test
-    #- name: Login to ACR
-    #  run: echo ${{ secrets.ACR_PASSWORD }} | docker login -u ${{ secrets.ACR_USERNAME }} --password-stdin ${{ secrets.ACR_URI }}
-    - name: Build the new Docker image and uniquely tag
-      run: docker build . --tag ${{ secrets.ACR_URI }}/data-dictionary_test:${{ github.sha }}
-    - name: Push the new Docker image
-      run: docker push ${{ secrets.ACR_URI }}/data-dictionary_test:${{ github.sha }}
-    - name: Tag latest
-      run: docker tag ${{ secrets.ACR_URI }}/data-dictionary_test:${{ github.sha }} ${{ secrets.ACR_URI }}/data-dictionary_test:latest
-    - name: Push latest
-      run: docker push ${{ secrets.ACR_URI }}/data-dictionary_test:latest
+      -
+        uses: actions/checkout@v2
+        with:
+          ref: test
+      - name: Build the new Docker image and uniquely tag
+        run: docker build . --tag ${{ secrets.ACR_URI }}/data-dictionary_test:${{ github.sha }}
+      - name: Push the new Docker image
+        run: docker push ${{ secrets.ACR_URI }}/data-dictionary_test:${{ github.sha }}
+      - name: Tag latest
+        run: docker tag ${{ secrets.ACR_URI }}/data-dictionary_test:${{ github.sha }} ${{ secrets.ACR_URI }}/data-dictionary_test:latest
+      - name: Push latest
+        run: docker push ${{ secrets.ACR_URI }}/data-dictionary_test:latest
