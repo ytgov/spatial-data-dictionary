@@ -11,7 +11,7 @@ WORKDIR /home/node/app
 COPY --chown=node:node api/package*.json ./
 COPY --chown=node:node api/.env* ./
 
-ENV NODE_ENV=test
+ENV NODE_ENV=production
 USER node
 RUN npm install && npm cache clean --force --loglevel=error
 COPY --chown=node:node api ./
