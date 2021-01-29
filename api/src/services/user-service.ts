@@ -8,12 +8,6 @@ export class UserService {
         this._people = people;
     }
 
-    isConnected(): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            resolve(false)
-        })
-    }
-
     async makeUser(document: any): Promise<InsertOneWriteOpResult<any>> {
         return this._people.insertOne(document);
     }
