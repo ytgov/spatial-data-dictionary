@@ -1,13 +1,39 @@
+import { Collection, InsertOneWriteOpResult, ObjectID } from "mongodb";
 
 export class UserService {
 
-    constructor() {
+    private _people: Collection;
 
+    constructor(people: Collection) {
+        this._people = people;
     }
 
     isConnected(): Promise<boolean> {
         return new Promise((resolve, reject) => {
             resolve(false)
         })
+    }
+
+    async makeUser(document: any): Promise<InsertOneWriteOpResult<any>> {
+        return this._people.insertOne(document);
+    }
+
+    async getUsers(): Promise<any> {
+        return this._people.find().toArray();
+    }
+
+    async getUserById(id: ObjectID): Promise<any> {
+        return this._people.findOne({ _id: id });
+    }
+
+    async search(term: string): Promise<any> {
+        return this._people.find(
+            {
+                $or: [
+                    { name: { '$regex': new RegExp('' + term + ''), '$options': 'i' } },
+                    { title: { '$regex': new RegExp('' + term + ''), '$options': 'i' }, }
+                ]
+            }
+        ).toArray();
     }
 }

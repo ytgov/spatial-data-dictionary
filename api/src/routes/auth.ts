@@ -1,18 +1,11 @@
-import { Express, NextFunction, Request, Response } from "express"
+import { Express, Request, Response } from "express"
 import * as ExpressSession from "express-session";
-import { AuthUser } from "../data";
+import { AuthUser, Storage } from "../data";
 import { AUTH_REDIRECT, VIVVO_CONFIG } from "../config";
+import { RequiresData } from "../middleware";
 
-var OidcStrategy = require('passport-openidconnect').Strategy
-var passport = require('passport')
-
-export function ensureLoggedIn(req: Request, res: Response, next: NextFunction) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-
-    res.redirect('/api/auth/login');
-}
+let OidcStrategy = require('passport-openidconnect').Strategy;
+let passport = require('passport');
 
 export function configureAuthentication(app: Express) {
     app.use(ExpressSession.default({
@@ -25,7 +18,7 @@ export function configureAuthentication(app: Express) {
     app.use(passport.session());
 
     passport.serializeUser((user: any, next: any) => {
-        var authUser = AuthUser.fromPassport(user);
+        let authUser = AuthUser.fromPassport(user);
         next(null, authUser)
     });
 
@@ -40,16 +33,16 @@ export function configureAuthentication(app: Express) {
 
     app.use('/api/auth/login', passport.authenticate('oidc'));
 
-    app.get('/api/auth/logout', (req: any, res) => {
+    app.get('/api/auth/logout', RequiresData, async (req: any, res) => {
+        let db = req.store as Storage;
+
+        await db.Sessions.end(req.sessionID);
         req.logout();
         req.session.destroy();
         res.status(202).send();
     });
 
     app.use("/api/auth/isAuthenticated", (req: Request, res: Response) => {
-
-        console.log("HERE", req.user)
-
         if (req.isAuthenticated()) {
             return res.send(req.user);
         }
@@ -57,15 +50,18 @@ export function configureAuthentication(app: Express) {
         return res.status(401).send();
     });
 
-    app.use('/authorization-code/callback',
+    app.use('/authorization-code/callback', RequiresData,
         passport.authenticate('oidc', { failureRedirect: '/api/error' }),
-        (req, res) => {
+        async (req, res) => {
+            let db = req.store as Storage;
+    
+            await db.Sessions.begin(AuthUser.fromPassport(req.user), req.sessionID)
             res.redirect(AUTH_REDIRECT);
         }
     );
 
     app.use("/api/error", (req: Request, res: Response) => {
-        console.log(req)
+        console.error(req)
         res.status(500).send("Authentication error");
     });
 }

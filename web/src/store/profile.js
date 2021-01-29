@@ -10,7 +10,7 @@ const state = {
     teams: [],
 };
 const getters = {
-    firstName: state => state.firstName,
+    firstName: state => state.first_name,
     lastName: state => state.lastName,
     email: state => state.email,
     id: state => state.id,
@@ -29,8 +29,8 @@ const actions = {
 };
 const mutations = {
     setProfile(state, profile) {
-        state.firstName = profile.givenName;
-        state.lastName = profile.familyName;
+        state.firstName = profile.given_name;
+        state.lastName = profile.family_name;
         state.email = profile.email;
         state.id = profile.id;
         state.username = profile.username;

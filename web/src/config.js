@@ -12,7 +12,7 @@ export const sections = [
     {
         name: "Entities",
         url: "/form",
-        icon: "mdi-book-open-variant"
+        icon: "mdi-database-marker"
     },
     {
         name: "Attributes",
