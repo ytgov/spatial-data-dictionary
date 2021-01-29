@@ -36,5 +36,6 @@ export const MONGO_USER = process.env.MONGO_USER || "admin";
 export const MONGO_PASS = process.env.MONGO_PASS || "password";
 export const MONGO_HOST = process.env.MONGO_HOST || "localhost";
 export const MONGO_PORT = process.env.MONGO_PORT || "27017";
+export const MONGO_DB = process.env.MONGO_DB || "SDD";
 
-export const MONGO_URL = `mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}`
+export const MONGO_URL = `mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`
