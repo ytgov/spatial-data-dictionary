@@ -31,13 +31,10 @@ export const VIVVO_CONFIG = {
   callbackURL: process.env.VIVVO_CALLBACK_URL || "",
   scope: 'openid profile email phone address'
 }
- 
-export const DB_NAME = process.env.DB_NAME || "";
-export const DB_USER = process.env.DB_USER || "";
-export const DB_PASS = process.env.DB_PASS || "";
-export const DB_HOST = process.env.DB_HOST || "";
-export const DB_PORT = process.env.DB_PORT || "1433";
 
-export const DB_CONFIG = {
-  client: "mssql", connection: { host: DB_HOST, user: DB_USER, password: DB_PASS, database: DB_NAME, port: parseInt(DB_PORT) }
-};
+export const MONGO_USER = process.env.MONGO_USER || "admin";
+export const MONGO_PASS = process.env.MONGO_PASS || "password";
+export const MONGO_HOST = process.env.MONGO_HOST || "localhost";
+export const MONGO_PORT = process.env.MONGO_PORT || "27017";
+
+export const MONGO_URL = `mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}`
