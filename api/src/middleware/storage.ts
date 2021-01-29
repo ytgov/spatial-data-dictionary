@@ -3,7 +3,13 @@ import { Storage } from "../data";
 
 export async function RequiresData(req: Request, res: Response, next: NextFunction) {
     let store = new Storage();
-    await store.ensureConnected();
-    req.store = store;
-    next();
+
+    store.ensureConnected()
+        .then(worked => {
+            req.store = store;
+            next();
+        })
+        .catch(error => {
+            res.status(500).send("Cant connect to database");
+        })
 }

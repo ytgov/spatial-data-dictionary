@@ -1,3 +1,3 @@
 
 export * from "./auth-user";
-export * from "./database";
+export * from "./storage";
