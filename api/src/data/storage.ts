@@ -28,6 +28,8 @@ export class Storage {
                     resolve("Connected");
                 })
                 .catch(err => {
+                    console.error("Can't connet to MongoDB @", MONGO_URL)
+                    console.error(err);
                     reject(err);
                 })
         })
