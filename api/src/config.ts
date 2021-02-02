@@ -29,7 +29,7 @@ export const VIVVO_CONFIG = {
   clientID: process.env.VIVVO_CLIENT_ID || "",
   clientSecret: process.env.VIVVO_CLIENT_SECRET || "",
   callbackURL: process.env.VIVVO_CALLBACK_URL || "",
-  scope: 'openid profile email phone address'
+  scope: 'profile email phone address'
 }
 
 export const MONGO_USER = process.env.MONGO_USER || "admin";

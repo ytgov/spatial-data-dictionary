@@ -1,14 +1,15 @@
 import { MongoClient } from "mongodb";
 import { MONGO_URL, MONGO_DB } from "../config";
-import { SessionService, UserService } from "../services";
+import { EntityService, SessionService, UserService } from "../services";
+import { Entity } from "./entity";
 
 export class Storage {
-
     mongoConnection!: MongoClient;
     isInitialized: boolean = false;
 
     Users!: UserService;
     Sessions!: SessionService;
+    Entities!: EntityService;
 
     constructor() {
     }
@@ -24,6 +25,7 @@ export class Storage {
                     this.mongoConnection = resp;
                     this.Users = new UserService(this.mongoConnection.db(MONGO_DB).collection("People"));
                     this.Sessions = new SessionService(this.mongoConnection.db(MONGO_DB).collection("Sessions"));
+                    this.Entities = new EntityService(this.mongoConnection.db(MONGO_DB).collection<Entity>("Entities"));
                     this.isInitialized = true;
                     resolve("Connected");
                 })

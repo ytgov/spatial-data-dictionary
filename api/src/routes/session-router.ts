@@ -1,19 +1,18 @@
 import express, { Request, Response } from "express";
 import { param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { AuthUser, Storage } from "../data";
-import { SessionService } from "src/services";
+import { SessionService } from "../services";
 import moment from "moment";
 
 export const sessionRouter = express.Router();
 
-sessionRouter.get("/", RequiresData, async (req: Request, res: Response) => {
+sessionRouter.get("/", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     let db = req.store.Sessions as SessionService;
     //let query = { 'user.username': "datajohnson" };
     return res.json({ data: await db.getAll() });
 });
 
-sessionRouter.get("/summary", RequiresData, async (req: Request, res: Response) => {
+sessionRouter.get("/summary", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     let db = req.store.Sessions as SessionService;
     //let query = { 'user.username': "datajohnson" };
     let data = await db.getAll({ duration: { $gt: 0 } })
@@ -32,7 +31,7 @@ sessionRouter.get("/summary", RequiresData, async (req: Request, res: Response) 
     return res.json({ data: { detail, daily: output } });
 });
 
-sessionRouter.get("/:id", [param("id").notEmpty()], RequiresData,
+sessionRouter.get("/:id", [param("id").notEmpty()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
