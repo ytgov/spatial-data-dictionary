@@ -4,11 +4,13 @@ import Home from "../components/Home.vue";
 import Dashboard from "../components/Dashboard.vue";
 import NotFound from "../views/NotFound.vue";
 import Form from "../components/Form";
-import Grid from "../components/Grid";
 import Login from "../components/Login";
 import LoginComplete from "../components/LoginComplete";
 import Profile from "../components/Profile";
-import store from "../store";
+import CategoryList from "../components/CategoryList";
+import EntityList from "../components/EntityList";
+import EntityDetail from "../components/EntityDetail";
+//import store from "../store";
 
 Vue.use(VueRouter);
 
@@ -23,7 +25,7 @@ const routes = [
     name: "Dashboard",
     component: Dashboard,
     meta: {
-      requiresAuth: true
+      //requiresAuth: true
     }
   },
   {
@@ -31,15 +33,31 @@ const routes = [
     name: "Basic Form",
     component: Form,
     meta: {
-      requiresAuth: true
+      //requiresAuth: true
     }
   },
   {
-    path: "/grid",
-    name: "Data grid",
-    component: Grid,
+    path: "/categories",
+    name: "Categories",
+    component: CategoryList,
     meta: {
-      requiresAuth: true
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entities",
+    name: "Entities",
+    component: EntityList,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/12",
+    name: "Entity detail",
+    component: EntityDetail,
+    meta: {
+      //requiresAuth: true
     }
   },
   {
@@ -57,7 +75,7 @@ const routes = [
     name: "Profile",
     component: Profile,
     meta: {
-      requiresAuth: true
+      //requiresAuth: true
     }
   },
   {
@@ -80,14 +98,14 @@ router.beforeEach(async (to, from, next) => {
     return next();
   }
 
-  await store.dispatch("checkAuthentication");
+  /* await store.dispatch("checkAuthentication");
   var isAuthenticated = store.getters.isAuthenticated;
 
   if (requiresAuth && !isAuthenticated) {
     console.log("You aren't authenticatd, redirecting to sign-in")
     next("/sign-in");
     return;
-  }
+  } */
 
   return next();
 });

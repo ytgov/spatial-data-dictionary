@@ -9,8 +9,8 @@
 <script>
 // @ is an alias to /src
 import * as config from "../config";
-import router from '../router';
-import store from '../store';
+//import router from '../router';
+//import store from '../store';
 
 export default {
   name: "Home",
@@ -18,11 +18,11 @@ export default {
     title: `Welcome to ${config.applicationName}`
   }),
   async created() {
-    await store.dispatch("checkAuthentication");
-    var isAuth = store.getters.isAuthenticated;
+    //await store.dispatch("checkAuthentication");
+    //var isAuth = store.getters.isAuthenticated;
 
-    if (isAuth)
-      router.push("/dashboard");
+    //if (isAuth)
+    //  router.push("/dashboard");
   },
   methods: {
   }

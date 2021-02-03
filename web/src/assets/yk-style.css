@@ -26,7 +26,7 @@ a {
     text-decoration: none;
 }
 
-.v-main .v-btn {
+.v-main .v-btn, .v-dialog__content .v-btn {
     text-transform: none;
     color: #ffffff;
     /* border: 1px #000 solid !important; */
@@ -42,7 +42,8 @@ a {
     border: 1px #000 solid !important;
 }
  */
-.v-main .v-btn.secondary {
+
+.v-main .v-btn.secondary, .v-dialog__content .v-btn.secondary {
     color: #0097a9;
     border: 1px #0097a9 solid !important;
 }

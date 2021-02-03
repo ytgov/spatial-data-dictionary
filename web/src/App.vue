@@ -9,6 +9,16 @@
       v-bind:class="{ 'd-none': !hasSidebar }"
     >
       <v-list dense nav style="" class="mt-4">
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          background-color="#fff"
+          label="Search"
+          outlined
+          dense
+          hint="Press enter to search"
+        ></v-text-field>
+        <v-divider class="mt-0 mb-2"></v-divider>
         <v-list-item
           link
           nav
@@ -22,6 +32,19 @@
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title>{{ section.name }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider></v-divider>
+        <v-subheader>
+          My watchlist<v-spacer></v-spacer>
+          <v-icon size="" class="mr-5">mdi-star</v-icon>
+          </v-subheader>
+
+        <v-list-item link nav>
+          <v-list-item-icon> </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>Empty</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -52,7 +75,7 @@
 
       <div v-if="isAuthenticated">
         <span>{{ username }}</span>
-        <v-menu bottom left class="ml-0">
+        <v-menu offset-y class="ml-0">
           <template v-slot:activator="{ on, attrs }">
             <v-btn icon color="primary" v-bind="attrs" v-on="on">
               <v-icon>mdi-dots-vertical</v-icon>
@@ -101,19 +124,19 @@ import router from "./router";
 //import { mapState } from "vuex";
 import store from "./store";
 import * as config from "./config";
-import { mapState } from "vuex";
+//import { mapState } from "vuex";
 
 export default {
   name: "App",
   components: {},
   computed: {
-    ...mapState("isAuthenticated"),
+    //...mapState("isAuthenticated"),
     username() {
       return store.getters.fullName;
     },
     isAuthenticated() {
       return store.getters.isAuthenticated;
-    }
+    },
   },
   data: () => ({
     dialog: false,
@@ -126,37 +149,40 @@ export default {
     applicationIcon: config.applicationIcon,
     sections: config.sections,
     hasSidebar: false, //config.hasSidebar,
-    hasSidebarClosable: config.hasSidebarClosable
+    hasSidebarClosable: config.hasSidebarClosable,
+    search: "",
   }),
-  created: async function() {
-    await store.dispatch("checkAuthentication");
-    //this.username = store.getters.fullName
-    console.log(this.isAuthenticated);
+  created: async function () {
+    //await store.dispatch("checkAuthentication");
 
     if (!this.isAuthenticated) this.hasSidebar = false;
     else this.hasSidebar = config.hasSidebar;
+
+    this.hasSidebar = true;
   },
   watch: {
-    isAuthenticated: function(val) {
+    isAuthenticated: function (val) {
       if (!val) this.hasSidebar = false;
       else this.hasSidebar = config.hasSidebar;
-    }
+
+      this.hasSidebar = true;
+    },
   },
   methods: {
-    nav: function(location) {
+    nav: function (location) {
       router.push(location);
       console.log(location);
     },
-    toggleHeader: function() {
+    toggleHeader: function () {
       this.headerShow = !this.headerShow;
     },
-    toggleMenu: function() {
+    toggleMenu: function () {
       this.menuShow = !this.menuShow;
     },
-    signOut: function() {
+    signOut: function () {
       store.dispatch("signOut");
       router.push("/");
-    }
-  }
+    },
+  },
 };
 </script>
