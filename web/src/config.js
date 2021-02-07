@@ -18,12 +18,12 @@ export const sections = [
         name: "Entities",
         url: "/entities",
         icon: "mdi-database-marker"
-    },/* 
+    },
     {
-        name: "Attributes",
-        url: "/grid",
-        icon: "mdi-table-large"
-    } */
+        name: "Domains",
+        url: "/domain",
+        icon: "mdi-format-list-text"
+    }
 ];
 export const environment = process.env.NODE_ENV;
 export const apiBaseUrl = process.env.NODE_ENV == "production" ? "" : "http://localhost:3000";

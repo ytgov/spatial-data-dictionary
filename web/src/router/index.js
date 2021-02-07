@@ -53,7 +53,7 @@ const routes = [
     }
   },
   {
-    path: "/entity/12",
+    path: "/entity/:id",
     name: "Entity detail",
     component: EntityDetail,
     meta: {

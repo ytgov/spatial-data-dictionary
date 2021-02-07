@@ -10,7 +10,9 @@
       <v-menu bottom offset-y class="ml-0">
         <template v-slot:activator="{ on, attrs }">
           <div>
-            <v-icon size="medium" style="mr-2" color="#323232">mdi-file-cabinet</v-icon>
+            <v-icon size="medium" style="mr-2" color="#323232"
+              >mdi-file-cabinet</v-icon
+            >
             <v-btn
               v-bind="attrs"
               v-on="on"
@@ -83,138 +85,178 @@
       <v-divider vertical class="ml-0 mr-3"></v-divider>
     </v-toolbar>
 
-    
-
-    <h1 class="mb-1">
-      Surface Management : <span style="font-weight: 400">Rehabilitation</span><v-btn color="primary" icon style="margin: 4px 0 12px 8px" small><v-icon>mdi-star</v-icon></v-btn>
-    </h1>
-    <p class="lead">
-      Event feature class that contains surface management rehab information,
-      consumed by the dTims pavement management system.
-    </p>
-
-    <hr class="mb-1" />
-
-    <div class="row">
-      <div class="col">
-        <strong>Project Custodian(s)</strong> <br />
-        Gjermund Roesholt/Colin Schut
+    <div style="clear: both">
+      <div style="float: left">
+        <h1>
+          {{ entity.name }}
+          <v-btn color="primary" icon style="margin: 4px 0 12px 8px" small
+            ><v-icon>mdi-star</v-icon></v-btn
+          >
+        </h1>
       </div>
-      <div class="col">
-        <strong>Program Manager(s)</strong><br />
-        Ken Jeffrey
-      </div>
-      <div class="col">
-        <strong>Feature Class Name</strong><br />TDYLRS_PRI_SM_REHAB
+      <div style="float: right; text-align: right">
+        <h2 class="mb-1">
+          {{ entity.primary }} <br />
+          <span style="font-weight: 400">{{ entity.secondary }}</span>
+        </h2>
       </div>
     </div>
 
+    <hr class="mb-1" style="clear: both" />
+    <p class="lead">
+      {{ entity.description }}
+    </p>
+
     <hr class="mb-4 mt-2" />
+
+    <div class="row">
+      <div class="col-md-8">
+        <v-card>
+          <v-tabs v-model="tab" background-color="#fff2d5" color="primary">
+            <v-tab key="0">Attributes</v-tab>
+            <v-tab key="1">Properties</v-tab>
+            <v-tab key="2">Changes</v-tab>
+          </v-tabs>
+
+          <v-tabs-items v-model="tab" style="height: 250px; padding: 20px">
+            <v-tab-item key="0">
+              <v-data-table :headers="attributeHeaders"> </v-data-table>
+            </v-tab-item>
+            <v-tab-item key="1">
+              <v-data-table
+                :headers="propertiesHeaders"
+                :items="desserts"
+                sort-by="calories"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat>
+                    <v-spacer></v-spacer>
+                    <v-dialog v-model="dialog" max-width="500px">
+                      <v-toolbar color="info" dark>{{ formTitle }}</v-toolbar>
+
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="primary"
+                          dark
+                          class="mb-2"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          Add
+                        </v-btn>
+                      </template>
+                      <v-card>
+                        <v-card-text class="mt-3 mb-0">
+                          <v-text-field
+                            v-model="editedItem.name"
+                            label="Name"
+                            dense
+                            outlined
+                            hint="* Required"
+                            persistent-hint
+                            class="mb-2"
+                          ></v-text-field>
+                          <v-textarea
+                            v-model="editedItem.value"
+                            label="Value"
+                            dense
+                            outlined
+                            hint="* Required"
+                            persistent-hint
+                          ></v-textarea>
+                        </v-card-text>
+
+                        <v-card-actions class="mt-0">
+                          <v-spacer></v-spacer>
+                          <v-btn color="secondary" @click="close">
+                            Cancel
+                          </v-btn>
+                          <v-btn color="primary" @click="save"> Save </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                    <v-dialog v-model="dialogDelete" max-width="500px">
+                      <v-toolbar color="info" dark>Delete Property</v-toolbar>
+
+                      <v-card>
+                        <v-card-text
+                          ><h3 class="mt-4">
+                            Are you sure you want to delete this property?
+                          </h3></v-card-text
+                        >
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn color="secondary" @click="closeDelete"
+                            >No</v-btn
+                          >
+                          <v-btn color="primary" @click="deleteItemConfirm"
+                            >Yes</v-btn
+                          >
+                          <v-spacer></v-spacer>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item.actions="{ item }">
+                  <v-icon small class="mr-2" @click="editItem(item)">
+                    mdi-pencil
+                  </v-icon>
+                  <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+                </template>
+                <template v-slot:no-data>
+                  <v-btn color="primary" @click="initialize"> Reset </v-btn>
+                </template>
+              </v-data-table>
+            </v-tab-item>
+            <v-tab-item key="2">
+              <v-data-table :headers="changeHeaders"> </v-data-table
+            ></v-tab-item>
+          </v-tabs-items>
+        </v-card>
+      </div>
+      <div class="col-md-4">
+        <h3 class="mb-4">
+          <span class="float-left"
+            ><v-icon color="#323232">mdi-link-variant</v-icon> Connections</span
+          >
+          <v-btn icon class="float-right my-0" title="Add Connection" color="primary" style="height:auto; width: auto"
+            ><v-icon>mdi-link-variant-plus</v-icon></v-btn
+          >
+          <div style="clear: both"></div>
+        </h3>
+
+        <div
+          v-for="item in entity.links.entities"
+          v-bind:key="item.id"
+          style="clear: both"
+        >
+          <v-card color="#fff2d5" class="mb-2">
+            <v-card-text>
+              <v-icon>mdi-database-marker</v-icon> &nbsp;
+              <strong><router-link :to="'/entity/'+item.id">{{ item.name }}</router-link></strong> <br />{{
+                item.type
+              }}</v-card-text
+            >
+          </v-card>
+        </div>
+
+        <div v-for="item in entity.links.people" v-bind:key="item.id">
+          <v-card color="#fff2d5" class="mb-2">
+            <v-card-text
+              ><v-icon>mdi-account-circle</v-icon> &nbsp;
+              <strong>{{ item.name }}</strong> <br />
+              {{ item.role }}</v-card-text
+            >
+          </v-card>
+        </div>
+      </div>
+    </div>
 
     <!--   <v-banner icon="mdi-cash-register">
       <h2>Form help</h2>
       Help text can go in here to make the form more</v-banner
     > -->
-
-    <v-card>
-      <v-tabs v-model="tab" background-color="#fff2d5" color="primary">
-        <v-tab key="0">Properties</v-tab>
-        <v-tab key="1">Attributes</v-tab>
-        <v-tab key="2">Changes</v-tab>
-      </v-tabs>
-
-      <v-tabs-items v-model="tab" style="height: 250px; padding: 20px">
-        <v-tab-item key="0">
-          <v-data-table
-            :headers="propertiesHeaders"
-            :items="desserts"
-            sort-by="calories"
-          >
-            <template v-slot:top>
-              <v-toolbar flat>
-                <v-spacer></v-spacer>
-                <v-dialog v-model="dialog" max-width="500px">
-                  <v-toolbar color="info" dark>{{ formTitle }}</v-toolbar>
-
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      color="primary"
-                      dark
-                      class="mb-2"
-                      v-bind="attrs"
-                      v-on="on"
-                    >
-                      Add
-                    </v-btn>
-                  </template>
-                  <v-card>
-                    <v-card-text class="mt-3 mb-0">
-                      <v-text-field
-                        v-model="editedItem.name"
-                        label="Name"
-                        dense
-                        outlined
-                        hint="* Required"
-                        persistent-hint
-                        class="mb-2"
-                      ></v-text-field>
-                      <v-textarea
-                        v-model="editedItem.value"
-                        label="Value"
-                        dense
-                        outlined
-                        hint="* Required"
-                        persistent-hint
-                      ></v-textarea>
-                    </v-card-text>
-
-                    <v-card-actions class="mt-0">
-                      <v-spacer></v-spacer>
-                      <v-btn color="secondary" @click="close"> Cancel </v-btn>
-                      <v-btn color="primary" @click="save"> Save </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-                <v-dialog v-model="dialogDelete" max-width="500px">
-                  <v-toolbar color="info" dark>Delete Property</v-toolbar>
-
-                  <v-card>
-                    <v-card-text
-                      ><h3 class="mt-4">
-                        Are you sure you want to delete this property?
-                      </h3></v-card-text
-                    >
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn color="secondary" @click="closeDelete">No</v-btn>
-                      <v-btn color="primary" @click="deleteItemConfirm"
-                        >Yes</v-btn
-                      >
-                      <v-spacer></v-spacer>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-              </v-toolbar>
-            </template>
-            <template v-slot:item.actions="{ item }">
-              <v-icon small class="mr-2" @click="editItem(item)">
-                mdi-pencil
-              </v-icon>
-              <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
-            </template>
-            <template v-slot:no-data>
-              <v-btn color="primary" @click="initialize"> Reset </v-btn>
-            </template>
-          </v-data-table>
-        </v-tab-item>
-        <v-tab-item key="1">
-          <v-data-table :headers="attributeHeaders"> </v-data-table>
-        </v-tab-item>
-        <v-tab-item key="2">
-          <v-data-table :headers="changeHeaders"> </v-data-table
-        ></v-tab-item>
-      </v-tabs-items>
-    </v-card>
 
     <!--  <v-btn
       color="primary"
@@ -233,6 +275,9 @@
 </template>
 
 <script>
+import axios from "axios";
+import { ENTITY_URL } from "../urls";
+
 export default {
   name: "Form",
   data: () => ({
@@ -240,6 +285,8 @@ export default {
     showError: null,
     snackbar: null,
     apiSuccess: "",
+
+    entity: {},
 
     propertiesHeaders: [
       { text: "Name", value: "name" },
@@ -291,6 +338,19 @@ export default {
   },
 
   created() {
+    let id = this.$route.params.id;
+    console.log("FINDING ", id);
+
+    axios
+      .get(`${ENTITY_URL}/${id}`)
+      .then((result) => {
+        console.log(result.data.data);
+        this.entity = result.data.data;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
     this.initialize();
   },
 

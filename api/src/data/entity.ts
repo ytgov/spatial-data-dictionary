@@ -49,6 +49,7 @@ export interface Entity { // a table or layer or file
     isSpatial: boolean;
     attributes: Attribute[];
     properties: Property[];
+    links: any;
 }
 
 export enum EntityStatus {

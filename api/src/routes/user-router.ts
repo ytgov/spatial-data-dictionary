@@ -7,12 +7,12 @@ import { UserService } from "../services";
 
 export const userRouter = express.Router();
 
-userRouter.get("/me", RequiresAuthentication, async (req: Request, res: Response) => {
+userRouter.get("/me",  async (req: Request, res: Response) => {
     let currentUser = req.user as AuthUser;
     return res.json({ data: currentUser });
 });
 
-userRouter.get("/", RequiresAuthentication, RequiresData, async (req: Request, res: Response) => {
+userRouter.get("/",  RequiresData, async (req: Request, res: Response) => {
     let db = req.store as Storage;
 
     let t = await db.Users.getUsers()
@@ -20,7 +20,7 @@ userRouter.get("/", RequiresAuthentication, RequiresData, async (req: Request, r
     return res.json({ data: t });
 });
 
-userRouter.post("/", RequiresAuthentication, RequiresData, async (req: Request, res: Response) => {
+userRouter.post("/",  RequiresData, async (req: Request, res: Response) => {
     let currentUser = req.user as AuthUser;
     let db = req.store as Storage;
     let newOne = await db.Users.makeUser(req.body)
@@ -43,7 +43,7 @@ userRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresAuthenticat
         return res.json({ data: t });
     });
 
-userRouter.post("/search", RequiresAuthentication, RequiresData, async (req: Request, res: Response) => {
+userRouter.post("/search",  RequiresData, async (req: Request, res: Response) => {
     let { term } = req.body;
     let db = req.store as Storage;
 
