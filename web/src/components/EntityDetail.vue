@@ -120,7 +120,14 @@
 
           <v-tabs-items v-model="tab" style="height: 250px; padding: 20px">
             <v-tab-item key="0">
-              <v-data-table :headers="attributeHeaders"> </v-data-table>
+              <v-btn
+                color="secondary"
+                small
+                :to="'/entity/' + entity._id + '/attributes'"
+                >Edit Attributes</v-btn
+              >
+
+              <v-data-table :items="entity.attributes" :headers="attributeHeaders"> </v-data-table>
             </v-tab-item>
             <v-tab-item key="1">
               <v-data-table
@@ -220,7 +227,12 @@
           <span class="float-left"
             ><v-icon color="#323232">mdi-link-variant</v-icon> Connections</span
           >
-          <v-btn icon class="float-right my-0" title="Add Connection" color="primary" style="height:auto; width: auto"
+          <v-btn
+            icon
+            class="float-right my-0"
+            title="Add Connection"
+            color="primary"
+            style="height: auto; width: auto"
             ><v-icon>mdi-link-variant-plus</v-icon></v-btn
           >
           <div style="clear: both"></div>
@@ -234,9 +246,12 @@
           <v-card color="#fff2d5" class="mb-2">
             <v-card-text>
               <v-icon>mdi-database-marker</v-icon> &nbsp;
-              <strong><router-link :to="'/entity/'+item.id">{{ item.name }}</router-link></strong> <br />{{
-                item.type
-              }}</v-card-text
+              <strong
+                ><router-link :to="'/entity/' + item.id">{{
+                  item.name
+                }}</router-link></strong
+              >
+              <br />{{ item.role }}</v-card-text
             >
           </v-card>
         </div>
@@ -286,7 +301,7 @@ export default {
     snackbar: null,
     apiSuccess: "",
 
-    entity: {},
+    entity: { links: {}},
 
     propertiesHeaders: [
       { text: "Name", value: "name" },
@@ -294,12 +309,12 @@ export default {
       { text: "Actions", value: "actions", sortable: false },
     ],
     attributeHeaders: [
-      { text: "Field", value: "id" },
-      { text: "Data type", value: "id" },
-      { text: "Required", value: "id" },
-      { text: "Notes", value: "id" },
-      { text: "Alias", value: "id" },
-      { text: "Domain", value: "id" },
+      { text: "Field", value: "name" },
+      { text: "Data type", value: "type" },
+      { text: "Required", value: "required" },
+      { text: "Notes", value: "description" },
+      { text: "Alias", value: "alias" },
+      { text: "Domain", value: "domain" },
     ],
     changeHeaders: [
       { text: "Date", value: "id" },

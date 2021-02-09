@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { param, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
 import { AuthUser, Storage } from "../data";
 import { EntityService, UserService } from "../services";
@@ -17,15 +17,17 @@ entityRouter.post("/", RequiresData, async (req: Request, res: Response) => {
     let db = req.store.Entities as EntityService;
     //let query = { 'user.username': "datajohnson" };
 
-    if (req.body.links.people) {
+    if (req.body.links && req.body.links.people) {
         req.body.links.people.forEach((element: any) => {
             element.id = new ObjectId(element.id);
         });
-
-
-
     }
 
+    if (req.body.links && req.body.links.entities) {
+        req.body.links.entities.forEach((element: any) => {
+            element.id = new ObjectId(element.id);
+        });
+    }
 
     let results = await db.create(req.user, req.body);
 
@@ -43,27 +45,36 @@ entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
         let db = req.store.Entities as EntityService;
         let userDB = req.store.Users as UserService;
         let { id } = req.params;
-
         let entity = await db.getById(id)
 
         if (entity) {
-            for (let item of entity.links.people) {
-                item.name = "Unknown";
-                let person = await userDB.getUserById(item.id);
+            if (entity.links) {
+                if (entity.links.people) {
+                    for (let item of entity.links.people) {
+                        item.name = "Unknown";
+                        let person = await userDB.getUserById(item.id);
 
-                if (person)
-                    item.name = person.name;
+                        if (person)
+                            item.name = person.name;
+                    }
+                }
+
+                if (entity.links.entities) {
+                    for (let item of entity.links.entities) {
+                        item.name = "Unknown";
+                        let entity = await db.getById(item.id);
+
+                        if (entity)
+                            item.name = entity.name;
+                    }
+                }
+
+                console.log("THING", entity.links)
+
             }
-
-            for (let item of entity.links.entities) {
-                item.name = "Unknown";
-                let entity = await db.getById(item.id);
-
-                if (entity)
-                    item.name = entity.name;
+            else {
+                entity.links = { people: [], entities: [] };
             }
-
-            console.log("THING", entity.links)
 
             return res.json({ data: entity });
         }
@@ -85,3 +96,95 @@ entityRouter.put("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
 
         return res.json({ data: results });
     });
+
+entityRouter.delete("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        let db = req.store.Entities as EntityService;
+        let { id } = req.params;
+        let results = await db.delete(id);
+
+
+        return res.json({ messages: [{ variant: "success", text: "Entity deleted" }] });
+    });
+
+entityRouter.post("/:id/attribute", RequiresData,
+    [
+        param("id").notEmpty().isMongoId(),
+        body("name").notEmpty()
+    ],
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        let db = req.store.Entities as EntityService;
+        let { id } = req.params;
+        let { name, oldName } = req.body;
+        let entity = await db.getById(id);
+
+        if (entity) {
+            let attributes = entity.attributes;
+
+            let existing = attributes.filter(a => a.name == oldName);
+
+            console.log("EXISTIN", existing);
+
+            if (existing) {
+                if (existing.length == 0) {
+                    entity.attributes.push(req.body);
+                } else {
+                    let aIndex = attributes.indexOf(existing[0]);
+                    entity.attributes[aIndex] = req.body;
+
+
+                    console.log("SET EXISTN TO", entity.attributes[aIndex])
+                }
+            }
+            console.log("RESULT OF POST", entity)
+
+            let results = await db.update(id, entity);
+            return res.json({ data: entity });
+        }
+
+        res.status(404).send();
+    });
+
+
+entityRouter.get("/:id/attribute", RequiresData,
+    [
+        param("id").notEmpty().isMongoId()
+    ],
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        let db = req.store.Entities as EntityService;
+        let { id } = req.params;
+        let entity = await db.getById(id);
+
+        if (entity) {
+            return res.json({ data: entity.attributes });
+        }
+
+        res.status(404).send();
+    });
+
+/*
+    name: this.editName,
+    description: this.editDescription,
+    type: this.editType,
+    alias: this.editAlias,
+    domain: this.editDomain,
+    required: this.editRequired,
+*/

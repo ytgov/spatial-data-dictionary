@@ -10,6 +10,8 @@ import Profile from "../components/Profile";
 import CategoryList from "../components/CategoryList";
 import EntityList from "../components/EntityList";
 import EntityDetail from "../components/EntityDetail";
+import EntityCreate from "../components/EntityCreate";
+import EntityAttributes from "../components/EntityAttributes";
 //import store from "../store";
 
 Vue.use(VueRouter);
@@ -45,9 +47,17 @@ const routes = [
     }
   },
   {
-    path: "/entities",
+    path: "/entity",
     name: "Entities",
     component: EntityList,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/create",
+    name: "EntityCreate",
+    component: EntityCreate,
     meta: {
       //requiresAuth: true
     }
@@ -56,6 +66,14 @@ const routes = [
     path: "/entity/:id",
     name: "Entity detail",
     component: EntityDetail,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/:id/attributes",
+    name: "Entity attriutes",
+    component: EntityAttributes,
     meta: {
       //requiresAuth: true
     }

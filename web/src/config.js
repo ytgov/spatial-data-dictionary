@@ -16,7 +16,7 @@ export const sections = [
     },
     {
         name: "Entities",
-        url: "/entities",
+        url: "/entity",
         icon: "mdi-database-marker"
     },
     {

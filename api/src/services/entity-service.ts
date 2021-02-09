@@ -10,20 +10,17 @@ export class EntityService {
     }
 
     async create(user: AuthUser, entity: Entity): Promise<any> {
-
         console.log("TRING TO INSERT", entity)
 
         return this.db.insertOne(entity);
     }
 
     async update(id: string, entity: Entity): Promise<any> {
-        let old = await this.getById(id);
+        return this.db.findOneAndUpdate({ _id: new ObjectId(id) }, { $set: entity });
+    }
 
-        console.log("FOUND: ", old)
-
-        if (old) {
-            return this.db.findOneAndUpdate({ _id: new ObjectId(id) }, { $set: entity });
-        }
+    async delete(id: string): Promise<any> {
+        return this.db.deleteOne({ _id: new ObjectId(id) });
     }
 
     async getAll(query?: FilterQuery<any>): Promise<Entity[]> {

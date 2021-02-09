@@ -7,3 +7,4 @@ export const LOGOUT_URL = `${config.apiBaseUrl}/api/auth/logout`;
 export const PROFILE_URL = `${config.apiBaseUrl}/api/user/me`;
 
 export const ENTITY_URL = `${config.apiBaseUrl}/api/entity`;
+export const CATEGORY_URL = `${config.apiBaseUrl}/api/category`;
