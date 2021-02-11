@@ -9,11 +9,11 @@ export const sections = [
         url: "/dashboard",
         icon: "mdi-view-dashboard"
     },
-    {
+/*     {
         name: "Categories",
         url: "/categories",
         icon: "mdi-file-cabinet"
-    },
+    }, */
     {
         name: "Entities",
         url: "/entity",

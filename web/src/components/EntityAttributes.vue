@@ -119,8 +119,20 @@
         </v-data-table>
       </div>
       <div class="col-md-4">
-        <v-btn color="secondary" @click="addNewAttribute">Add Attribute</v-btn>
-        <v-btn color="info" @click="addSourceAttribute">Add from Source</v-btn>
+        <v-btn
+          :color="sideAction == 'Add new Attribute' ? 'primary' : 'secondary'"
+          @click="addNewAttribute"
+          active
+          >Add Attribute</v-btn
+        >
+        <v-btn
+          class="float-right"
+          :color="
+            sideAction == 'Add source Attribute' ? 'primary' : 'secondary'
+          "
+          @click="addSourceAttribute"
+          >Add from Source</v-btn
+        >
 
         <v-card color="#fff2d5">
           <v-card-title>{{ sideAction }}</v-card-title>
@@ -129,6 +141,9 @@
               <v-select
                 :items="sources"
                 item-text="name"
+                outlined
+                dense
+                background-color="#fff"
                 item-value="id"
                 @change="changeSource"
               ></v-select>
@@ -137,6 +152,9 @@
               <v-select
                 :items="sourceAttributes"
                 item-text="name"
+                outlined
+                dense
+                background-color="#fff"
                 @change="changeSourceAttribute"
               ></v-select>
             </div>
@@ -293,26 +311,12 @@ export default {
     addNewAttribute() {
       this.sideAction = "Add new Attribute";
       this.sideActionButton = "Add";
-      this.editItem = null;
-      this.editItem.oldName = null;
-      this.editName = "";
-      this.editDescription = "";
-      this.editType = "";
-      this.editRequired = "";
-      this.alias = "";
-      this.domain = "";
+      this.clearEdits();
     },
     addSourceAttribute() {
       this.sideAction = "Add source Attribute";
       this.sideActionButton = "Add";
-      this.editItem = null;
-      this.editItem.oldName = null;
-      this.editName = "";
-      this.editDescription = "";
-      this.editType = "";
-      this.editRequired = "";
-      this.alias = "";
-      this.domain = "";
+      this.clearEdits();
     },
     changeSource(sourceId) {
       console.log("Source changed to:", sourceId);
@@ -321,25 +325,23 @@ export default {
         .get(`${ENTITY_URL}/${sourceId}/attribute`)
         .then((result) => {
           this.sourceAttributes = result.data.data;
-
-          console.log(this.sourceAttributes);
         })
         .catch((err) => {
           console.log(err);
         });
     },
     changeSourceAttribute(item) {
-      let selected = this.sourceAttributes.filter((attr) => attr.name == item)[0];
-      console.log("SELECTED", selected);
-
+      let selected = this.sourceAttributes.filter(
+        (attr) => attr.name == item
+      )[0];
       this.editItem = selected;
       this.editItem.oldName = "";
       this.editName = selected.name;
       this.editDescription = selected.description;
       this.editType = selected.type;
       this.editRequired = selected.required;
-      this.alias = selected.alias;
-      this.domain = selected.domain;
+      this.editAlias = selected.alias;
+      this.editDomain = selected.domain;
     },
     sideSave() {
       console.log("SIDE SAVE");
@@ -358,9 +360,11 @@ export default {
         axios
           .post(`${ENTITY_URL}/${this.entity._id}/attribute`, body)
           .then((result) => {
-            console.log(result.data.data.attributes);
-
             this.attributes = result.data.data.attributes;
+            //this.clearEdits();
+
+            this.snackbar = true;
+            this.apiSuccess = "Attribute saved";
           });
       } else if (this.sideAction == "Add new Attribute") {
         let body = {
@@ -376,9 +380,11 @@ export default {
         axios
           .post(`${ENTITY_URL}/${this.entity._id}/attribute`, body)
           .then((result) => {
-            console.log(result.data.data.attributes);
-
             this.attributes = result.data.data.attributes;
+            this.clearEdits();
+
+            this.snackbar = true;
+            this.apiSuccess = "Attribute added";
           });
       } else if (this.sideAction == "Add source Attribute") {
         let body = {
@@ -394,11 +400,11 @@ export default {
         axios
           .post(`${ENTITY_URL}/${this.entity._id}/attribute`, body)
           .then((result) => {
-            console.log("Source Add RESULT", result.data.data.attributes);
-
             this.attributes = result.data.data.attributes;
+            this.clearEdits();
 
-
+            this.snackbar = true;
+            this.apiSuccess = "Attribute added";
           });
       }
     },
@@ -413,8 +419,18 @@ export default {
       this.editDescription = item.description;
       this.editType = item.type;
       this.editRequired = item.required;
-      this.alias = item.alias;
-      this.domain = item.domain;
+      this.editAlias = item.alias;
+      this.editDomain = item.domain;
+    },
+
+    clearEdits() {
+      this.editItem = null;
+      this.editName = "";
+      this.editDescription = "";
+      this.editType = "";
+      this.editRequired = false;
+      this.editAlias = "";
+      this.editDomain = "";
     },
   },
 };

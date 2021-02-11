@@ -118,7 +118,7 @@
             <v-tab key="2">Changes</v-tab>
           </v-tabs>
 
-          <v-tabs-items v-model="tab" style="height: 250px; padding: 20px">
+          <v-tabs-items v-model="tab" style="padding: 20px">
             <v-tab-item key="0">
               <v-btn
                 color="secondary"
@@ -127,7 +127,11 @@
                 >Edit Attributes</v-btn
               >
 
-              <v-data-table :items="entity.attributes" :headers="attributeHeaders"> </v-data-table>
+              <v-data-table
+                :items="entity.attributes"
+                :headers="attributeHeaders"
+              >
+              </v-data-table>
             </v-tab-item>
             <v-tab-item key="1">
               <v-data-table
@@ -231,7 +235,7 @@
             icon
             class="float-right my-0"
             title="Add Connection"
-            color="primary"
+            color="primary" @click="addConnection()"
             style="height: auto; width: auto"
             ><v-icon>mdi-link-variant-plus</v-icon></v-btn
           >
@@ -243,13 +247,11 @@
           v-bind:key="item.id"
           style="clear: both"
         >
-          <v-card color="#fff2d5" class="mb-2">
+          <v-card color="#fff2d5" class="mb-2" @click="loadEntity(item.id)" :to="'/entity/' + item.id">
             <v-card-text>
               <v-icon>mdi-database-marker</v-icon> &nbsp;
               <strong
-                ><router-link :to="'/entity/' + item.id">{{
-                  item.name
-                }}</router-link></strong
+                ><a>{{ item.name }}</a></strong
               >
               <br />{{ item.role }}</v-card-text
             >
@@ -301,7 +303,7 @@ export default {
     snackbar: null,
     apiSuccess: "",
 
-    entity: { links: {}},
+    entity: { links: {} },
 
     propertiesHeaders: [
       { text: "Name", value: "name" },
@@ -355,18 +357,7 @@ export default {
   created() {
     let id = this.$route.params.id;
     console.log("FINDING ", id);
-
-    axios
-      .get(`${ENTITY_URL}/${id}`)
-      .then((result) => {
-        console.log(result.data.data);
-        this.entity = result.data.data;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    this.initialize();
+    this.loadEntity(id);
   },
 
   methods: {
@@ -381,6 +372,21 @@ export default {
           value: false,
         },
       ];
+    },
+
+    loadEntity(id) {
+      console.log("LAODING");
+      axios
+        .get(`${ENTITY_URL}/${id}`)
+        .then((result) => {
+          console.log(result.data.data);
+          this.entity = result.data.data;
+
+          this.initialize();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
 
     editItem(item) {
@@ -424,6 +430,10 @@ export default {
       }
       this.close();
     },
+
+    addConnection() {
+      console.log("ADD CONNECTION")
+    }
   },
 };
 </script>

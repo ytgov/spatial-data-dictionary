@@ -10,22 +10,15 @@
     </h2>
 
     <div class="row">
-      <div class="col-3" v-for="item of list" v-bind:key="item.id">
-        <v-card class="mt-5" color="#fff2d5">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3" v-for="item of list" v-bind:key="item.id">
+        <v-card class="mt-3" color="#fff2d5" :to="'/entity/' + item._id" style="height:220px; overflow:hidden;">
           <v-card-title>{{ item.name }}</v-card-title>
 
-          <v-card-text> {{item.attributes.length}} Attributes<br />{{item.links.people.length}} People </v-card-text>
-          <v-card-actions
-            style="
-              background-color: rgb(241, 241, 241);
-              border-top: thin solid rgba(0, 0, 0, 0.12) !important;
-            "
-            dense
-          >
-            <v-btn small color="info" icon outlined :to="'/entity/' + item._id"
-              ><v-icon>mdi-link-variant</v-icon></v-btn
-            >
-          </v-card-actions>
+          <v-card-text style="max-height: 110px; overflow:hidden"> {{item.attributes.length}} Attributes<br />{{item.links.people.length}} People 
+          <br>
+            <strong>{{item.description}}</strong>
+          </v-card-text>
+          
         </v-card>
       </div>
     </div>
