@@ -91,23 +91,36 @@
           {{ entity.name }}
           <v-btn color="primary" icon style="margin: 4px 0 12px 8px" small
             ><v-icon>mdi-star</v-icon></v-btn
+          ><br />
+
+          <status-chip :status="entity.status"></status-chip>
+          <location-chip :location="entity.location.storage"></location-chip>
+
+          <br />
+          <v-chip
+            class="mr-2"
+            v-for="tag of entity.tags"
+            v-bind:key="tag"
+            link
+            :to="'/tags/' + tag"
           >
+            <v-icon left> mdi-tag </v-icon>{{ tag }}
+          </v-chip>
         </h1>
       </div>
       <div style="float: right; text-align: right">
         <h2 class="mb-1">
           {{ entity.primary }} <br />
-          <span style="font-weight: 400">{{ entity.secondary }}</span>
+          <span style="font-weight: 400">{{ entity.program }}</span>
         </h2>
+        <v-btn color="info" :to="'/entity/' + entity._id + '/edit'">Edit</v-btn>
       </div>
     </div>
 
-    <hr class="mb-1" style="clear: both" />
-    <p class="lead">
+    <p class="lead" style="clear: both">
       {{ entity.description }}
     </p>
-
-    <hr class="mb-4 mt-2" />
+    <hr class="mb-1" />
 
     <div class="row">
       <div class="col-md-8">
@@ -235,7 +248,8 @@
             icon
             class="float-right my-0"
             title="Add Connection"
-            color="primary" @click="addConnection()"
+            color="primary"
+            @click="addConnection()"
             style="height: auto; width: auto"
             ><v-icon>mdi-link-variant-plus</v-icon></v-btn
           >
@@ -247,7 +261,12 @@
           v-bind:key="item.id"
           style="clear: both"
         >
-          <v-card color="#fff2d5" class="mb-2" @click="loadEntity(item.id)" :to="'/entity/' + item.id">
+          <v-card
+            color="#fff2d5"
+            class="mb-2"
+            @click="loadEntity(item.id)"
+            :to="'/entity/' + item.id"
+          >
             <v-card-text>
               <v-icon>mdi-database-marker</v-icon> &nbsp;
               <strong
@@ -432,8 +451,8 @@ export default {
     },
 
     addConnection() {
-      console.log("ADD CONNECTION")
-    }
+      console.log("ADD CONNECTION");
+    },
   },
 };
 </script>

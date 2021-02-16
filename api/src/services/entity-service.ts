@@ -10,8 +10,6 @@ export class EntityService {
     }
 
     async create(user: AuthUser, entity: Entity): Promise<any> {
-        console.log("TRING TO INSERT", entity)
-
         return this.db.insertOne(entity);
     }
 
@@ -29,7 +27,6 @@ export class EntityService {
 
     async getById(id: string): Promise<Entity | null> {
         try {
-            let objId = new ObjectId(id)
             return this.db.findOne<Entity>({ _id: new ObjectId(id) });
         }
         catch (e) { }

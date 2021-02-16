@@ -11,7 +11,7 @@ import CategoryList from "../components/CategoryList";
 import EntityList from "../components/EntityList";
 import EntityDetail from "../components/EntityDetail";
 import EntityCreate from "../components/EntityCreate";
-import EntityAttributes from "../components/EntityAttributes";
+import EntityEdit from "../components/EntityEdit";
 //import store from "../store";
 
 Vue.use(VueRouter);
@@ -71,9 +71,9 @@ const routes = [
     }
   },
   {
-    path: "/entity/:id/attributes",
+    path: "/entity/:id/edit",
     name: "Entity attriutes",
-    component: EntityAttributes,
+    component: EntityEdit,
     meta: {
       //requiresAuth: true
     }

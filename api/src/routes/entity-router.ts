@@ -4,6 +4,7 @@ import { RequiresData, RequiresAuthentication } from "../middleware";
 import { AuthUser, Storage } from "../data";
 import { EntityService, UserService } from "../services";
 import { ObjectId } from "mongodb";
+import { configureAuthentication } from "./auth";
 
 export const entityRouter = express.Router();
 
@@ -68,9 +69,6 @@ entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
                             item.name = entity.name;
                     }
                 }
-
-                console.log("THING", entity.links)
-
             }
             else {
                 entity.links = { people: [], entities: [] };
@@ -89,10 +87,12 @@ entityRouter.put("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+
         let db = req.store.Entities as EntityService;
         let { id } = req.params;
+        delete req.body._id;
         let results = await db.update(id, req.body);
-
+        results.value = await db.getById(id);
 
         return res.json({ data: results });
     });

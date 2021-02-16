@@ -50,9 +50,12 @@ export interface Entity { // a table or layer or file
     attributes: Attribute[];
     properties: Property[];
     links: any;
+    primary: string;
+    secondary: string;
 }
 
 export enum EntityStatus {
+    DRAFT = "Draft",
     ACTIVE = "Active",
     INACTIVE = "Inactive",
     RETIRED = "Retired"
