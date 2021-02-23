@@ -126,7 +126,7 @@
                   outlined
                   label="Location"
                   hide-details
-                  :items="tagOptions"
+                  :items="locationOptions"
                   v-model="entity.primary"
                 ></v-combobox>
               </div>
@@ -135,7 +135,7 @@
                   dense
                   outlined
                   label="Program"
-                  :items="tagOptions"
+                  :items="programOptions"
                   hide-details
                   v-model="entity.program"
                 ></v-combobox>
@@ -257,7 +257,9 @@
               </div>
             </div>
 
-            <v-btn @click="saveProperties()" color="primary" class="mr-5">Save</v-btn>
+            <v-btn @click="saveProperties()" color="primary" class="mr-5"
+              >Save</v-btn
+            >
             <v-btn :to="'/entity/' + entity._id" color="secondary">Done</v-btn>
           </v-form>
         </v-tab-item>
@@ -371,14 +373,15 @@
                   </div>
 
                   <div v-if="sideAction != 'Add source Attribute'">
-                    <v-text-field
+                    <v-select
                       dense
                       v-model="editDomain"
                       outlined
                       label="Domain"
                       required
+                      :items=domainOptions
                       background-color="white"
-                    ></v-text-field>
+                    ></v-select>
                   </div>
 
                   <v-btn color="primary" @click="sideSave">{{
@@ -414,7 +417,7 @@
 
 <script>
 import axios from "axios";
-import { ENTITY_URL } from "../urls";
+import { ENTITY_URL, LOCATION_URL, PROGRAM_URL, DOMAIN_URL } from "../urls";
 
 export default {
   name: "Form",
@@ -431,6 +434,9 @@ export default {
     locationTypes: ["Database", "File", "Web service"],
     statusOptions: ["Draft", "Complete", "Archived"],
     tagOptions: ["Important", "This will be dynamic"],
+    locationOptions: [],
+    programOptions: [],
+    domainOptions: [],
 
     sideAction: "Add new Attribute",
     sideActionButton: "Add Attribute",
@@ -470,6 +476,33 @@ export default {
       })
       .catch((err) => {
         console.log(err);
+      });
+
+    axios
+      .get(LOCATION_URL)
+      .then((result) => {
+        this.locationOptions = result.data.data.map((o) => o.name);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    axios
+      .get(PROGRAM_URL)
+      .then((result) => {
+        this.programOptions = result.data.data.map((o) => o.name);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    axios
+      .get(DOMAIN_URL)
+      .then((result) => {
+        this.domainOptions = result.data.data.map((o) => o.name);
+      })
+      .catch((error) => {
+        console.error(error);
       });
 
     this.addNewAttribute();

@@ -133,12 +133,6 @@
 
           <v-tabs-items v-model="tab" style="padding: 20px">
             <v-tab-item key="0">
-              <v-btn
-                color="secondary"
-                small
-                :to="'/entity/' + entity._id + '/attributes'"
-                >Edit Attributes</v-btn
-              >
 
               <v-data-table
                 :items="entity.attributes"

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon -L src/index.ts"
+    "start": "nodemon -L src/index.ts"
   },
   "author": "Michael Johnson",
   "license": "ISC",

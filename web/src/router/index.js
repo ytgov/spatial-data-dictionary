@@ -12,6 +12,9 @@ import EntityList from "../components/EntityList";
 import EntityDetail from "../components/EntityDetail";
 import EntityCreate from "../components/EntityCreate";
 import EntityEdit from "../components/EntityEdit";
+import Locations from "../views/Locations";
+import Programs from "../views/Programs";
+import Domains from "../views/Domains";
 //import store from "../store";
 
 Vue.use(VueRouter);
@@ -74,6 +77,30 @@ const routes = [
     path: "/entity/:id/edit",
     name: "Entity attriutes",
     component: EntityEdit,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/location",
+    name: "Locations",
+    component: Locations,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/program",
+    name: "Programs",
+    component: Programs,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/domain",
+    name: "Domains",
+    component: Domains,
     meta: {
       //requiresAuth: true
     }

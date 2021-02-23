@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <v-btn color="primary" class="float-right mt-0" to="/entity/create"
-      ><v-icon>mdi-plus</v-icon> Create Entity</v-btn
+      ><v-icon>mdi-plus</v-icon> Create</v-btn
     >
     <h1>Entities</h1>
     <hr class="mb-3" />
@@ -56,13 +56,11 @@ export default {
     axios
       .get(ENTITY_URL)
       .then((results) => {
-        console.log(results.data.data);
         this.list = results.data.data;
       })
       .catch((err) => {
         console.err(err);
       });
   },
-  methods: {},
 };
 </script>

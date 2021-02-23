@@ -23,6 +23,16 @@ export const sections = [
         name: "Domains",
         url: "/domain",
         icon: "mdi-format-list-text"
+    },
+    {
+        name: "Locations",
+        url: "/location",
+        icon: "mdi-file-cabinet"
+    },
+    {
+        name: "Programs",
+        url: "/program",
+        icon: "mdi-select-group"
     }
 ];
 export const environment = process.env.NODE_ENV;
