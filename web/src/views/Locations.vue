@@ -5,6 +5,7 @@
     >
     <h1>Locations</h1>
     <hr class="mb-3" />
+    <p>Locations are the physical or digital homes of entities.</p>
 
     <div class="row mt-5" style="clear: both">
       <div class="col-md-8">

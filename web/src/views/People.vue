@@ -5,6 +5,7 @@
     >
     <h1>People</h1>
     <hr class="mb-3" />
+    <p>People are tied to programs and entities and may or may not have an account in this system.</p>
 
     <div class="row mt-5" style="clear: both">
       <div class="col-md-8">

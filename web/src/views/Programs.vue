@@ -6,6 +6,7 @@
     <h1>Programs</h1>
     <hr class="mb-3" />
 
+    <p>Programs represent business areas of management sectors. Entities are assigned to one or more programs. </p>
     <div class="row mt-5" style="clear: both">
       <div class="col-md-8">
         <v-card class="" color="#fff2d5">
