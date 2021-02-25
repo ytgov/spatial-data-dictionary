@@ -41,6 +41,21 @@
                 outlined
                 background-color="white"
               ></v-select>
+
+              <v-textarea
+                label="Details"
+                v-model="editDetails"
+                dense
+                outlined
+                background-color="white"
+              ></v-textarea>
+              <v-textarea
+                label="Description"
+                v-model="editDescription"
+                dense
+                outlined
+                background-color="white"
+              ></v-textarea>
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -77,11 +92,15 @@ export default {
     editId: "",
     editName: "",
     editType: "Database",
-    typeOptions: ["Database", "Web", "Directory"],
+    editDescription: "",
+    editDetails: "",
+    typeOptions: ["Database", "Geodatabase", "Web", "Directory"],
     items: [],
     itemHeaders: [
       { text: "Name", value: "name" },
       { text: "Type", value: "type" },
+      { text: "Details", value: "details" },
+      { text: "Description", value: "description" },
     ],
   }),
   created() {
@@ -99,6 +118,8 @@ export default {
       this.editName = "";
       this.editId = "";
       this.editType = "Database";
+      this.editDescription = "";
+      this.editDetails = "";
       this.isCreate = true;
       this.showForm = true;
     },
@@ -109,12 +130,19 @@ export default {
       this.editName = item.name;
       this.editType = item.type;
       this.editId = item._id;
+      this.editDescription = item.description;
+      this.editDetails = item.details;
       this.showForm = true;
     },
     saveClick() {
       if (this.isCreate) {
         axios
-          .post(LOCATION_URL, { name: this.editName, type: this.editType })
+          .post(LOCATION_URL, {
+            name: this.editName,
+            type: this.editType,
+            description: this.editDescription,
+            details: this.editDetails
+          })
           .then((result) => {
             if (result && result.data.data) {
               this.items = result.data.data;
@@ -129,6 +157,8 @@ export default {
           .put(`${LOCATION_URL}/${this.editId}`, {
             name: this.editName,
             type: this.editType,
+            description: this.editDescription,
+            details: this.editDetails
           })
           .then((result) => {
             if (result && result.data.data) {

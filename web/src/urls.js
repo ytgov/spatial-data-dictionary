@@ -11,3 +11,4 @@ export const CATEGORY_URL = `${config.apiBaseUrl}/api/category`;
 export const LOCATION_URL = `${config.apiBaseUrl}/api/location`;
 export const PROGRAM_URL = `${config.apiBaseUrl}/api/program`;
 export const DOMAIN_URL = `${config.apiBaseUrl}/api/domain`;
+export const PERSON_URL = `${config.apiBaseUrl}/api/person`;

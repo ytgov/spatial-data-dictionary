@@ -379,7 +379,7 @@
                       outlined
                       label="Domain"
                       required
-                      :items=domainOptions
+                      :items="domainOptions"
                       background-color="white"
                     ></v-select>
                   </div>

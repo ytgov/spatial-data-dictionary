@@ -133,7 +133,6 @@
 
           <v-tabs-items v-model="tab" style="padding: 20px">
             <v-tab-item key="0">
-
               <v-data-table
                 :items="entity.attributes"
                 :headers="attributeHeaders"
@@ -301,6 +300,12 @@
       <v-icon class="mr-3">mdi-thumb-up-outline</v-icon>
       {{ apiSuccess }}
     </v-snackbar>
+
+    <connection-dialog
+      :dialog="connectionDialogVisible"
+      @doClose="closeConnection()"
+      @doSave="saveConnection"
+    ></connection-dialog>
   </div>
 </template>
 
@@ -315,8 +320,10 @@ export default {
     showError: null,
     snackbar: null,
     apiSuccess: "",
+    connectionDialogVisible: null,
 
-    entity: { links: {} },
+    entity_id: "",
+    entity: { links: {}, location: {} },
 
     propertiesHeaders: [
       { text: "Name", value: "name" },
@@ -368,9 +375,9 @@ export default {
   },
 
   created() {
-    let id = this.$route.params.id;
-    console.log("FINDING ", id);
-    this.loadEntity(id);
+    this.entity_id = this.$route.params.id;
+
+    this.loadEntity(this.entity_id);
   },
 
   methods: {
@@ -388,13 +395,10 @@ export default {
     },
 
     loadEntity(id) {
-      console.log("LAODING");
       axios
         .get(`${ENTITY_URL}/${id}`)
         .then((result) => {
-          console.log(result.data.data);
           this.entity = result.data.data;
-
           this.initialize();
         })
         .catch((err) => {
@@ -445,7 +449,32 @@ export default {
     },
 
     addConnection() {
-      console.log("ADD CONNECTION");
+      this.connectionDialogVisible = true;
+    },
+
+    closeConnection() {
+      this.connectionDialogVisible = null;
+    },
+
+    saveConnection(args) {
+      console.log("SAVING CONNECTION", args);
+
+      axios
+        .post(`${ENTITY_URL}/${this.entity_id}/connection`, args)
+        .then((results) => {
+          console.log(results);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
+      /* let connection = {
+        connectionType: this.connectionType,
+        selectedEntity: this.selectedEntity,
+        selectedPerson: this.selectedPerson,
+        newPersonName: this.newPersonName,
+        newPersonEmail: this.newPersonEmail,
+      }; */
     },
   },
 };

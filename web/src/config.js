@@ -33,6 +33,11 @@ export const sections = [
         name: "Programs",
         url: "/program",
         icon: "mdi-select-group"
+    },
+    {
+        name: "People",
+        url: "/people",
+        icon: "mdi-account-group"
     }
 ];
 export const environment = process.env.NODE_ENV;

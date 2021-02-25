@@ -15,6 +15,7 @@ import EntityEdit from "../components/EntityEdit";
 import Locations from "../views/Locations";
 import Programs from "../views/Programs";
 import Domains from "../views/Domains";
+import People from "../views/People";
 //import store from "../store";
 
 Vue.use(VueRouter);
@@ -101,6 +102,14 @@ const routes = [
     path: "/domain",
     name: "Domains",
     component: Domains,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/people",
+    name: "People",
+    component: People,
     meta: {
       //requiresAuth: true
     }

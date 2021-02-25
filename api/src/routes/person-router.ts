@@ -1,35 +1,34 @@
 import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { ProgramService } from "../services";
+import { GenericService } from "../services";
 
-export const programRouter = express.Router();
+export const personRouter = express.Router();
 
-programRouter.get("/", RequiresData,
+personRouter.get("/", RequiresData,
     async (req: Request, res: Response) => {
-        let db = req.store.Programs as ProgramService;
-        return res.json({ data: await db.getAll() });
+        let db = req.store.Persons as GenericService;
+
+        let list = await db.getAll();
+        list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}`)
+
+        return res.json({ data: list });
+    });
+personRouter.get("/active", RequiresData,
+    async (req: Request, res: Response) => {
+        let db = req.store.Persons as GenericService;
+
+        let list = await db.getAll({ status: 'Active' });
+        list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}`)
+
+        return res.json({ data: list });
     });
 
-    programRouter.post("/", RequiresData,
-    [body("name").notEmpty().isString()],
-    async (req: Request, res: Response) => {
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        let db = req.store.Programs as ProgramService;
-        await db.create(req.body);
-
-        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location created" }] });
-    });
-
-    programRouter.put("/:id", RequiresData,
+personRouter.post("/", RequiresData,
     [
-        param("id").notEmpty().isMongoId(),
-        body("name").notEmpty().isString()
+        body("first_name").notEmpty().isString(),
+        body("last_name").notEmpty().isString(),
+        body("status").notEmpty().isString()
     ],
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -38,14 +37,34 @@ programRouter.get("/", RequiresData,
             return res.status(400).json({ errors: errors.array() });
         }
 
-        let db = req.store.Programs as ProgramService;
+        let db = req.store.Persons as GenericService;
+        await db.create(req.body);
+
+        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location created" }] });
+    });
+
+personRouter.put("/:id", RequiresData,
+    [
+        param("id").notEmpty().isMongoId(),
+        body("first_name").notEmpty().isString(),
+        body("last_name").notEmpty().isString(),
+        body("status").notEmpty().isString()
+    ],
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        let db = req.store.Persons as GenericService;
         let { id } = req.params;
 
         await db.update(id, req.body);
         return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location edited" }] });
     });
 
-    programRouter.delete("/:id", RequiresData,
+personRouter.delete("/:id", RequiresData,
     [
         param("id").notEmpty().isMongoId()
     ],
@@ -56,7 +75,7 @@ programRouter.get("/", RequiresData,
             return res.status(400).json({ errors: errors.array() });
         }
 
-        let db = req.store.Programs as ProgramService;
+        let db = req.store.Persons as GenericService;
         let { id } = req.params;
 
         await db.delete(id);

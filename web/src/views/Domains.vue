@@ -15,6 +15,17 @@
             @click:row="rowClick"
           ></v-data-table>
         </v-card>
+
+        <v-card class="mt-5" v-if="showForm" color="#fff2d5">
+          <v-card-title>Values for {{editName}}</v-card-title>
+          <v-data-table
+            :headers="valueHeaders"
+            :items="editValues"
+          ></v-data-table>
+          <v-card-actions>
+            <v-btn color="info">Add</v-btn>
+          </v-card-actions>
+        </v-card>
       </div>
       <div class="col-md-4">
         <v-card v-if="showForm" color="#fff2d5">
@@ -32,15 +43,23 @@
                 dense
                 background-color="white"
               ></v-text-field>
-
-              <v-combobox
-                label="Values"
-                v-model="editValues"
-                dense small-chips
-                outlined multiple
+              <v-text-field
+                label="Field type"
+                outlined
+                required
+                v-model="editType"
+                dense
                 background-color="white"
-                hint="Enter a value and press Tab"
-              ></v-combobox>
+              ></v-text-field>
+              <v-textarea
+                label="Description"
+                outlined
+                required
+                v-model="editDescription"
+                dense
+                background-color="white"
+              ></v-textarea>
+
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -76,11 +95,19 @@ export default {
     showForm: false,
     editId: "",
     editName: "",
-    editValues: "",
+    editDescription: "",
+    editValues: [],
+    editType: "s",
     items: [],
     itemHeaders: [
       { text: "Name", value: "name" },
+      { text: "Field type", value: "type" },
+      { text: "Description", value: "description" },
       { text: "Value Count", value: "values.length" },
+    ],
+    valueHeaders: [
+      { text: "Value", value: "value" },
+      { text: "Description", value: "description" },
     ],
   }),
   created() {
@@ -95,9 +122,11 @@ export default {
   },
   methods: {
     createClick() {
-      this.editName = "";
       this.editId = "";
-      this.editValues = "";
+      this.editName = "";
+      this.editDescription = "";
+      this.editType = "";
+      this.editValues = [];
       this.isCreate = true;
       this.showForm = true;
     },
@@ -106,14 +135,21 @@ export default {
     rowClick(item) {
       this.isCreate = false;
       this.editName = item.name;
+      this.editDescription = item.description;
       this.editValues = item.values;
+      this.editType = item.type;
       this.editId = item._id;
       this.showForm = true;
     },
     saveClick() {
       if (this.isCreate) {
         axios
-          .post(DOMAIN_URL, { name: this.editName, values: this.editValues })
+          .post(DOMAIN_URL, {
+            name: this.editName,
+            description: this.editDescription,
+            values: this.editValues,
+            type: this.editType,
+          })
           .then((result) => {
             if (result && result.data.data) {
               this.items = result.data.data;
@@ -127,7 +163,9 @@ export default {
         axios
           .put(`${DOMAIN_URL}/${this.editId}`, {
             name: this.editName,
+            description: this.editDescription,
             values: this.editValues,
+            type: this.editType,
           })
           .then((result) => {
             if (result && result.data.data) {

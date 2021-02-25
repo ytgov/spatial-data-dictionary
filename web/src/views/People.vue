@@ -3,7 +3,7 @@
     <v-btn color="primary" class="float-right mt-0" @click="createClick"
       ><v-icon>mdi-plus</v-icon> Create</v-btn
     >
-    <h1>Programs</h1>
+    <h1>People</h1>
     <hr class="mb-3" />
 
     <div class="row mt-5" style="clear: both">
@@ -25,23 +25,36 @@
           <v-card-text>
             <v-form>
               <v-text-field
-                label="Name"
+                label="First name"
                 outlined
                 required
-                v-model="editName"
+                v-model="editFirstName"
+                dense
+                background-color="white"
+              ></v-text-field>
+
+              <v-text-field
+                label="Last name"
+                outlined
+                required
+                v-model="editLastName"
+                dense
+                background-color="white"
+              ></v-text-field>
+
+              <v-text-field
+                label="Email"
+                outlined
+                v-model="editEmail"
                 dense
                 background-color="white"
               ></v-text-field>
 
               <v-select
-                label="Managers"
-                :items="peopleOptions"
-                v-model="editPeople"
-                item-text="display_name"
-                item-value="_id"
-                multiple
-                dense
+                v-model="editStatus"
+                :items="['Active', 'Inactive']"
                 outlined
+                dense
                 background-color="white"
               ></v-select>
             </v-form>
@@ -70,36 +83,32 @@
 
 <script>
 import axios from "axios";
-import { PERSON_URL, PROGRAM_URL } from "../urls";
+import { PERSON_URL } from "../urls";
 
 export default {
-  name: "Programs",
+  name: "People",
   data: () => ({
     isCreate: true,
     showForm: false,
     editId: "",
-    editName: "",
-    editPeople: [],
+    editFirstName: "",
+    editLastName: "",
+    editEmail: "",
+    editStatus: "Active",
     peopleOptions: [],
     items: [],
     itemHeaders: [
-      { text: "Name", value: "name" },
-      { text: "People", value: "people.length" },
+      { text: "First name", value: "first_name" },
+      { text: "Last name", value: "last_name" },
+      { text: "Email", value: "email" },
+      { text: "Active", value: "status" },
     ],
   }),
   created() {
     axios
-      .get(PROGRAM_URL)
+      .get(PERSON_URL)
       .then((result) => {
         this.items = result.data.data;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-    axios
-      .get(`${PERSON_URL}/active`)
-      .then((result) => {
-        this.peopleOptions = result.data.data;
       })
       .catch((error) => {
         console.error(error);
@@ -108,8 +117,10 @@ export default {
   methods: {
     createClick() {
       this.editId = "";
-      this.editName = "";
-      this.editPeople = [];
+      this.editFirstName = "";
+      this.editLastName = "";
+      this.editEmail = "";
+      this.editStatus = "Active";
       this.isCreate = true;
       this.showForm = true;
     },
@@ -117,15 +128,22 @@ export default {
     removeLocation() {},
     rowClick(item) {
       this.isCreate = false;
-      this.editName = item.name;
-      this.editPeople = item.people;
       this.editId = item._id;
+      this.editFirstName = item.first_name;
+      this.editLastName = item.last_name;
+      this.editEmail = item.email;
+      this.editStatus = item.status;
       this.showForm = true;
     },
     saveClick() {
       if (this.isCreate) {
         axios
-          .post(PROGRAM_URL, { name: this.editName, people: this.editPeople })
+          .post(PERSON_URL, {
+            first_name: this.editFirstName,
+            last_name: this.editLastName,
+            email: this.editEmail,
+            status: this.editStatus,
+          })
           .then((result) => {
             if (result && result.data.data) {
               this.items = result.data.data;
@@ -137,9 +155,11 @@ export default {
           });
       } else {
         axios
-          .put(`${PROGRAM_URL}/${this.editId}`, {
-            name: this.editName,
-            people: this.editPeople,
+          .put(`${PERSON_URL}/${this.editId}`, {
+            first_name: this.editFirstName,
+            last_name: this.editLastName,
+            email: this.editEmail,
+            status: this.editStatus,
           })
           .then((result) => {
             if (result && result.data.data) {
@@ -155,7 +175,7 @@ export default {
     removeClick() {
       if (this.editId && this.editId.length > 2) {
         axios
-          .delete(`${PROGRAM_URL}/${this.editId}`)
+          .delete(`${PERSON_URL}/${this.editId}`)
           .then((result) => {
             if (result && result.data.data) {
               this.items = result.data.data;
