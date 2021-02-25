@@ -97,7 +97,7 @@ export default {
         console.error(error);
       });
     axios
-      .get(`${PERSON_URL}/active`)
+      .get(`${PERSON_URL}`)
       .then((result) => {
         this.peopleOptions = result.data.data;
       })

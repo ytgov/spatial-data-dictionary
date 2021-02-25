@@ -10,7 +10,7 @@ personRouter.get("/", RequiresData,
         let db = req.store.Persons as GenericService;
 
         let list = await db.getAll();
-        list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}`)
+        list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}` + (person.status == "Inactive" ? " (Inactive)" : ""))
 
         return res.json({ data: list });
     });
