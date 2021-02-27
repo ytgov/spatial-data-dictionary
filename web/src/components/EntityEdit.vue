@@ -93,8 +93,13 @@
       </div>
       <div style="float: right; text-align: right">
         <h2 class="mb-1">
-          {{ entity.primary }} <br />
-          <span style="font-weight: 400">{{ entity.program }}</span>
+          {{ entity.location.name }} <br /><span
+            class="program-link"
+            v-for="program of entity.links.programs"
+            v-bind:key="program.id"
+          >
+            {{ program.name }}</span
+          >
         </h2>
       </div>
       <div style="clear: both"></div>
@@ -126,19 +131,24 @@
                   outlined
                   label="Location"
                   hide-details
+                  item-text="name"
+                  item-value="_id"
                   :items="locationOptions"
-                  v-model="entity.primary"
+                  v-model="editLocation"
                 ></v-combobox>
               </div>
               <div class="col-md-12">
-                <v-combobox
+                <v-select
                   dense
                   outlined
+                  multiple
                   label="Program"
                   :items="programOptions"
+                  item-text="name"
+                  item-value="_id"
                   hide-details
-                  v-model="entity.program"
-                ></v-combobox>
+                  v-model="editPrograms"
+                ></v-select>
               </div>
 
               <div class="col-md-12">
@@ -152,7 +162,7 @@
                 ></v-textarea>
               </div>
 
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <v-card color="#fff2d5">
                   <v-card-subtitle>Location</v-card-subtitle>
                   <v-card-text>
@@ -234,7 +244,7 @@
                   </v-card-text>
                 </v-card>
               </div>
-
+ -->
               <div class="col-md-6">
                 <v-select
                   label="Status"
@@ -448,8 +458,11 @@ export default {
     editRequired: false,
     editAlias: "",
     editDomain: "",
+    editPrograms: [],
+    editLocation: {},
 
     attributeHeaders: [
+      { text: "Id", value: "_id" },
       { text: "Field", value: "name" },
       { text: "Data type", value: "type" },
       { text: "Required", value: "required" },
@@ -460,6 +473,13 @@ export default {
   }),
 
   computed: {},
+  watch: {
+    editPrograms: function (val) {
+      this.entity.links.programs = this.programOptions.filter(
+        (p) => val.indexOf(p._id) >= 0
+      );
+    },
+  },
 
   created() {
     let id = this.$route.params.id;
@@ -470,6 +490,11 @@ export default {
         this.entity = result.data.data;
         this.attributes = this.entity.attributes;
         this.sources = this.entity.links.entities;
+        this.editLocation = this.entity.location;
+
+        if (this.entity.links.programs) {
+          this.editPrograms = this.entity.links.programs.map((p) => p.id);
+        }
 
         if (!this.entity.location)
           this.entity.location = { storage: "Database", name: "" };
@@ -481,7 +506,7 @@ export default {
     axios
       .get(LOCATION_URL)
       .then((result) => {
-        this.locationOptions = result.data.data.map((o) => o.name);
+        this.locationOptions = result.data.data;
       })
       .catch((error) => {
         console.error(error);
@@ -490,7 +515,7 @@ export default {
     axios
       .get(PROGRAM_URL)
       .then((result) => {
-        this.programOptions = result.data.data.map((o) => o.name);
+        this.programOptions = result.data.data;
       })
       .catch((error) => {
         console.error(error);
@@ -520,8 +545,6 @@ export default {
       this.clearEdits();
     },
     changeSource(sourceId) {
-      console.log("Source changed to:", sourceId);
-
       axios
         .get(`${ENTITY_URL}/${sourceId}/attribute`)
         .then((result) => {
@@ -535,6 +558,7 @@ export default {
       let selected = this.sourceAttributes.filter(
         (attr) => attr.name == item
       )[0];
+      this.editAttrId = selected._id;
       this.editItem = selected;
       this.editItem.oldName = "";
       this.editName = selected.name;
@@ -549,6 +573,7 @@ export default {
 
       if (this.sideAction == "Edit Attribute") {
         let body = {
+          _id: this.editAttrId,
           oldName: this.editItem.oldName,
           name: this.editName,
           description: this.editDescription,
@@ -589,6 +614,7 @@ export default {
           });
       } else if (this.sideAction == "Add source Attribute") {
         let body = {
+          sourceAttrId: this.editAttrId,
           oldName: this.editItem.oldName,
           name: this.editName,
           description: this.editDescription,
@@ -614,6 +640,7 @@ export default {
       this.sideAction = "Edit Attribute";
       this.sideActionButton = "Save Changes";
 
+      this.editAttrId = item._id;
       this.editItem = item;
       this.editItem.oldName = item.name;
       this.editName = item.name;
@@ -625,6 +652,7 @@ export default {
     },
 
     clearEdits() {
+      this.editAttrId = "";
       this.editItem = null;
       this.editName = "";
       this.editDescription = "";
@@ -635,15 +663,28 @@ export default {
     },
 
     saveProperties() {
-      axios
-        .put(`${ENTITY_URL}/${this.entity._id}`, this.entity)
-        .then((result) => {
-          this.entity = result.data.data.value;
-          this.clearEdits();
+      let body = this.entity;
 
-          this.snackbar = true;
-          this.apiSuccess = "Changes saved";
-        });
+      body.location = {
+        id: this.editLocation._id || this.editLocation.id,
+      };
+      body.links.programs = [];
+
+      if (this.editPrograms) {
+        let pList = [];
+        for (let p of this.editPrograms) {
+          if (p) pList.push({ id: p });
+        }
+        body.links.programs = pList;
+      }
+
+      axios.put(`${ENTITY_URL}/${this.entity._id}`, body).then((result) => {
+        this.entity = result.data.data.value;
+        this.clearEdits();
+
+        this.snackbar = true;
+        this.apiSuccess = "Changes saved";
+      });
     },
   },
 };

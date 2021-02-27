@@ -13,6 +13,7 @@
             label="Name (required)"
             required
             :rules="nameRules"
+            hide-details
           ></v-text-field>
         </div>
 
@@ -21,21 +22,35 @@
             dense
             v-model="description"
             outlined
-            label="Description (required)"
-            required
+            label="Description"
+            hide-details
           ></v-textarea>
         </div>
 
         <div class="col-12">
           <v-autocomplete
             dense
-            :items="categoryList"
-            v-model="category"
+            :items="locationOptions"
+            v-model="location"
             outlined
-            label="Category"
+            label="Location (required)"
             required
+            hide-details
+            item-value="_id"
+            item-text="name"
+          ></v-autocomplete>
+        </div>
+        <div class="col-12">
+          <v-autocomplete
+            dense
+            :items="programOptions"
+            v-model="programs"
+            outlined
             multiple
-            item-value="name"
+            hide-details
+            label="Program(s)"
+            required
+            item-value="_id"
             item-text="name"
           ></v-autocomplete>
         </div>
@@ -78,7 +93,7 @@
 
 <script>
 import axios from "axios";
-import { ENTITY_URL, CATEGORY_URL } from "../urls";
+import { ENTITY_URL, LOCATION_URL, PROGRAM_URL } from "../urls";
 import router from "../router";
 
 export default {
@@ -86,7 +101,8 @@ export default {
   data: () => ({
     list: [],
     sources: [],
-    categoryList: [],
+    locationOptions: [],
+    programOptions: [],
     form1Valid: true,
     name: "",
     nameRules: [
@@ -94,14 +110,13 @@ export default {
       (v) => (v && v.length > 2) || "Name must be more than 2 characters",
     ],
     description: "",
-    category: [],
+    location: "",
+    programs: [],
     showError: null,
     snackbar: null,
     apiSuccess: "",
   }),
   created() {
-    this.loadCategories();
-
     axios
       .get(ENTITY_URL)
       .then((results) => {
@@ -110,29 +125,41 @@ export default {
       .catch((err) => {
         console.err(err);
       });
+
+    axios
+      .get(LOCATION_URL)
+      .then((results) => {
+        this.locationOptions = results.data.data;
+      })
+      .catch((err) => {
+        console.err(err);
+      });
+
+    axios
+      .get(PROGRAM_URL)
+      .then((results) => {
+        this.programOptions = results.data.data;
+      })
+      .catch((err) => {
+        console.err(err);
+      });
   },
   methods: {
-    loadCategories() {
-      axios
-        .get(CATEGORY_URL)
-        .then((result) => {
-          console.log(result.data.data);
-          this.categoryList = result.data.data;
-        })
-        .catch((err) => console.log(err));
-    },
-
     saveForm() {
       this.showError = false;
       console.log("SAVING");
 
       let body = {
         name: this.name,
-        categories: this.category,
-        links: { entities: [], people: [] },
-        attributes: [],
-        status: "Active",
         description: this.description,
+        location: { id: this.location },
+        links: {
+          entities: [],
+          people: [],
+          programs: [],
+        },
+        attributes: [],
+        status: "Draft",
       };
 
       if (this.sources) {
@@ -143,6 +170,16 @@ export default {
         });
 
         body.links.entities = sourceList;
+      }
+
+      if (this.programs) {
+        let programList = [];
+
+        this.programs.forEach((item) => {
+          programList.push({ id: item });
+        });
+
+        body.links.programs = programList;
       }
 
       axios

@@ -42,16 +42,11 @@ export interface Entity { // a table or layer or file
     id?: string;
     name: string;
     description: string;
-    fileName?: string;
-    repositoryId?: string;
-    programIds: string[];
     status: EntityStatus;
-    isSpatial: boolean;
+    location: any;
     attributes: Attribute[];
     properties: Property[];
     links: any;
-    primary: string;
-    secondary: string;
 }
 
 export enum EntityStatus {
@@ -62,7 +57,7 @@ export enum EntityStatus {
 }
 
 export interface Attribute {
-    id?: string;
+    _id?: string;
     name: string;
     domain: Domain;
     properties: Property[];

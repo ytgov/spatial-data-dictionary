@@ -94,7 +94,7 @@
           ><br />
 
           <status-chip :status="entity.status"></status-chip>
-          <location-chip :location="entity.location.storage"></location-chip>
+          <location-chip :location="entity.location.type"></location-chip>
 
           <br />
           <v-chip
@@ -110,8 +110,19 @@
       </div>
       <div style="float: right; text-align: right">
         <h2 class="mb-1">
-          {{ entity.primary }} <br />
-          <span style="font-weight: 400">{{ entity.program }}</span>
+          <router-link :to="'/entity?location=' + entity.location.id">{{
+            entity.location.name
+          }}</router-link
+          ><br />
+          <span
+            class="program-link"
+            v-for="program of entity.links.programs"
+            v-bind:key="program.id"
+          >
+            <router-link :to="'/entity?program=' + program.id">{{
+              program.name
+            }}</router-link></span
+          >
         </h2>
         <v-btn color="info" :to="'/entity/' + entity._id + '/edit'">Edit</v-btn>
       </div>
@@ -309,6 +320,16 @@
   </div>
 </template>
 
+<style>
+.program-link {
+  font-weight: 400;
+}
+.program-link:after {
+  content: ", "
+}
+.program-link:last-child:after { content: ""; }
+
+</style>
 <script>
 import axios from "axios";
 import { ENTITY_URL } from "../urls";
