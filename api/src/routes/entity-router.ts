@@ -176,7 +176,7 @@ entityRouter.post("/:id/connection", RequiresData,
 
             }
             else if (connectionType == "Source Entity" && selectedEntity) {
-                entity.links.entities.push({ id: selectedEntity, type: "Source" });
+                entity.links.entities.push({ id: selectedEntity, role: "Source" });
             }
 
             let results = await db.update(id, entity);

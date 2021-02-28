@@ -22,8 +22,8 @@
           <v-card-title> {{ item.name }}</v-card-title>
 
           <v-card-text style="max-height: 110px; overflow: hidden">
-            <strong>{{ item.program }}</strong
-            ><br />
+            <!-- <strong>{{ item.location }}</strong
+            ><br /> -->
             {{ item.attributes.length }} Attributes<br />{{
               item.links.people.length
             }}

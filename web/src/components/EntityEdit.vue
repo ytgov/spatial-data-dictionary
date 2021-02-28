@@ -437,7 +437,7 @@ export default {
     snackbar: null,
     apiSuccess: "",
 
-    entity: {},
+    entity: { location: {}, links: { programs: [], entities: [], people: [] } },
     attributes: [],
     sources: [],
     sourceAttributes: [],
@@ -569,8 +569,6 @@ export default {
       this.editDomain = selected.domain;
     },
     sideSave() {
-      console.log("SIDE SAVE");
-
       if (this.sideAction == "Edit Attribute") {
         let body = {
           _id: this.editAttrId,

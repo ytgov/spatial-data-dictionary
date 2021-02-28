@@ -325,10 +325,11 @@
   font-weight: 400;
 }
 .program-link:after {
-  content: ", "
+  content: ", ";
 }
-.program-link:last-child:after { content: ""; }
-
+.program-link:last-child:after {
+  content: "";
+}
 </style>
 <script>
 import axios from "axios";
@@ -478,12 +479,12 @@ export default {
     },
 
     saveConnection(args) {
-      console.log("SAVING CONNECTION", args);
-
       axios
         .post(`${ENTITY_URL}/${this.entity_id}/connection`, args)
         .then((results) => {
           console.log(results);
+          this.entity = results.data.data;
+          this.closeConnection();
         })
         .catch((error) => {
           console.error(error);
