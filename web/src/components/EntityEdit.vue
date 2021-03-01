@@ -462,7 +462,7 @@ export default {
     editLocation: {},
 
     attributeHeaders: [
-      { text: "Id", value: "_id" },
+      //{ text: "Id", value: "_id" },
       { text: "Field", value: "name" },
       { text: "Data type", value: "type" },
       { text: "Required", value: "required" },
