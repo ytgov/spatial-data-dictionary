@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { Storage } from "../data";
 
+const store = new Storage();
+
 export async function RequiresData(req: Request, res: Response, next: NextFunction) {
-    let store = new Storage();
+    //   let store = new Storage();
 
     store.ensureConnected()
         .then(worked => {
