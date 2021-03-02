@@ -189,6 +189,42 @@ entityRouter.post("/:id/connection", RequiresData,
         res.status(404).send();
     });
 
+entityRouter.delete("/:id/connection/:connectionId", RequiresData,
+    [
+        param("id").notEmpty().isMongoId(),
+        param("connectionId").notEmpty(),
+    ],
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        let db = req.store.Entities as EntityService;
+        let { id, connectionId } = req.params;
+        let entity = await db.getById(id);
+
+        if (entity) {
+            let connections = new Array();
+
+            entity.links.entities.forEach((e: any) => {
+                if (e._id === connectionId || e.id === connectionId) { }
+                else {
+                    connections.push(e);
+                }
+            })
+
+            entity.links.entities = connections;
+            let results = await db.update(id, entity);
+
+            await buildConnections(entity, req);
+            return res.json({ data: entity });
+        }
+
+        res.status(404).send();
+    });
+
 entityRouter.get("/:id/attribute", RequiresData,
     [
         param("id").notEmpty().isMongoId()

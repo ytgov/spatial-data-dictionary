@@ -1,8 +1,8 @@
 <template>
-  <div class="">
+  <div class="" :key="entity_id">
     <v-toolbar flat dense color="#f3b228" class="mb-5" style="color: red">
       <v-btn text style="margin-left: -10px; color: #323232" to="/dashboard"
-        >Dashboard</v-btn
+        >Dashboard {{ entity_id }}</v-btn
       >
 
       <v-divider vertical class="ml-0 mr-3"></v-divider>
@@ -269,7 +269,6 @@
             color="#fff2d5"
             class="mb-2"
             @click="openConnectionDialog(item)"
-            :to="'/entity/' + item.id"
           >
             <v-card-text>
               <v-icon>mdi-database-marker</v-icon> &nbsp;
@@ -318,11 +317,14 @@
       :self="entity"
       @doClose="closeConnection()"
       @doSave="saveConnection"
-
     ></connection-dialog>
 
     <entityconnection-dialog
-      :entity="connectionEntity"
+      :dialog="editConnectionDialogVisible"
+      :selectedEntity="connectionEntity"
+      :entity="entity"
+      @doClose="closeConnectionDialog()"
+      @removeConnection="removeConnection"
     ></entityconnection-dialog>
   </div>
 </template>
@@ -350,6 +352,7 @@ export default {
     snackbar: null,
     apiSuccess: "",
     connectionDialogVisible: null,
+    editConnectionDialogVisible: null,
 
     entity_id: "",
     entity: { links: {}, location: {} },
@@ -402,6 +405,14 @@ export default {
     dialogDelete(val) {
       val || this.closeDelete();
     },
+    "$route.params.id": {
+      handler: function (id) {
+        this.entity_id = id;
+        this.loadEntity(this.entity_id);
+      },
+      deep: true,
+      immediate: true,
+    },
   },
 
   created() {
@@ -425,6 +436,9 @@ export default {
     },
 
     loadEntity(id) {
+      this.closeConnectionDialog();
+      this.closeConnection();
+
       axios
         .get(`${ENTITY_URL}/${id}`)
         .then((result) => {
@@ -508,8 +522,28 @@ export default {
     },
 
     openConnectionDialog(connection) {
-      console.log("OPEBNING", connection);
+      console.log("TRYINT OT OPEN");
       this.connectionEntity = connection;
+      this.editConnectionDialogVisible = true;
+    },
+    closeConnectionDialog() {
+      this.editConnectionDialogVisible = null;
+    },
+    removeConnection(item) {
+      console.log("REMOVING CONECOITN TO ", item);
+
+      axios
+        .delete(
+          `${ENTITY_URL}/${this.entity_id}/connection/${item._id || item.id}`
+        )
+        .then((results) => {
+          console.log(results);
+          this.entity = results.data.data;
+          this.closeConnectionDialog();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
 };
