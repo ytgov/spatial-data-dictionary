@@ -268,7 +268,7 @@
           <v-card
             color="#fff2d5"
             class="mb-2"
-            @click="loadEntity(item.id)"
+            @click="openConnectionDialog(item)"
             :to="'/entity/' + item.id"
           >
             <v-card-text>
@@ -314,9 +314,16 @@
 
     <connection-dialog
       :dialog="connectionDialogVisible"
+      :existing="entity.links.entities"
+      :self="entity"
       @doClose="closeConnection()"
       @doSave="saveConnection"
+
     ></connection-dialog>
+
+    <entityconnection-dialog
+      :entity="connectionEntity"
+    ></entityconnection-dialog>
   </div>
 </template>
 
@@ -379,6 +386,7 @@ export default {
       name: "",
       value: "",
     },
+    connectionEntity: {},
   }),
 
   computed: {
@@ -497,6 +505,11 @@ export default {
         newPersonName: this.newPersonName,
         newPersonEmail: this.newPersonEmail,
       }; */
+    },
+
+    openConnectionDialog(connection) {
+      console.log("OPEBNING", connection);
+      this.connectionEntity = connection;
     },
   },
 };

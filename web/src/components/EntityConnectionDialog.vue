@@ -95,15 +95,13 @@ import { ENTITY_URL, PERSON_URL } from "../urls";
 import axios from "axios";
 
 export default {
-  name: "ConnectionDialog",
-  props: ["dialog", "existing", "self"],
+  name: "EntityConnectionDialog",
+  props: ["dialog"],
   data: () => ({
     isOpen: null,
     connectionTypeOptions: ["Source Entity", "Person"],
     entityOptions: [],
     personOptions: [],
-    allEntities: [],
-    existingEntities: [],
 
     connectionType: "Source Entity",
     selectedEntity: null,
@@ -118,21 +116,7 @@ export default {
   watch: {
     dialog: function (val) {
       this.clearInput();
-
-      let existingIds = this.existingEntities.map((e) => e.id);
-      this.entityOptions = [];
-
-      this.allEntities.forEach((e) => {
-        if (existingIds.indexOf(e._id) == -1 && this.self._id != e._id) this.entityOptions.push(e);
-      });
-
       this.isOpen = val;
-    },
-    existing: function (val) {
-      this.existingEntities = val;
-    },
-    self: function (val) {
-      console.log("SETTING: ", val);
     },
   },
   created() {
@@ -141,7 +125,7 @@ export default {
     axios
       .get(ENTITY_URL)
       .then((result) => {
-        this.allEntities = result.data.data;
+        this.entityOptions = result.data.data;
       })
       .catch((error) => {
         console.error(error);
@@ -152,10 +136,7 @@ export default {
       .then((result) => {
         this.personOptions = result.data.data;
         this.selectedPerson = this.personOptions[0]._id;
-        this.personOptions.push({
-          _id: null,
-          display_name: "Add a New Person",
-        });
+        this.personOptions.push({ _id: null, display_name: "Add a New Person" });
       })
       .catch((error) => {
         console.error(error);
