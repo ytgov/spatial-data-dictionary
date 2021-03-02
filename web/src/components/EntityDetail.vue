@@ -2,7 +2,7 @@
   <div class="" :key="entity_id">
     <v-toolbar flat dense color="#f3b228" class="mb-5" style="color: red">
       <v-btn text style="margin-left: -10px; color: #323232" to="/dashboard"
-        >Dashboard {{ entity_id }}</v-btn
+        >Dashboard</v-btn
       >
 
       <v-divider vertical class="ml-0 mr-3"></v-divider>
