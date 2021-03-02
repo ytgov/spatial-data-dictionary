@@ -39,6 +39,7 @@ export interface Repository { // database or ALRS
 }
 
 export interface Entity { // a table or layer or file
+    _id: any;
     id?: string;
     name: string;
     description: string;

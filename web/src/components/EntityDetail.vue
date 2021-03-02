@@ -279,6 +279,25 @@
             >
           </v-card>
         </div>
+        
+        <div
+          v-for="item in entity.links.downstream"
+          v-bind:key="item.id"
+          style="clear: both"
+        >
+          <v-card
+            color="#fff2d5"
+            class="mb-2"
+          >
+            <v-card-text>
+              <v-icon>mdi-database-marker</v-icon> &nbsp;
+              <strong
+                ><a>{{ item.name }}</a></strong
+              >
+              <br />Destination</v-card-text
+            >
+          </v-card>
+        </div>
 
         <div v-for="item in entity.links.people" v-bind:key="item.id">
           <v-card color="#fff2d5" class="mb-2">

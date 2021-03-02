@@ -304,6 +304,12 @@ async function buildConnections(entity: Entity, req: Request) {
                 }
             }
         }
+
+        let childLinks = await db.findDownLinks(entity._id);
+
+        if (childLinks && childLinks.length > 0) {
+            entity.links.downstream = childLinks;
+        }
     }
     else {
         entity.links = { people: [], entities: [] };
