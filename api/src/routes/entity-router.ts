@@ -290,8 +290,13 @@ async function buildConnections(entity: Entity, req: Request) {
                 item.name = "Unknown";
                 let entity = await db.getById(item.id);
 
-                if (entity)
+                if (entity) {
                     item.name = entity.name;
+                    item.attributes = entity.attributes;
+                    item.description = entity.description;
+                    item.status = entity.status;
+                    item.location = entity.location;
+                }
             }
         }
         if (entity.links.programs) {
