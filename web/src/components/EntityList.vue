@@ -74,8 +74,8 @@
             <v-card-title> {{ item.name }}</v-card-title>
 
             <v-card-text style="max-height: 110px; overflow: hidden">
-              <!-- <strong>{{ item.location }}</strong
-            ><br /> -->
+               <strong>{{ item.location.name }}</strong
+            ><br /> 
               {{ item.attributes.length }} Attributes<br />{{
                 item.links.people.length
               }}
@@ -83,7 +83,7 @@
               <div class="mt-3">
                 <status-chip :status="item.status"> </status-chip>
                 <location-chip
-                  :location="item.location.storage"
+                  :location="item.location.type"
                 ></location-chip>
               </div>
             </v-card-text>
