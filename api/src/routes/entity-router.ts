@@ -11,7 +11,14 @@ export const entityRouter = express.Router();
 entityRouter.get("/", RequiresData, async (req: Request, res: Response) => {
     let db = req.store.Entities as EntityService;
     //let query = { 'user.username': "datajohnson" };
-    return res.json({ data: await db.getAll() });
+
+    let allEntities = await db.getAll();
+
+    for (let entity of allEntities) {
+        await buildConnections(entity, req);
+    }
+
+    return res.json({ data: allEntities });
 });
 
 entityRouter.post("/", RequiresData, async (req: Request, res: Response) => {
@@ -299,6 +306,7 @@ async function buildConnections(entity: Entity, req: Request) {
                 }
             }
         }
+        
         if (entity.links.programs) {
             for (let item of entity.links.programs) {
                 item.name = "Unknown";

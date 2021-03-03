@@ -250,9 +250,12 @@
                   label="Status"
                   v-model="entity.status"
                   dense
+                  hide-details
                   outlined
                   :items="statusOptions"
                 ></v-select>
+
+                <v-switch label="Is Domain Table?" v-model="entity.is_domain" dense outlined></v-switch>
 
                 <v-combobox
                   dense
@@ -332,6 +335,8 @@
                   </div>
 
                   <div v-if="sideAction != 'Add source Attribute'">
+                    {{ findSourceAttribute(editSourceAttrId) }}
+
                     <v-text-field
                       dense
                       v-model="editName"
@@ -381,7 +386,7 @@
                       background-color="white"
                     ></v-text-field>
                   </div>
-
+                  <!-- 
                   <div v-if="sideAction != 'Add source Attribute'">
                     <v-select
                       dense
@@ -392,7 +397,7 @@
                       :items="domainOptions"
                       background-color="white"
                     ></v-select>
-                  </div>
+                  </div> -->
 
                   <v-btn color="primary" @click="sideSave">{{
                     sideActionButton
@@ -460,6 +465,7 @@ export default {
     editDomain: "",
     editPrograms: [],
     editLocation: {},
+    editSourceAttrId: "",
 
     attributeHeaders: [
       //{ text: "Id", value: "_id" },
@@ -567,6 +573,7 @@ export default {
       this.editRequired = selected.required;
       this.editAlias = selected.alias;
       this.editDomain = selected.domain;
+      this.editSourceAttrId = selected.sourceAttrId;
     },
     sideSave() {
       if (this.sideAction == "Edit Attribute") {
@@ -579,6 +586,7 @@ export default {
           alias: this.editAlias,
           domain: this.editDomain,
           required: this.editRequired,
+          sourceAttrId: this.editSourceAttrId,
         };
 
         axios
@@ -599,6 +607,7 @@ export default {
           alias: this.editAlias,
           domain: this.editDomain,
           required: this.editRequired,
+          sourceAttrId: this.editSourceAttrId,
         };
 
         axios
@@ -647,6 +656,7 @@ export default {
       this.editRequired = item.required;
       this.editAlias = item.alias;
       this.editDomain = item.domain;
+      this.editSourceAttrId = item.sourceAttrId;
     },
 
     clearEdits() {
@@ -658,6 +668,29 @@ export default {
       this.editRequired = false;
       this.editAlias = "";
       this.editDomain = "";
+      this.editSourceAttrId = "";
+    },
+
+    findSourceAttribute(id) {
+      if (!id) return "No Source Selected";
+
+      let entityName = "";
+
+      for (let e of this.entity.links.entities) {
+        entityName = e.name;
+
+        let attrMatches = e.attributes.filter((a) => a._id == id);
+
+        console.log("ATTRMATCHES", attrMatches);
+
+        if (attrMatches.length > 0) {
+          let attr = attrMatches[0];
+
+          return `${entityName}:${attr.name}`;
+        }
+      }
+
+      return "NAME OF " + id;
     },
 
     saveProperties() {
