@@ -61,6 +61,7 @@ export interface Attribute {
     _id?: string;
     name: string;
     domain: Domain;
+    source: any;
     properties: Property[];
 }
 

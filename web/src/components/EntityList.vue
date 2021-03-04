@@ -69,22 +69,31 @@
             class="mt-3"
             color="#fff2d5"
             :to="'/entity/' + item._id"
-            style="height: 220px; overflow: hidden"
+            style="height: 280px; overflow: hidden"
           >
             <v-card-title> {{ item.name }}</v-card-title>
 
-            <v-card-text style="max-height: 110px; overflow: hidden">
-               <strong>{{ item.location.name }}</strong
-            ><br /> 
+            <v-card-text style="max-height: 210px; overflow: hidden">
+              <strong>{{ item.location.name }}</strong
+              ><br />
               {{ item.attributes.length }} Attributes<br />{{
                 item.links.people.length
               }}
               People
               <div class="mt-3">
                 <status-chip :status="item.status"> </status-chip>
-                <location-chip
-                  :location="item.location.type"
-                ></location-chip>
+                <location-chip :location="item.location.type"></location-chip>
+                <div class="mt-3">
+                  <v-chip
+                    class="mr-2"
+                    v-for="tag of item.tags"
+                    v-bind:key="tag"
+                    link
+                    :to="'/tags/' + tag"
+                  >
+                    <v-icon left> mdi-tag </v-icon>{{ tag }}
+                  </v-chip>
+                </div>
               </div>
             </v-card-text>
           </v-card>

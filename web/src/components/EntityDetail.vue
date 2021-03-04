@@ -138,7 +138,7 @@
         <v-card>
           <v-tabs v-model="tab" background-color="#fff2d5" color="primary">
             <v-tab key="0">Attributes</v-tab>
-            <v-tab key="1">Properties</v-tab>
+            <v-tab v-if="entity.is_domain" key="1">VALUES</v-tab>
             <v-tab key="2">Changes</v-tab>
           </v-tabs>
 
@@ -148,14 +148,17 @@
                 :items="entity.attributes"
                 :headers="attributeHeaders"
               >
+                <template v-slot:item.domain="{ item }"
+                  >
+                  <span @click="openDomainLink(item)" style="text-decoration: underline; color: #00818f; cursor: pointer">{{ getDomainName(item) }}</span>
+                </template>
+                <template v-slot:item.source="{ item }"
+                  ><span @click="openSourceLink(item)" style="text-decoration: underline; color: #00818f; cursor: pointer">{{getSourceName(item)}}</span>
+                </template>
               </v-data-table>
             </v-tab-item>
             <v-tab-item key="1">
-              <v-data-table
-                :headers="propertiesHeaders"
-                :items="desserts"
-                sort-by="calories"
-              >
+              <v-data-table :headers="valuesHeaders" :items="values">
                 <template v-slot:top>
                   <v-toolbar flat>
                     <v-spacer></v-spacer>
@@ -279,16 +282,13 @@
             >
           </v-card>
         </div>
-        
+
         <div
           v-for="item in entity.links.downstream"
           v-bind:key="item.id"
           style="clear: both"
         >
-          <v-card
-            color="#fff2d5"
-            class="mb-2"
-          >
+          <v-card color="#fff2d5" class="mb-2">
             <v-card-text>
               <v-icon>mdi-database-marker</v-icon> &nbsp;
               <strong
@@ -375,8 +375,9 @@ export default {
 
     entity_id: "",
     entity: { links: {}, location: {} },
+    values: [],
 
-    propertiesHeaders: [
+    valuesHeaders: [
       { text: "Name", value: "name" },
       { text: "Value", value: "value" },
       { text: "Actions", value: "actions", sortable: false },
@@ -388,6 +389,7 @@ export default {
       { text: "Notes", value: "description" },
       { text: "Alias", value: "alias" },
       { text: "Domain", value: "domain" },
+      { text: "Source", value: "source" },
     ],
     changeHeaders: [
       { text: "Date", value: "id" },
@@ -398,7 +400,6 @@ export default {
     dialog: false,
     dialogDelete: false,
 
-    desserts: [],
     editedIndex: -1,
     editedItem: {
       name: "",
@@ -441,18 +442,7 @@ export default {
   },
 
   methods: {
-    initialize() {
-      this.desserts = [
-        {
-          name: "In ALRS",
-          value: true,
-        },
-        {
-          name: "In OPR",
-          value: false,
-        },
-      ];
-    },
+    initialize() {},
 
     loadEntity(id) {
       this.closeConnectionDialog();
@@ -469,20 +459,32 @@ export default {
         });
     },
 
+    getDomainName(item) {
+      if (item.domain && item.domain.name) return item.domain.name;
+
+      return "";
+    },
+
+    getSourceName(item) {
+      if (item.source && item.source.name) return item.source.name;
+
+      return "";
+    },
+
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.values.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.values.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
+      this.values.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -504,9 +506,9 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        Object.assign(this.values[this.editedIndex], this.editedItem);
       } else {
-        this.desserts.push(this.editedItem);
+        this.values.push(this.editedItem);
       }
       this.close();
     },
@@ -563,6 +565,14 @@ export default {
         .catch((error) => {
           console.error(error);
         });
+    },
+
+    openSourceLink(item) {  
+      alert("Source is " + item.source.name)
+
+    },
+    openDomainLink(item) {
+      alert("Domain is " + item.domain.name)
     },
   },
 };

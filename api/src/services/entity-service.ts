@@ -34,6 +34,15 @@ export class EntityService {
         return null;
     }
 
+    async getByAttributeId(id: string): Promise<Entity | null> {
+        try {
+            return this.db.findOne<Entity>({ "attributes._id": id });
+        }
+        catch (e) { }
+
+        return null;
+    }
+
     async findDownLinks(id: string): Promise<any> {
         return this.db.find({ 'links.entities.id': new ObjectId(id) }).toArray();
     }

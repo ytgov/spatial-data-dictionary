@@ -255,7 +255,12 @@
                   :items="statusOptions"
                 ></v-select>
 
-                <v-switch label="Is Domain Table?" v-model="entity.is_domain" dense outlined></v-switch>
+                <v-switch
+                  label="Is Domain Table?"
+                  v-model="entity.is_domain"
+                  dense
+                  outlined
+                ></v-switch>
 
                 <v-combobox
                   dense
@@ -335,8 +340,6 @@
                   </div>
 
                   <div v-if="sideAction != 'Add source Attribute'">
-                    {{ findSourceAttribute(editSourceAttrId) }}
-
                     <v-text-field
                       dense
                       v-model="editName"
@@ -363,7 +366,7 @@
                       dense
                       v-model="editType"
                       outlined
-                      label="Data type (required)"
+                      label="Data type"
                       required
                       background-color="white"
                     ></v-text-field>
@@ -386,18 +389,32 @@
                       background-color="white"
                     ></v-text-field>
                   </div>
-                  <!-- 
+
                   <div v-if="sideAction != 'Add source Attribute'">
                     <v-select
                       dense
                       v-model="editDomain"
                       outlined
                       label="Domain"
-                      required
                       :items="domainOptions"
+                      item-text="name"
+                      item-value="_id"
+                      clearable
                       background-color="white"
                     ></v-select>
-                  </div> -->
+                  </div>
+                  
+                  <v-autocomplete
+                    dense
+                    outlined
+                    v-model="editSourceAttrId"
+                    label="Source"
+                    :items="sourceOptions"
+                    item-text="name"
+                    item-value="id"
+                    clearable
+                    background-color="white"
+                  ></v-autocomplete>
 
                   <v-btn color="primary" @click="sideSave">{{
                     sideActionButton
@@ -452,6 +469,7 @@ export default {
     locationOptions: [],
     programOptions: [],
     domainOptions: [],
+    sourceOptions: [],
 
     sideAction: "Add new Attribute",
     sideActionButton: "Add Attribute",
@@ -462,7 +480,7 @@ export default {
     editType: "",
     editRequired: false,
     editAlias: "",
-    editDomain: "",
+    editDomain: {},
     editPrograms: [],
     editLocation: {},
     editSourceAttrId: "",
@@ -474,7 +492,8 @@ export default {
       { text: "Required", value: "required" },
       { text: "Notes", value: "description" },
       { text: "Alias", value: "alias" },
-      { text: "Domain", value: "domain" },
+      { text: "Domain", value: "domain.name" },
+      { text: "Source", value: "source.name" },
     ],
   }),
 
@@ -504,6 +523,17 @@ export default {
 
         if (!this.entity.location)
           this.entity.location = { storage: "Database", name: "" };
+
+        if (this.sources) {
+          for (let e of this.sources) {
+            for (let a of e.attributes) {
+              this.sourceOptions.push({
+                id: a._id,
+                name: `${e.name}.${a.name}`,
+              });
+            }
+          }
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -530,7 +560,7 @@ export default {
     axios
       .get(DOMAIN_URL)
       .then((result) => {
-        this.domainOptions = result.data.data.map((o) => o.name);
+        this.domainOptions = result.data.data;
       })
       .catch((error) => {
         console.error(error);
@@ -572,8 +602,8 @@ export default {
       this.editType = selected.type;
       this.editRequired = selected.required;
       this.editAlias = selected.alias;
-      this.editDomain = selected.domain;
-      this.editSourceAttrId = selected.sourceAttrId;
+      this.editDomain = selected.domain.id;
+      this.editSourceAttrId = selected.source.id;
     },
     sideSave() {
       if (this.sideAction == "Edit Attribute") {
@@ -584,9 +614,9 @@ export default {
           description: this.editDescription,
           type: this.editType,
           alias: this.editAlias,
-          domain: this.editDomain,
+          domain: { id: this.editDomain },
           required: this.editRequired,
-          sourceAttrId: this.editSourceAttrId,
+          source: { id: this.editSourceAttrId },
         };
 
         axios
@@ -605,9 +635,9 @@ export default {
           description: this.editDescription,
           type: this.editType,
           alias: this.editAlias,
-          domain: this.editDomain,
+          domain: { id: this.editDomain },
           required: this.editRequired,
-          sourceAttrId: this.editSourceAttrId,
+          source: { id: this.editSourceAttrId },
         };
 
         axios
@@ -621,13 +651,13 @@ export default {
           });
       } else if (this.sideAction == "Add source Attribute") {
         let body = {
-          sourceAttrId: this.editAttrId,
+          source: { id: this.editSourceAttrId },
           oldName: this.editItem.oldName,
           name: this.editName,
           description: this.editDescription,
           type: this.editType,
           alias: this.editAlias,
-          domain: this.editDomain,
+          domain: { id: this.editDomain },
           required: this.editRequired,
         };
 
@@ -655,8 +685,8 @@ export default {
       this.editType = item.type;
       this.editRequired = item.required;
       this.editAlias = item.alias;
-      this.editDomain = item.domain;
-      this.editSourceAttrId = item.sourceAttrId;
+      this.editDomain = item.domain ? item.domain.id : "";
+      this.editSourceAttrId = item.source ? item.source.id : "";
     },
 
     clearEdits() {
@@ -678,10 +708,7 @@ export default {
 
       for (let e of this.entity.links.entities) {
         entityName = e.name;
-
         let attrMatches = e.attributes.filter((a) => a._id == id);
-
-        console.log("ATTRMATCHES", attrMatches);
 
         if (attrMatches.length > 0) {
           let attr = attrMatches[0];

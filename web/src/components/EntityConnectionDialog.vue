@@ -19,8 +19,15 @@
         {{ errorMessage }}
       </v-alert>
 
-      <v-btn color="primary" @click="goToConnection()"><v-icon class="mr-2">mdi-link-variant</v-icon> View Entity</v-btn>
-      <v-btn color="warning" v-if="attributes.length == 0" class="float-right" @click="removeConnection()">
+      <v-btn color="primary" @click="goToConnection()"
+        ><v-icon class="mr-2">mdi-link-variant</v-icon> View Entity</v-btn
+      >
+      <v-btn
+        color="warning"
+        v-if="attributes.length == 0"
+        class="float-right"
+        @click="removeConnection()"
+      >
         Remove Connection
       </v-btn>
     </v-container>
@@ -88,14 +95,21 @@ export default {
         this.attributes = [];
         let ids = this.connection.attributes.map((a) => a._id);
 
+        console.log("ids", ids)
+
         this.allAttributes.forEach((a) => {
-          if (ids.indexOf(a.sourceAttrId) != -1) this.attributes.push(a);
+          console.log("checking ", a)
+
+
+          if (a.source && a.source.id) {
+            if (ids.indexOf(a.source.id) != -1) this.attributes.push(a);
+          }
         });
       }
     },
     goToConnection() {
-      router.push(`/entity/${this.connection._id}`)
-    }
+      router.push(`/entity/${this.connection._id}`);
+    },
   },
 };
 </script>

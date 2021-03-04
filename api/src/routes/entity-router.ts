@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { AuthUser, Entity, Storage } from "../data";
+import { Attribute, AuthUser, Entity, Storage } from "../data";
 import { EntityService, GenericService, LocationService, ProgramService, UserService } from "../services";
 import { ObjectId } from "mongodb";
 import { v4 as uuidV4 } from "uuid";
@@ -281,6 +281,35 @@ async function buildConnections(entity: Entity, req: Request) {
         }
     }
 
+    if (entity.attributes) {
+
+        for (let attr of entity.attributes) {
+            if (attr.domain && attr.domain.id) {
+                let domain = await db.getById(attr.domain.id);
+
+                if (domain) {
+                    attr.domain.name = domain.name;
+                }
+            }
+
+            if (attr.source && attr.source.id) {
+                let attrEntity = await db.getByAttributeId(attr.source.id);
+                attr.source.name = "Unknown"
+
+                if (attrEntity) {
+                    let found = attrEntity.attributes.find((item) => { return item._id == attr.source.id }) as Attribute;
+
+                    if (found)
+                        attr.source.name = `${attrEntity.name}.${found.name}`;
+                    else
+                        attr.source.name = "Unknown"
+                }
+            }
+        }
+
+
+    }
+
     if (entity.links) {
         if (entity.links.people) {
             for (let item of entity.links.people) {
@@ -306,7 +335,7 @@ async function buildConnections(entity: Entity, req: Request) {
                 }
             }
         }
-        
+
         if (entity.links.programs) {
             for (let item of entity.links.programs) {
                 item.name = "Unknown";

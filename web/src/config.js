@@ -18,12 +18,12 @@ export const sections = [
         name: "Entities",
         url: "/entity",
         icon: "mdi-database-marker"
-    },
+    },/* 
     {
         name: "Domains",
         url: "/domain",
         icon: "mdi-format-list-text"
-    },
+    }, */
     {
         name: "Locations",
         url: "/location",

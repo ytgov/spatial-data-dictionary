@@ -14,7 +14,7 @@ import EntityCreate from "../components/EntityCreate";
 import EntityEdit from "../components/EntityEdit";
 import Locations from "../views/Locations";
 import Programs from "../views/Programs";
-import Domains from "../views/Domains";
+//import Domains from "../views/Domains";
 import People from "../views/People";
 //import store from "../store";
 
@@ -98,14 +98,14 @@ const routes = [
       //requiresAuth: true
     }
   },
-  {
+  /* {
     path: "/domain",
     name: "Domains",
     component: Domains,
     meta: {
       //requiresAuth: true
     }
-  },
+  }, */
   {
     path: "/people",
     name: "People",
