@@ -44,6 +44,6 @@ export class EntityService {
     }
 
     async findDownLinks(id: string): Promise<any> {
-        return this.db.find({ 'links.entities.id': new ObjectId(id) }).toArray();
+        return this.db.find({ 'links.entities.id': id.toString() }).toArray();
     }
 }

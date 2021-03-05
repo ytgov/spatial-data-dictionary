@@ -178,9 +178,6 @@ entityRouter.post("/:id/connection", RequiresData,
                 else {
                     entity.links.people.push({ id: selectedPerson, role: personRole });
                 }
-
-
-
             }
             else if (connectionType == "Source Entity" && selectedEntity) {
                 entity.links.entities.push({ id: selectedEntity, role: "Source" });
@@ -348,7 +345,6 @@ async function buildConnections(entity: Entity, req: Request) {
         }
 
         let childLinks = await db.findDownLinks(entity._id);
-
         if (childLinks && childLinks.length > 0) {
             entity.links.downstream = childLinks;
         }

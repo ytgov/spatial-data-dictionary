@@ -302,7 +302,7 @@
                   active
                   >Add</v-btn
                 >
-                <v-btn
+                <!-- <v-btn
                   class="float-right"
                   :color="
                     sideAction == 'Add source Attribute'
@@ -311,7 +311,7 @@
                   "
                   @click="addSourceAttribute"
                   >Add from Source</v-btn
-                >
+                > -->
                 <div style="clear: both"></div>
               </div>
               <v-card color="#fff2d5">
@@ -354,6 +354,17 @@
                     <v-textarea
                       dense
                       v-model="editDescription"
+                      outlined
+                      label="Description"
+                      rows="3"
+                      background-color="white"
+                    ></v-textarea>
+                  </div>
+
+                  <div v-if="sideAction != 'Add source Attribute'">
+                    <v-textarea
+                      dense
+                      v-model="editNotes"
                       outlined
                       label="Notes"
                       rows="3"
@@ -403,7 +414,7 @@
                       background-color="white"
                     ></v-select>
                   </div>
-                  
+
                   <v-autocomplete
                     dense
                     outlined
@@ -477,6 +488,7 @@ export default {
     editItem: {},
     editName: "",
     editDescription: "",
+    editNotes: "",
     editType: "",
     editRequired: false,
     editAlias: "",
@@ -490,7 +502,7 @@ export default {
       { text: "Field", value: "name" },
       { text: "Data type", value: "type" },
       { text: "Required", value: "required" },
-      { text: "Notes", value: "description" },
+      { text: "Description", value: "description" },
       { text: "Alias", value: "alias" },
       { text: "Domain", value: "domain.name" },
       { text: "Source", value: "source.name" },
@@ -599,6 +611,7 @@ export default {
       this.editItem.oldName = "";
       this.editName = selected.name;
       this.editDescription = selected.description;
+      this.editNotes = selected.notes;
       this.editType = selected.type;
       this.editRequired = selected.required;
       this.editAlias = selected.alias;
@@ -607,11 +620,15 @@ export default {
     },
     sideSave() {
       if (this.sideAction == "Edit Attribute") {
+
+        console.log("SAVING SOURCE", this.editSourceAttrId);
+
         let body = {
           _id: this.editAttrId,
           oldName: this.editItem.oldName,
           name: this.editName,
           description: this.editDescription,
+          notes: this.editNotes,
           type: this.editType,
           alias: this.editAlias,
           domain: { id: this.editDomain },
@@ -633,6 +650,7 @@ export default {
           //oldName: this.editItem.oldName,
           name: this.editName,
           description: this.editDescription,
+          notes: this.editNotes,
           type: this.editType,
           alias: this.editAlias,
           domain: { id: this.editDomain },
@@ -655,6 +673,7 @@ export default {
           oldName: this.editItem.oldName,
           name: this.editName,
           description: this.editDescription,
+          notes: this.editNotes,
           type: this.editType,
           alias: this.editAlias,
           domain: { id: this.editDomain },
@@ -682,6 +701,7 @@ export default {
       this.editItem.oldName = item.name;
       this.editName = item.name;
       this.editDescription = item.description;
+      this.editNotes = item.notes;
       this.editType = item.type;
       this.editRequired = item.required;
       this.editAlias = item.alias;
@@ -694,6 +714,7 @@ export default {
       this.editItem = null;
       this.editName = "";
       this.editDescription = "";
+      this.editNotes = "";
       this.editType = "";
       this.editRequired = false;
       this.editAlias = "";
