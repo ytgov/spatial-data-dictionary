@@ -288,6 +288,7 @@
               <v-data-table
                 :items="attributes"
                 :headers="attributeHeaders"
+                :sort-by="['order']"
                 @click:row="clickRow"
               >
               </v-data-table>
@@ -427,6 +428,16 @@
                     background-color="white"
                   ></v-autocomplete>
 
+                  <v-text-field
+                    dense
+                    outlined
+                    v-model="editOrder"
+                    label="Order"
+                    clearable
+                    type="number"
+                    background-color="white"
+                  ></v-text-field>
+
                   <v-btn color="primary" @click="sideSave">{{
                     sideActionButton
                   }}</v-btn>
@@ -496,9 +507,10 @@ export default {
     editPrograms: [],
     editLocation: {},
     editSourceAttrId: "",
+    editOrder: 1,
 
     attributeHeaders: [
-      //{ text: "Id", value: "_id" },
+      { text: "Order", value: "order" },
       { text: "Field", value: "name" },
       { text: "Data type", value: "type" },
       { text: "Required", value: "required" },
@@ -617,10 +629,10 @@ export default {
       this.editAlias = selected.alias;
       this.editDomain = selected.domain.id;
       this.editSourceAttrId = selected.source.id;
+      this.editOrder = selected.order;
     },
     sideSave() {
       if (this.sideAction == "Edit Attribute") {
-
         console.log("SAVING SOURCE", this.editSourceAttrId);
 
         let body = {
@@ -634,6 +646,7 @@ export default {
           domain: { id: this.editDomain },
           required: this.editRequired,
           source: { id: this.editSourceAttrId },
+          order: this.editOrder
         };
 
         axios
@@ -656,6 +669,7 @@ export default {
           domain: { id: this.editDomain },
           required: this.editRequired,
           source: { id: this.editSourceAttrId },
+          order: this.editOrder
         };
 
         axios
@@ -678,6 +692,7 @@ export default {
           alias: this.editAlias,
           domain: { id: this.editDomain },
           required: this.editRequired,
+          order: this.editOrder
         };
 
         axios
@@ -707,6 +722,7 @@ export default {
       this.editAlias = item.alias;
       this.editDomain = item.domain ? item.domain.id : "";
       this.editSourceAttrId = item.source ? item.source.id : "";
+      this.editOrder = item.order;
     },
 
     clearEdits() {
@@ -720,6 +736,7 @@ export default {
       this.editAlias = "";
       this.editDomain = "";
       this.editSourceAttrId = "";
+      this.editOrder = 1
     },
 
     findSourceAttribute(id) {

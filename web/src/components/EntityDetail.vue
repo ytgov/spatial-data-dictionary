@@ -145,7 +145,8 @@
           <v-tabs-items v-model="tab" style="padding: 20px">
             <v-tab-item key="0">
               <v-data-table
-                :items="entity.attributes"
+                :items="attributes"
+                :sort-by="['order']"
                 :headers="attributeHeaders"
               >
                 <template v-slot:item.domain="{ item }"
@@ -375,6 +376,7 @@ export default {
 
     entity_id: "",
     entity: { links: {}, location: {} },
+    attributes: [],
     values: [],
 
     valuesHeaders: [
@@ -453,6 +455,7 @@ export default {
         .get(`${ENTITY_URL}/${id}`)
         .then((result) => {
           this.entity = result.data.data;
+          this.attributes = this.entity.attributes;
           this.initialize();
         })
         .catch((err) => {
