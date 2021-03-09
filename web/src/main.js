@@ -10,6 +10,7 @@ import ConnectionDialog from "./components/ConnectionDialog";
 import EntityConnectionDialog from "./components/EntityConnectionDialog";
 import DownEntityConnectionDialog from "./components/DownEntityConnectionDialog";
 import PersonConnectionDialog from "./components/PersonConnectionDialog";
+import DomainDialog from "./components/DomainDialog";
 
 Vue.config.productionTip = false;
 
@@ -21,6 +22,7 @@ Vue.component('connection-dialog', ConnectionDialog);
 Vue.component('entityconnection-dialog', EntityConnectionDialog);
 Vue.component('downentityconnection-dialog', DownEntityConnectionDialog);
 Vue.component('personconnection-dialog', PersonConnectionDialog);
+Vue.component('domain-dialog', DomainDialog);
 
 new Vue({
   router,

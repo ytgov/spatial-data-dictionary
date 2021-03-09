@@ -44,6 +44,7 @@
           label="Locations"
           multiple
           outlined
+          clearable
           dense
           @change="changeFilter"
           v-model="locationFilter"
@@ -129,6 +130,20 @@ export default {
       .then((results) => {
         this.allEntities = results.data.data;
         this.filteredEntities = results.data.data;
+
+        let parameters = this.$route.query;
+        console.log("PARAMS", parameters);
+
+        if (parameters.location) {
+          this.locationFilter.push(parameters.location);
+          this.changeFilter();
+        }
+
+        if (parameters.program) {
+          this.programFilter.push(parameters.program);
+          this.changeFilter();
+        }
+
         this.makeGroups();
       })
       .catch((err) => {

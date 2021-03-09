@@ -3,13 +3,16 @@
     <v-container class="pb-3" style="background-color: white">
       <h2>Connection: {{ connection.name }}</h2>
       <hr class="mb-4" />
-      <v-text-field v-model="role" label="Role (required)" dense outlined required>
+      <v-text-field
+        v-model="role"
+        label="Role (required)"
+        dense
+        outlined
+        required
+      >
       </v-text-field>
 
-
-      <v-btn color="primary" @click="saveConnection()"
-        > Save</v-btn
-      >
+      <v-btn color="primary" @click="saveConnection()"> Save</v-btn>
       <v-btn color="warning" class="float-right" @click="removeConnection()">
         Remove
       </v-btn>
@@ -40,7 +43,8 @@ export default {
     },
     removeConnection() {
       this.$emit("removePersonConnection");
-      this.closeDialog();},
+      this.closeDialog();
+    },
   },
 };
 </script>

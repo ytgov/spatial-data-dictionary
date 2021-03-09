@@ -161,15 +161,7 @@
                   >
                 </template>
                 <template v-slot:item.source="{ item }"
-                  ><span
-                    @click="openSourceLink(item)"
-                    style="
-                      text-decoration: underline;
-                      color: #00818f;
-                      cursor: pointer;
-                    "
-                    >{{ getSourceName(item) }}</span
-                  >
+                  ><span>{{ getSourceName(item) }}</span>
                 </template>
               </v-data-table>
             </v-tab-item>
@@ -327,7 +319,10 @@
           >
             <v-card-text
               ><v-icon>mdi-account-circle</v-icon> &nbsp;
-              <strong><a>{{ item.name }}</a></strong> <br />
+              <strong
+                ><a>{{ item.name }}</a></strong
+              >
+              <br />
               {{ item.role }}</v-card-text
             >
           </v-card>
@@ -377,8 +372,13 @@
       ref="personDialog"
       @updatePersonConnection="updatePersonConnection"
       @removePersonConnection="removePersonConnection"
-    >
-    </personconnection-dialog>
+    ></personconnection-dialog>
+    
+    <domain-dialog
+      ref="domainDialog"
+      @updatePersonConnection="updatePersonConnection"
+      @removePersonConnection="removePersonConnection"
+    ></domain-dialog>
   </div>
 </template>
 
@@ -617,11 +617,11 @@ export default {
         });
     },
 
-    openSourceLink(item) {
+   /*  openSourceLink(item) {
       alert("Source is " + item.source.name);
-    },
+    }, */
     openDomainLink(item) {
-      alert("Domain is " + item.domain.name);
+      this.$refs.domainDialog.openDialog(item.domain)
     },
 
     openPersonConnectionDialog(index) {
