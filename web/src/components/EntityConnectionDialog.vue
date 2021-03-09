@@ -41,7 +41,7 @@ import router from "../router";
 
 export default {
   name: "EntityConnectionDialog",
-  props: ["dialog", "selectedEntity", "entity"],
+  props: ["selectedEntity", "entity"],
   data: () => ({
     isOpen: null,
     errorMessage: "",
@@ -53,9 +53,6 @@ export default {
     timer: null,
   }),
   watch: {
-    dialog: function (val) {
-      this.isOpen = val;
-    },
     selectedEntity: function (val) {
       this.connection = val;
       this.role = val.role;
@@ -70,18 +67,17 @@ export default {
       this.self = val;
       this.allAttributes = val.attributes;
     },
-    isOpen: function (val) {
-      if (!val) this.$emit("doClose");
-    },
   },
   created() {
     this.errorMessage = "";
     //this.isOpen = null;
   },
   methods: {
+    openDialog() {
+      this.isOpen = true;
+    },
     closeDialog() {
       this.isOpen = null;
-      this.$emit("doClose");
     },
 
     removeConnection() {
@@ -95,11 +91,10 @@ export default {
         this.attributes = [];
         let ids = this.connection.attributes.map((a) => a._id);
 
-        console.log("ids", ids)
+        console.log("ids", ids);
 
         this.allAttributes.forEach((a) => {
-          console.log("checking ", a)
-
+          console.log("checking ", a);
 
           if (a.source && a.source.id) {
             if (ids.indexOf(a.source.id) != -1) this.attributes.push(a);

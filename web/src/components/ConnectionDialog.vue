@@ -123,7 +123,8 @@ export default {
       this.entityOptions = [];
 
       this.allEntities.forEach((e) => {
-        if (existingIds.indexOf(e._id) == -1 && this.self._id != e._id) this.entityOptions.push(e);
+        if (existingIds.indexOf(e._id) == -1 && this.self._id != e._id)
+          this.entityOptions.push(e);
       });
 
       this.isOpen = val;
@@ -162,8 +163,12 @@ export default {
       });
   },
   methods: {
+    openDialog() {
+      this.isOpen = true;
+    },
     closeDialog() {
-      this.$emit("doClose");
+      this.isOpen = null;
+      //this.$emit("doClose");
     },
     clearInput() {
       this.errorMessage = "";

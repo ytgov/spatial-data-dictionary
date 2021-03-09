@@ -262,7 +262,7 @@ entityRouter.get("/:id/attribute", RequiresData,
 
 async function buildConnections(entity: Entity, req: Request) {
     const db = req.store.Entities as EntityService;
-    const userDB = req.store.Users as UserService;
+    const userDB = req.store.Persons as GenericService;
     const programDB = req.store.Programs as ProgramService;
     const locationDB = req.store.Locations as LocationService;
 
@@ -311,10 +311,14 @@ async function buildConnections(entity: Entity, req: Request) {
         if (entity.links.people) {
             for (let item of entity.links.people) {
                 item.name = "Unknown";
-                let person = await userDB.getUserById(item.id);
+
+                if (typeof (item.id) != 'string')
+                    continue;
+
+                let person = await userDB.getById(item.id);
 
                 if (person)
-                    item.name = person.name;
+                    item.name = `${person.first_name} ${person.last_name}`;
             }
         }
 

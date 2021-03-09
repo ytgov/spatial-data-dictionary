@@ -8,6 +8,8 @@ import StatusChip from "./components/StatusChip";
 import LocationChip from "./components/LocationChip";
 import ConnectionDialog from "./components/ConnectionDialog";
 import EntityConnectionDialog from "./components/EntityConnectionDialog";
+import DownEntityConnectionDialog from "./components/DownEntityConnectionDialog";
+import PersonConnectionDialog from "./components/PersonConnectionDialog";
 
 Vue.config.productionTip = false;
 
@@ -17,6 +19,8 @@ Vue.component('status-chip', StatusChip);
 Vue.component('location-chip', LocationChip);
 Vue.component('connection-dialog', ConnectionDialog);
 Vue.component('entityconnection-dialog', EntityConnectionDialog);
+Vue.component('downentityconnection-dialog', DownEntityConnectionDialog);
+Vue.component('personconnection-dialog', PersonConnectionDialog);
 
 new Vue({
   router,

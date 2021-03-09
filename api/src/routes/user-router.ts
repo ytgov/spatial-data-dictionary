@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import { param, validationResult } from "express-validator";
-import { ObjectId } from "mongodb";
 import { RequiresData, RequiresAuthentication } from "../middleware";
 import { AuthUser, Storage } from "../data";
 import { UserService } from "../services";
@@ -39,7 +38,7 @@ userRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresAuthenticat
         let db = req.store as Storage;
         let { id } = req.params;
 
-        let t = await db.Users.getUserById(new ObjectId(id));
+        let t = await db.Users.getUserById(id);
         return res.json({ data: t });
     });
 

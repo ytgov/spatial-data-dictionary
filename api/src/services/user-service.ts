@@ -16,8 +16,8 @@ export class UserService {
         return this._people.find().toArray();
     }
 
-    async getUserById(id: ObjectID): Promise<any> {
-        return this._people.findOne({ _id: id });
+    async getUserById(id: string): Promise<any> {
+        return this._people.findOne({ _id: new ObjectID(id) });
     }
 
     async search(term: string): Promise<any> {

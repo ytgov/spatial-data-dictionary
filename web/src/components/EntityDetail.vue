@@ -149,12 +149,27 @@
                 :sort-by="['order']"
                 :headers="attributeHeaders"
               >
-                <template v-slot:item.domain="{ item }"
+                <template v-slot:item.domain="{ item }">
+                  <span
+                    @click="openDomainLink(item)"
+                    style="
+                      text-decoration: underline;
+                      color: #00818f;
+                      cursor: pointer;
+                    "
+                    >{{ getDomainName(item) }}</span
                   >
-                  <span @click="openDomainLink(item)" style="text-decoration: underline; color: #00818f; cursor: pointer">{{ getDomainName(item) }}</span>
                 </template>
                 <template v-slot:item.source="{ item }"
-                  ><span @click="openSourceLink(item)" style="text-decoration: underline; color: #00818f; cursor: pointer">{{getSourceName(item)}}</span>
+                  ><span
+                    @click="openSourceLink(item)"
+                    style="
+                      text-decoration: underline;
+                      color: #00818f;
+                      cursor: pointer;
+                    "
+                    >{{ getSourceName(item) }}</span
+                  >
                 </template>
               </v-data-table>
             </v-tab-item>
@@ -289,7 +304,11 @@
           v-bind:key="item.id"
           style="clear: both"
         >
-          <v-card color="#fff2d5" class="mb-2">
+          <v-card
+            color="#fff2d5"
+            class="mb-2"
+            @click="openDownConnectionDialog(item)"
+          >
             <v-card-text>
               <v-icon>mdi-database-marker</v-icon> &nbsp;
               <strong
@@ -300,11 +319,15 @@
           </v-card>
         </div>
 
-        <div v-for="item in entity.links.people" v-bind:key="item.id">
-          <v-card color="#fff2d5" class="mb-2">
+        <div v-for="(item, index) in entity.links.people" v-bind:key="item.id">
+          <v-card
+            color="#fff2d5"
+            class="mb-2"
+            @click="openPersonConnectionDialog(index)"
+          >
             <v-card-text
               ><v-icon>mdi-account-circle</v-icon> &nbsp;
-              <strong>{{ item.name }}</strong> <br />
+              <strong><a>{{ item.name }}</a></strong> <br />
               {{ item.role }}</v-card-text
             >
           </v-card>
@@ -332,20 +355,30 @@
     </v-snackbar>
 
     <connection-dialog
-      :dialog="connectionDialogVisible"
+      ref="conn"
       :existing="entity.links.entities"
       :self="entity"
-      @doClose="closeConnection()"
       @doSave="saveConnection"
     ></connection-dialog>
 
     <entityconnection-dialog
-      :dialog="editConnectionDialogVisible"
+      ref="upConn"
       :selectedEntity="connectionEntity"
       :entity="entity"
-      @doClose="closeConnectionDialog()"
       @removeConnection="removeConnection"
     ></entityconnection-dialog>
+
+    <downentityconnection-dialog
+      ref="downConn"
+      :selectedEntity="downEntity"
+    ></downentityconnection-dialog>
+
+    <personconnection-dialog
+      ref="personDialog"
+      @updatePersonConnection="updatePersonConnection"
+      @removePersonConnection="removePersonConnection"
+    >
+    </personconnection-dialog>
   </div>
 </template>
 
@@ -413,14 +446,14 @@ export default {
       value: "",
     },
     connectionEntity: {},
+    downEntity: {},
+    personIndex: -1,
   }),
-
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Add Property" : "Edit Property";
     },
   },
-
   watch: {
     dialog(val) {
       val || this.close();
@@ -437,26 +470,29 @@ export default {
       immediate: true,
     },
   },
-
   created() {
     this.entity_id = this.$route.params.id;
-
     this.loadEntity(this.entity_id);
   },
-
   methods: {
     initialize() {},
-
     loadEntity(id) {
-      this.closeConnectionDialog();
-      this.closeConnection();
-
       axios
         .get(`${ENTITY_URL}/${id}`)
         .then((result) => {
           this.entity = result.data.data;
           this.attributes = this.entity.attributes;
-          this.initialize();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    updateEntity() {
+      axios
+        .put(`${ENTITY_URL}/${this.entity._id}`, this.entity)
+        .then((result) => {
+          this.entity = result.data.data.value;
+          this.attributes = this.entity.attributes;
         })
         .catch((err) => {
           console.log(err);
@@ -518,12 +554,12 @@ export default {
     },
 
     addConnection() {
-      this.connectionDialogVisible = true;
+      this.$refs.conn.openDialog();
     },
 
-    closeConnection() {
+    /* closeConnection() {
       this.connectionDialogVisible = null;
-    },
+    }, */
 
     saveConnection(args) {
       axios
@@ -531,7 +567,8 @@ export default {
         .then((results) => {
           console.log(results);
           this.entity = results.data.data;
-          this.closeConnection();
+          //this.closeConnection();
+          this.$refs.conn.closeDialog();
         })
         .catch((error) => {
           console.error(error);
@@ -547,13 +584,21 @@ export default {
     },
 
     openConnectionDialog(connection) {
-      console.log("TRYINT OT OPEN");
       this.connectionEntity = connection;
-      this.editConnectionDialogVisible = true;
+      this.$refs.upConn.openDialog();
     },
-    closeConnectionDialog() {
-      this.editConnectionDialogVisible = null;
+    /* closeConnectionDialog() {
+      //this.$refs.upConn.closeDialog();
+    }, */
+
+    openDownConnectionDialog(connection) {
+      this.downEntity = connection;
+      this.$refs.downConn.openDialog();
     },
+    /* closeDownConnectionDialog() {
+      this.$refs.downConn.closeDialog();
+    }, */
+
     removeConnection(item) {
       console.log("REMOVING CONECOITN TO ", item);
 
@@ -564,19 +609,32 @@ export default {
         .then((results) => {
           console.log(results);
           this.entity = results.data.data;
-          this.closeConnectionDialog();
+          //this.closeConnectionDialog();
+          this.$refs.upConn.closeDialog();
         })
         .catch((error) => {
           console.error(error);
         });
     },
 
-    openSourceLink(item) {  
-      alert("Source is " + item.source.name)
-
+    openSourceLink(item) {
+      alert("Source is " + item.source.name);
     },
     openDomainLink(item) {
-      alert("Domain is " + item.domain.name)
+      alert("Domain is " + item.domain.name);
+    },
+
+    openPersonConnectionDialog(index) {
+      this.personIndex = index;
+      this.$refs.personDialog.openDialog(this.entity.links.people[index]);
+    },
+    updatePersonConnection(role) {
+      this.entity.links.people[this.personIndex].role = role;
+      this.updateEntity();
+    },
+    removePersonConnection() {
+      this.entity.links.people.splice(this.personIndex, 1);
+      this.updateEntity();
     },
   },
 };
