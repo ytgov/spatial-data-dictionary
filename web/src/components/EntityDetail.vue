@@ -138,8 +138,9 @@
         <v-card>
           <v-tabs v-model="tab" background-color="#fff2d5" color="primary">
             <v-tab key="0">Attributes</v-tab>
-            <v-tab v-if="entity.is_domain" key="1">VALUES</v-tab>
-            <v-tab key="2">Changes</v-tab>
+            <v-tab key="1">Properties</v-tab>
+            <v-tab key="2">Values</v-tab>
+            <v-tab key="3">Changes</v-tab>
           </v-tabs>
 
           <v-tabs-items v-model="tab" style="padding: 20px">
@@ -166,7 +167,7 @@
               </v-data-table>
             </v-tab-item>
             <v-tab-item key="1">
-              <v-data-table :headers="valuesHeaders" :items="values">
+              <v-data-table :headers="propertyHeaders" :items="properties" :sort-by="['name']">
                 <template v-slot:top>
                   <v-toolbar flat>
                     <v-spacer></v-spacer>
@@ -243,12 +244,89 @@
                   </v-icon>
                   <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
                 </template>
-                <template v-slot:no-data>
-                  <v-btn color="primary" @click="initialize"> Reset </v-btn>
-                </template>
               </v-data-table>
             </v-tab-item>
             <v-tab-item key="2">
+              <v-data-table :headers="valuesHeaders" :items="values" :sort-by="['name']">
+                <template v-slot:top>
+                  <v-toolbar flat>
+                    <v-spacer></v-spacer>
+                    <v-dialog v-model="valDialog" max-width="500px">
+                      <v-toolbar color="info" dark>{{
+                        valFormTitle
+                      }}</v-toolbar>
+
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="primary"
+                          dark
+                          class="mb-2"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          Add
+                        </v-btn>
+                      </template>
+                      <v-card>
+                        <v-card-text class="mt-3 mb-0">
+                          <v-text-field
+                            v-model="editedItem.name"
+                            label="Code (required)"
+                            dense
+                            outlined
+                            class="mb-2"
+                          ></v-text-field>
+                          <v-textarea
+                            v-model="editedItem.value"
+                            label="Value"
+                            dense
+                            outlined
+                          ></v-textarea>
+                        </v-card-text>
+
+                        <v-card-actions class="mt-0">
+                          <v-spacer></v-spacer>
+                          <v-btn color="secondary" @click="closeVal">
+                            Cancel
+                          </v-btn>
+                          <v-btn color="primary" @click="saveValue">
+                            Save
+                          </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                    <v-dialog v-model="valDialogDelete" max-width="500px">
+                      <v-toolbar color="info" dark>Delete Value</v-toolbar>
+
+                      <v-card>
+                        <v-card-text
+                          ><h3 class="mt-4">
+                            Are you sure you want to delete this value?
+                          </h3></v-card-text
+                        >
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn color="secondary" @click="closeDelete"
+                            >No</v-btn
+                          >
+                          <v-btn color="primary" @click="deleteValItemConfirm"
+                            >Yes</v-btn
+                          >
+                          <v-spacer></v-spacer>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item.actions="{ item }">
+                  <v-icon small class="mr-2" @click="editValItem(item)">
+                    mdi-pencil
+                  </v-icon>
+                  <v-icon small @click="deleteValItem(item)"> mdi-delete </v-icon>
+                </template>
+              </v-data-table>
+            </v-tab-item>
+            <v-tab-item key="3">
               <v-data-table :headers="changeHeaders"> </v-data-table
             ></v-tab-item>
           </v-tabs-items>
@@ -373,7 +451,7 @@
       @updatePersonConnection="updatePersonConnection"
       @removePersonConnection="removePersonConnection"
     ></personconnection-dialog>
-    
+
     <domain-dialog
       ref="domainDialog"
       @updatePersonConnection="updatePersonConnection"
@@ -406,13 +484,19 @@ export default {
     apiSuccess: "",
     connectionDialogVisible: null,
     editConnectionDialogVisible: null,
+    properties: [],
 
     entity_id: "",
-    entity: { links: {}, location: {} },
+    entity: { links: {}, location: {}, properties: [] },
     attributes: [],
     values: [],
 
     valuesHeaders: [
+      { text: "Name", value: "name" },
+      { text: "Value", value: "value" },
+      { text: "Actions", value: "actions", sortable: false },
+    ],
+    propertyHeaders: [
       { text: "Name", value: "name" },
       { text: "Value", value: "value" },
       { text: "Actions", value: "actions", sortable: false },
@@ -436,6 +520,9 @@ export default {
     dialog: false,
     dialogDelete: false,
 
+    valDialog: false,
+    valDialogDelete: false,
+
     editedIndex: -1,
     editedItem: {
       name: "",
@@ -452,6 +539,9 @@ export default {
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Add Property" : "Edit Property";
+    },
+    valFormTitle() {
+      return this.editedIndex === -1 ? "Add Domain Value" : "Edit Domain Value";
     },
   },
   watch: {
@@ -482,6 +572,12 @@ export default {
         .then((result) => {
           this.entity = result.data.data;
           this.attributes = this.entity.attributes;
+
+          if (!this.entity.properties) this.entity.properties = new Array();
+          this.properties = this.entity.properties;
+
+          if (!this.entity.values) this.entity.values = new Array();
+          this.values = this.entity.values;
         })
         .catch((err) => {
           console.log(err);
@@ -493,6 +589,8 @@ export default {
         .then((result) => {
           this.entity = result.data.data.value;
           this.attributes = this.entity.attributes;
+          this.values = this.entity.values || new Array();
+          this.properties = this.entity.properties || new Array();
         })
         .catch((err) => {
           console.log(err);
@@ -501,35 +599,60 @@ export default {
 
     getDomainName(item) {
       if (item.domain && item.domain.name) return item.domain.name;
-
       return "";
     },
 
     getSourceName(item) {
       if (item.source && item.source.name) return item.source.name;
-
       return "";
     },
 
     editItem(item) {
-      this.editedIndex = this.values.indexOf(item);
+      this.editedIndex = this.properties.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
-    deleteItem(item) {
+    editValItem(item) {
       this.editedIndex = this.values.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+      this.valDialog = true;
+    },
+
+    deleteItem(item) {
+      this.editedIndex = this.properties.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.values.splice(this.editedIndex, 1);
+      this.entity.properties.splice(this.editedIndex, 1);
+      this.updateEntity();
       this.closeDelete();
+    },
+
+    deleteValItem(item) {
+      this.editedIndex = this.values.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+      this.valDialogDelete = true;
+    },
+
+    deleteValItemConfirm() {
+      this.entity.values.splice(this.editedIndex, 1);
+      this.updateEntity();
+      this.closeValDelete();
     },
 
     close() {
       this.dialog = false;
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
+    },
+
+    closeVal() {
+      this.valDialog = false;
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
@@ -543,14 +666,31 @@ export default {
         this.editedIndex = -1;
       });
     },
+    closeValDelete() {
+      this.valDialogDelete = false;
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
+    },
 
     save() {
       if (this.editedIndex > -1) {
+        Object.assign(this.properties[this.editedIndex], this.editedItem);
+      } else {
+        this.entity.properties.push(this.editedItem);
+      }
+      this.updateEntity();
+      this.close();
+    },
+    saveValue() {
+      if (this.editedIndex > -1) {
         Object.assign(this.values[this.editedIndex], this.editedItem);
       } else {
-        this.values.push(this.editedItem);
+        this.entity.values.push(this.editedItem);
       }
-      this.close();
+      this.updateEntity();
+      this.closeVal();
     },
 
     addConnection() {
@@ -617,11 +757,11 @@ export default {
         });
     },
 
-   /*  openSourceLink(item) {
+    /*  openSourceLink(item) {
       alert("Source is " + item.source.name);
     }, */
     openDomainLink(item) {
-      this.$refs.domainDialog.openDialog(item.domain)
+      this.$refs.domainDialog.openDialog(item.domain);
     },
 
     openPersonConnectionDialog(index) {

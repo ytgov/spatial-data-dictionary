@@ -132,9 +132,6 @@ export default {
     existing: function (val) {
       this.existingEntities = val;
     },
-    self: function (val) {
-      console.log("SETTING: ", val);
-    },
   },
   created() {
     this.errorMessage = "";
