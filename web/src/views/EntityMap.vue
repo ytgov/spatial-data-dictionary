@@ -97,6 +97,7 @@ export default {
   created() {
     this.entity_id = this.$route.params.id;
     this.loadEntity(this.entity_id);
+    this.buildMap();
   },
   methods: {
     initialize() {},
@@ -109,16 +110,16 @@ export default {
         .catch((err) => {
           console.log(err);
         });
-
-      this.buildMap();
     },
     buildMap() {
+      console.log("CALLED BUILD");
+
       axios
         .get(`${ENTITY_URL}/${this.entity_id}/graph-data`)
         .then((result) => {
           let elements = result.data.data;
 
-          let cy = cytoscape({
+          cytoscape({
             container: document.getElementById("graph"), // container to render in
             style: [
               {
@@ -126,17 +127,35 @@ export default {
                 style: {
                   "background-color": "#2196f3",
                   label: "data(label)",
+                  "edge-arrow": "triangle",
+                },
+              },
+              {
+                selector: "edge",
+                style: {
+                  width: 2,
+                  "curve-style": "straight",
+                },
+              },
+
+              {
+                selector: "edge[arrow]",
+                style: {
+                  "target-arrow-shape": "data(arrow)",
                 },
               },
             ],
             elements: elements,
+            userZoomingEnabled: false,
+            panningEnabled: false,
             layout: {
-              name: "grid",
-              rows: 1,
+              name: "breadthfirst",
+              directed: true,
+              nodeDimensionsIncludeLabels: false
             },
           });
 
-          cy.fit();
+          //cy.fit();
         })
         .catch((err) => {
           console.log(err);

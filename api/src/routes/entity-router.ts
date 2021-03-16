@@ -5,6 +5,7 @@ import { Attribute, AuthUser, Entity, Storage } from "../data";
 import { EntityService, GenericService, LocationService, ProgramService, UserService } from "../services";
 import { ObjectId } from "mongodb";
 import { v4 as uuidV4 } from "uuid";
+import { BuildGraphForEntity } from "../utils/directed-graph";
 
 export const entityRouter = express.Router();
 
@@ -73,19 +74,10 @@ entityRouter.get("/:id/graph-data", [param("id").notEmpty().isMongoId()], Requir
 
         const db = req.store.Entities as EntityService;
         let { id } = req.params;
-        let entity = await db.getById(id)
 
-        if (entity) {
+        let graph = await BuildGraphForEntity(db, id)
 
-            return res.json({
-                data: [
-                    { group: 'nodes', data: { id: 'n3', label: entity.name } }
-
-                ]
-            });
-        }
-
-        res.status(404).send();
+        return res.json({ data: graph });
     });
 
 
