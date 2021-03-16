@@ -282,6 +282,12 @@
                             dense
                             outlined
                           ></v-textarea>
+                          <v-textarea
+                            v-model="editedItem.description"
+                            label="Description"
+                            dense
+                            outlined
+                          ></v-textarea>
                         </v-card-text>
 
                         <v-card-actions class="mt-0">
@@ -494,6 +500,7 @@ export default {
     valuesHeaders: [
       { text: "Name", value: "name" },
       { text: "Value", value: "value" },
+      { text: "Description", value: "description" },
       { text: "Actions", value: "actions", sortable: false },
     ],
     propertyHeaders: [
@@ -526,11 +533,13 @@ export default {
     editedIndex: -1,
     editedItem: {
       name: "",
-      value: 0,
+      value: "",
+      description: "",
     },
     defaultItem: {
       name: "",
       value: "",
+      description: "",
     },
     connectionEntity: {},
     downEntity: {},
