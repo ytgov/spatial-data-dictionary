@@ -132,7 +132,6 @@ export default {
         this.filteredEntities = results.data.data;
 
         let parameters = this.$route.query;
-        console.log("PARAMS", parameters);
 
         if (parameters.location) {
           this.locationFilter.push(parameters.location);

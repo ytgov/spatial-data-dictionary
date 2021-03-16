@@ -2,35 +2,106 @@ import { EntityService } from "../services";
 import { Entity } from "../data/entity";
 import { v4 as uuidv4 } from "uuid";
 
-export async function BuildGraphForEntity(db: EntityService, id: string): Promise<any> {
-    console.log("BUILDENTITY GRPAH", id)
+export class GraphBuilder {
+    db: EntityService;
+    searched: string[];
 
-    let entity = await db.getById(id);
+    nodes: any[];
+    edges: any[];
 
-    if (entity) {
-        let nodes = new Array();
-        nodes.push({ group: "nodes", data: { id: `${entity._id}`, label: entity.name }, });
-        console.log("ADDINGROOTNODE: ", { group: "nodes", data: { id: `${entity._id}`, label: entity.name } })
+    gotParentsFor: string[];
+    gotChildrenFor: string[];
 
-        nodes = await getParents(db, entity, nodes);
-
-        return nodes;
+    constructor(db: EntityService) {
+        this.db = db;
+        this.searched = new Array<string>();
+        this.nodes = new Array<any>();
+        this.edges = new Array<any>();
+        this.gotParentsFor = new Array<string>();
+        this.gotChildrenFor = new Array<string>();
     }
 
-    return [];
-}
+    async BuildGraphForEntity(id: string): Promise<any> {
+        this.nodes = new Array<any>();
+        this.edges = new Array<any>();
 
-async function getParents(db: EntityService, entity: Entity, nodes: any[]): Promise<any[]> {
-    for (let parent of entity.links.entities) {
-        let parentObj = await db.getById(parent.id);
+        console.log("BUILDENTITY GRPAH", id)
 
-        if (parentObj) {
-            nodes.push({ group: "nodes", data: { id: `${parentObj._id}`, label: parentObj.name, type: "circle"  } })
-            nodes.push({ group: "edges", data: { id: `${uuidv4()}`, source: `${entity._id}`, target: parent.id, arrow: "triangle-tee" } })
+        let entity = await this.db.getById(id);
 
-            nodes = await getParents(db, parentObj, nodes);
+        if (entity) {
+            this.searched.push(`${entity._id}`);
+
+            this.nodes.push({ group: "nodes", data: { id: `${entity._id}`, label: entity.name }, });
+            console.log("ADDINGROOTNODE: ", { group: "nodes", data: { id: `${entity._id}`, label: entity.name } })
+
+            await this.getParents(entity);
+            await this.getChildren(entity);
+        }
+
+        return this.nodes
+    }
+
+    addNode(node: Entity) {
+        let nodeId = `${node._id}`;
+        let exists = this.nodes.filter(n => n.data.id == nodeId)
+
+        if (exists.length == 0) {
+            this.nodes.push({ group: "nodes", data: { id: nodeId, label: node.name } })
         }
     }
 
-    return nodes;
+    async getParents(entity: Entity): Promise<void> {
+        let eId = `${entity._id}`;
+
+        if (this.gotParentsFor.indexOf(eId) >= 0)
+            return;
+            
+        this.gotParentsFor.push(eId)
+        console.log("Parents FOR " + entity.name)
+
+        for (let parent of entity.links.entities) {
+            let parentObj = await this.db.getById(parent.id);
+
+            if (parentObj) {
+                this.addNode(parentObj)
+                this.nodes.push({ group: "edges", data: { id: `${uuidv4()}`, target: eId, source: parent.id, arrow: "triangle-tee" } })
+
+                await this.getParents(parentObj);
+                await this.getChildren(parentObj);
+
+                this.searched.push(`${parentObj._id}`)
+            }
+        }
+    }
+
+    async getChildren(entity: Entity,): Promise<void> {
+        let eId = `${entity._id}`;
+
+        if (this.gotChildrenFor.indexOf(eId) >= 0)
+            return;
+
+        this.gotChildrenFor.push(eId)
+        let downLinks = await this.db.findDownLinks(eId);
+
+        console.log("CHILDREN FOR " + entity.name)
+
+        for (let parent of downLinks) {
+            let parentObj = await this.db.getById(parent._id);
+
+            if (parentObj) {
+                //console.log("WORKIN GON ", parentObj.name)
+                this.addNode(parentObj)
+                this.nodes.push({ group: "edges", data: { id: `${uuidv4()}`, source: eId, target: `${parent._id}`, arrow: "vee" } })
+
+                await this.getParents(parentObj);
+                await this.getChildren(parentObj);
+            }
+        }
+    }
 }
+
+
+
+
+

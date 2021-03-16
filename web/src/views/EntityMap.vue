@@ -112,8 +112,6 @@ export default {
         });
     },
     buildMap() {
-      console.log("CALLED BUILD");
-
       axios
         .get(`${ENTITY_URL}/${this.entity_id}/graph-data`)
         .then((result) => {
@@ -127,7 +125,6 @@ export default {
                 style: {
                   "background-color": "#2196f3",
                   label: "data(label)",
-                  "edge-arrow": "triangle",
                 },
               },
               {
@@ -151,7 +148,8 @@ export default {
             layout: {
               name: "breadthfirst",
               directed: true,
-              nodeDimensionsIncludeLabels: false
+              nodeDimensionsIncludeLabels: false,
+              padding: 250
             },
           });
 
