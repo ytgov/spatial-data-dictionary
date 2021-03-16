@@ -167,7 +167,11 @@
               </v-data-table>
             </v-tab-item>
             <v-tab-item key="1">
-              <v-data-table :headers="propertyHeaders" :items="properties" :sort-by="['name']">
+              <v-data-table
+                :headers="propertyHeaders"
+                :items="properties"
+                :sort-by="['name']"
+              >
                 <template v-slot:top>
                   <v-toolbar flat>
                     <v-spacer></v-spacer>
@@ -247,7 +251,11 @@
               </v-data-table>
             </v-tab-item>
             <v-tab-item key="2">
-              <v-data-table :headers="valuesHeaders" :items="values" :sort-by="['name']">
+              <v-data-table
+                :headers="valuesHeaders"
+                :items="values"
+                :sort-by="['name']"
+              >
                 <template v-slot:top>
                   <v-toolbar flat>
                     <v-spacer></v-spacer>
@@ -328,7 +336,9 @@
                   <v-icon small class="mr-2" @click="editValItem(item)">
                     mdi-pencil
                   </v-icon>
-                  <v-icon small @click="deleteValItem(item)"> mdi-delete </v-icon>
+                  <v-icon small @click="deleteValItem(item)">
+                    mdi-delete
+                  </v-icon>
                 </template>
               </v-data-table>
             </v-tab-item>
@@ -354,6 +364,14 @@
           >
           <div style="clear: both"></div>
         </h3>
+
+        <v-btn
+          color="secondary"
+          :to="'/entity/' + entity._id + '/map'"
+          style="width: 100%"
+        >
+          <v-icon class="mr-4">mdi-graph</v-icon> View Graph</v-btn
+        >
 
         <div
           v-for="item in entity.links.entities"
@@ -411,6 +429,19 @@
             >
           </v-card>
         </div>
+
+        <hr class="my-5" />
+        <h3 class="mb-4 mt-5">
+          <v-icon color="#323232">mdi-hammer-wrench</v-icon> Change Requests
+        </h3>
+
+        <v-btn
+          color="secondary"
+          :to="'/entity/' + entity._id + '/change-request'"
+          style="width: 100%"
+        >
+          <v-icon class="mr-4">mdi-hammer-wrench</v-icon> Request Change</v-btn
+        >
       </div>
     </div>
 

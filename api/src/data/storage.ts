@@ -15,6 +15,7 @@ export class Storage {
     Programs!: ProgramService;
     Domains!: GenericService;
     Persons!: GenericService;
+    ChangeRequests!: GenericService;
 
     constructor() {
     }
@@ -36,6 +37,7 @@ export class Storage {
                     this.Programs = new ProgramService(this.mongoConnection.db(MONGO_DB).collection("Programs"));
                     this.Domains = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Domains"));
                     this.Persons = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Persons"));
+                    this.ChangeRequests = new GenericService(this.mongoConnection.db(MONGO_DB).collection("ChangeRequests"));
                     this.isInitialized = true;
                     resolve("Connected");
                 })

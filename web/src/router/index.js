@@ -14,9 +14,9 @@ import EntityCreate from "../components/EntityCreate";
 import EntityEdit from "../components/EntityEdit";
 import Locations from "../views/Locations";
 import Programs from "../views/Programs";
-//import Domains from "../views/Domains";
 import People from "../views/People";
-//import store from "../store";
+import EntityMap from "../views/EntityMap";
+import EntityChangeRequest from "../views/EntityChangeRequest";
 
 Vue.use(VueRouter);
 
@@ -76,8 +76,24 @@ const routes = [
   },
   {
     path: "/entity/:id/edit",
-    name: "Entity attriutes",
+    name: "Entity attributes",
     component: EntityEdit,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/:id/map",
+    name: "Entity map",
+    component: EntityMap,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/:id/change-request",
+    name: "Entity change request",
+    component: EntityChangeRequest,
     meta: {
       //requiresAuth: true
     }
