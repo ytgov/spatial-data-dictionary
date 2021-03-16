@@ -119,14 +119,6 @@ export default {
     dialog: function (val) {
       this.clearInput();
 
-      let existingIds = this.existingEntities.map((e) => e.id);
-      this.entityOptions = [];
-
-      this.allEntities.forEach((e) => {
-        if (existingIds.indexOf(e._id) == -1 && this.self._id != e._id)
-          this.entityOptions.push(e);
-      });
-
       this.isOpen = val;
     },
     existing: function (val) {
@@ -162,6 +154,19 @@ export default {
   methods: {
     openDialog() {
       this.isOpen = true;
+
+
+      let existingIds = this.existingEntities.map((e) => e.id);
+      this.entityOptions = [];
+
+      console.log("EXIST", existingIds)
+
+      this.allEntities.forEach((e) => {
+        if (existingIds.indexOf(e._id) == -1 && this.self._id != e._id)
+          this.entityOptions.push(e);
+      });
+
+
     },
     closeDialog() {
       this.isOpen = null;
