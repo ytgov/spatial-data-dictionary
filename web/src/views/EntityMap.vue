@@ -149,7 +149,7 @@ export default {
               name: "breadthfirst",
               directed: true,
               nodeDimensionsIncludeLabels: false,
-              padding: 250
+              padding: 0
             },
           });
 
