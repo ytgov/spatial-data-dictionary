@@ -45,9 +45,10 @@
 
 <style>
 #graph {
-  width: 100%;
+  width: 600px;
   min-height: 500px;
   border: 1px #bbb solid;
+  background-color: #eee;
   padding: 10px 20px
 }
 </style>
