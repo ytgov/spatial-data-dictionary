@@ -46,7 +46,9 @@
 <style>
 #graph {
   width: 100%;
-  min-height: 400px;
+  min-height: 500px;
+  border: 1px #bbb solid;
+  padding: 10px 20px
 }
 </style>
 <script>
@@ -148,8 +150,6 @@ export default {
             layout: {
               name: "breadthfirst",
               directed: true,
-              nodeDimensionsIncludeLabels: false,
-              padding: 0
             },
           });
 
