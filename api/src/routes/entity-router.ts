@@ -73,9 +73,10 @@ entityRouter.get("/:id/graph-data", [param("id").notEmpty().isMongoId()], Requir
         }
 
         const db = req.store.Entities as EntityService;
+        const locationDB = req.store.Locations as LocationService;
         let { id } = req.params;
 
-        let builder = new GraphBuilder(db);
+        let builder = new GraphBuilder(db, locationDB);
         let graph = await builder.BuildGraphForEntity(id)
 
         return res.json({ data: graph });

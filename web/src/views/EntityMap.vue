@@ -124,10 +124,27 @@ export default {
             container: document.getElementById("graph"), // container to render in
             style: [
               {
-                selector: "node",
+                selector: "node.blue",
                 style: {
                   "background-color": "#2196f3",
                   label: "data(label)",
+                  shape: "round-rectangle"
+                },
+              },
+              {
+                selector: "node.red",
+                style: {
+                  "background-color": "#fff2d5",
+                  label: "data(label)",
+                  shape: "round-rectangle"
+                },
+              },
+              {
+                selector: "node.brown",
+                style: {
+                  "background-color": "#4caf50",
+                  label: "data(label)",
+                  shape: "star"
                 },
               },
               {
@@ -135,6 +152,9 @@ export default {
                 style: {
                   width: 2,
                   "curve-style": "straight",
+                  "target-arrow-shape": "data(arrow)",
+                  "target-arrow-color": "#323232",
+                  "line-color": "#323232"
                 },
               },
 
@@ -142,6 +162,7 @@ export default {
                 selector: "edge[arrow]",
                 style: {
                   "target-arrow-shape": "data(arrow)",
+                  "background-color": "#323232"
                 },
               },
             ],
@@ -150,7 +171,7 @@ export default {
             panningEnabled: false,
             layout: {
               name: "grid",
-              directed: true,
+              fit: true,
             },
           });
 
