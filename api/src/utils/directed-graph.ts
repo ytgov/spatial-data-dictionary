@@ -108,13 +108,10 @@ export class GraphBuilder {
         this.gotChildrenFor.push(eId)
         let downLinks = await this.db.findDownLinks(eId);
 
-        console.log("CHILDREN FOR " + entity.name)
-
         for (let parent of downLinks) {
             let parentObj = await this.loadEntity(parent._id);
 
             if (parentObj) {
-                //console.log("WORKIN GON ", parentObj.name)
                 this.addNode(parentObj)
                 this.nodes.push({ group: "edges", data: { id: `${uuidv4()}`, source: eId, target: `${parent._id}`, arrow: "vee" } })
 

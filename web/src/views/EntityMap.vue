@@ -58,6 +58,8 @@ import moment from "moment";
 import { ENTITY_URL } from "../urls";
 
 import cytoscape from "cytoscape";
+import cola from 'cytoscape-cola';
+
 
 export default {
   name: "Form",
@@ -120,6 +122,9 @@ export default {
         .then((result) => {
           let elements = result.data.data;
 
+          cytoscape.use(cola);
+
+          //let cy = 
           cytoscape({
             container: document.getElementById("graph"), // container to render in
             style: [
@@ -170,11 +175,11 @@ export default {
             userZoomingEnabled: false,
             panningEnabled: false,
             layout: {
-              name: "grid",
+              name: "cola",
               fit: true,
+              nodeDimensionsIncludeLabels: true, 
             },
           });
-
           //cy.fit();
         })
         .catch((err) => {
