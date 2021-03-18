@@ -45,7 +45,7 @@
 
 <style>
 #graph {
-  width: 600px;
+  width: 100%;
   min-height: 500px;
   border: 1px #bbb solid;
   background-color: #eee;
@@ -149,7 +149,7 @@ export default {
             userZoomingEnabled: false,
             panningEnabled: false,
             layout: {
-              name: "breadthfirst",
+              name: "grid",
               directed: true,
             },
           });
