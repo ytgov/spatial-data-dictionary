@@ -12,6 +12,8 @@ export default {
       if (this.location == "Web service") return "mdi-web";
       else if (this.location == "Database")
         return "mdi-database";
+      else if (this.location == "Geodatabase")
+        return "mdi-map-marker-distance";
       else return "mdi-file";
     },
   },

@@ -1,89 +1,15 @@
 <template>
   <div class="">
-    <v-toolbar flat dense color="#f3b228" class="mb-5" style="color: red">
-      <v-btn text style="margin-left: -10px; color: #323232" to="/dashboard"
-        >Dashboard</v-btn
-      >
-
-      <v-divider vertical class="ml-0 mr-3"></v-divider>
-
-      <v-menu bottom offset-y class="ml-0">
-        <template v-slot:activator="{ on, attrs }">
-          <div>
-            <v-icon size="medium" style="mr-2" color="#323232"
-              >mdi-file-cabinet</v-icon
-            >
-            <v-btn
-              v-bind="attrs"
-              v-on="on"
-              text
-              style="color: #323232 !important"
-            >
-              Surface Management<v-icon>mdi-menu-down</v-icon>
-            </v-btn>
-          </div>
-        </template>
-
-        <v-list>
-          <v-subheader>Category:</v-subheader>
-          <v-list-item link to="TESgin">
-            <v-list-item-title router-link="st"
-              >Surface Management</v-list-item-title
-            >
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Culverts</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Vegetation</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-
-      <v-divider vertical class="ml-0 mr-3"></v-divider>
-
-      <v-menu bottom offset-y class="ml-0" title="Entities">
-        <template v-slot:activator="{ on, attrs }">
-          <div>
-            <v-icon size="medium" style="mr-2" color="#323232"
-              >mdi-database-marker</v-icon
-            >
-            <v-btn
-              v-bind="attrs"
-              v-on="on"
-              text
-              style="color: #323232 !important"
-            >
-              Rehabilitation<v-icon>mdi-menu-down</v-icon>
-            </v-btn>
-          </div>
-        </template>
-
-        <v-list>
-          <v-subheader>Entities:</v-subheader>
-          <v-list-item>
-            <v-list-item-title>Rehabilitation</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Condition B</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Condition G</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Condition P</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Planning</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>Structure</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-
-      <v-divider vertical class="ml-0 mr-3"></v-divider>
-    </v-toolbar>
+    <v-breadcrumbs
+      class="pl-0"
+      divider="/"
+      :items="[
+        { text: 'Dashboard', href: '/dashboard' },
+        { text: 'Entities', href: '/entity' },
+        { text: entity.name, href: '/entity/' + entity._id },
+        { text: 'Edit' },
+      ]"
+    ></v-breadcrumbs>
 
     <div style="clear: both">
       <div style="float: left">
@@ -254,14 +180,26 @@
                   outlined
                   :items="statusOptions"
                 ></v-select>
-
+              </div>
+              <div class="col-md-6">
+                <v-select
+                  label="Entity type"
+                  v-model="entity.entity_type"
+                  dense
+                  hide-details
+                  outlined
+                  :items="['Feature class', 'Table', 'View', 'Web service']"
+                ></v-select>
+              </div>
+              <div class="col-md-6">
                 <v-switch
                   label="Is Domain Table?"
                   v-model="entity.is_domain"
                   dense
                   outlined
                 ></v-switch>
-
+              </div>
+              <div class="col-md-6">
                 <v-combobox
                   dense
                   outlined
@@ -646,7 +584,7 @@ export default {
           domain: { id: this.editDomain },
           required: this.editRequired,
           source: { id: this.editSourceAttrId },
-          order: this.editOrder
+          order: this.editOrder,
         };
 
         axios
@@ -669,7 +607,7 @@ export default {
           domain: { id: this.editDomain },
           required: this.editRequired,
           source: { id: this.editSourceAttrId },
-          order: this.editOrder
+          order: this.editOrder,
         };
 
         axios
@@ -692,7 +630,7 @@ export default {
           alias: this.editAlias,
           domain: { id: this.editDomain },
           required: this.editRequired,
-          order: this.editOrder
+          order: this.editOrder,
         };
 
         axios
@@ -736,7 +674,7 @@ export default {
       this.editAlias = "";
       this.editDomain = "";
       this.editSourceAttrId = "";
-      this.editOrder = 1
+      this.editOrder = 1;
     },
 
     findSourceAttribute(id) {

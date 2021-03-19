@@ -1,5 +1,17 @@
 <template>
   <div class="" :key="entity_id">
+
+    <v-breadcrumbs
+      class="pl-0"
+      divider="/"
+      :items="[
+        { text: 'Dashboard', href: '/dashboard' },
+        { text: 'Entities', href: '/entity' },
+        { text: entity.name, href: '/entity/' + entity._id },
+        { text: 'Graph' },
+      ]"
+    ></v-breadcrumbs>
+
     <div style="clear: both">
       <div style="float: left">
         <h1>

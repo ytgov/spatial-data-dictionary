@@ -1,5 +1,14 @@
 <template>
   <div class="">
+    <v-breadcrumbs
+      class="pl-0"
+      divider="/"
+      :items="[
+        { text: 'Dashboard', href: '/dashboard' },
+        { text: 'Entities' },
+      ]"
+    ></v-breadcrumbs>
+    
     <v-btn color="primary" class="float-right mt-0" to="/entity/create"
       ><v-icon>mdi-plus</v-icon> Create</v-btn
     >

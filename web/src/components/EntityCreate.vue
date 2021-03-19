@@ -1,5 +1,14 @@
 <template>
   <div>
+    <v-breadcrumbs
+      class="pl-0"
+      divider="/"
+      :items="[
+        { text: 'Dashboard', href: '/dashboard' },
+        { text: 'Entities', href:'/entity' },
+        { text: 'Create Entity' },
+      ]"
+    ></v-breadcrumbs>
     <h1>Create Entity</h1>
     <hr class="mb-3" />
 

@@ -1,5 +1,16 @@
 <template>
   <div class="" :key="entity_id">
+    <v-breadcrumbs
+      class="pl-0"
+      divider="/"
+      :items="[
+        { text: 'Dashboard', href: '/dashboard' },
+        { text: 'Entities', href: '/entity' },
+        { text: entity.name, href: '/entity/' + entity._id },
+        { text: 'Change Requests' },
+      ]"
+    ></v-breadcrumbs>
+
     <div style="clear: both">
       <div style="float: left">
         <h1>
@@ -108,11 +119,13 @@
         </v-card>
       </div>
       <div class="col-md-6">
+        <h3>Change Request History</h3>
         <v-data-table
           :items="changeRequests"
           :headers="[
-            { text: 'Create', value: 'create_date' },
+            { text: 'Created', value: 'create_date' },
             { text: 'Title', value: 'title' },
+            { text: 'Reason', value: 'reason' },
             { text: 'Status', value: 'status' },
           ]"
           @click:row="changeClick"
@@ -149,6 +162,7 @@ export default {
 
     changeHeaders: [
       { text: "Date", value: "id" },
+      { text: "Name", value: "id" },
       { text: "Name", value: "id" },
       { text: "Description", value: "id" },
     ],
@@ -237,7 +251,7 @@ export default {
       return moment(date).format("YYYY-MM-DD");
     },
     changeClick(item) {
-      console.log("CICK", item)
+      console.log("CICK", item);
     },
   },
 };
