@@ -204,11 +204,11 @@
                   dense
                   outlined
                   label="Tags"
-                  :items="tagOptions"
                   hide-selected
                   multiple
                   small-chips
                   v-model="entity.tags"
+                  hint="Enter a tag and hit tab to add"
                 ></v-combobox>
               </div>
             </div>

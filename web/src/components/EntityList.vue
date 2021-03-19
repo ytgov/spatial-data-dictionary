@@ -3,12 +3,9 @@
     <v-breadcrumbs
       class="pl-0"
       divider="/"
-      :items="[
-        { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Entities' },
-      ]"
+      :items="[{ text: 'Dashboard', href: '/dashboard' }, { text: 'Entities' }]"
     ></v-breadcrumbs>
-    
+
     <v-btn color="primary" class="float-right mt-0" to="/entity/create"
       ><v-icon>mdi-plus</v-icon> Create</v-btn
     >
@@ -21,17 +18,33 @@
           label="Search"
           outlined
           dense
-          hide-details
           v-model="searchFilter"
           @keyup="changeFilter"
         ></v-text-field>
 
-        <v-switch
+        <v-select
+          :items="[
+            'Domain table',
+            'Feature class',
+            'Table',
+            'View',
+            'Web service',
+          ]"
+          label="Entity type"
+          multiple
+          outlined
+          clearable
+          dense
+          @change="changeFilter"
+          v-model="typeFilter"
+        ></v-select>
+
+        <!--  <v-switch
           label="Show Only Domain Tables"
           dense
           v-model="domainFilter"
           @change="changeFilter"
-        ></v-switch>
+        ></v-switch> -->
       </div>
       <div class="col-md-6">
         <v-select
@@ -75,25 +88,40 @@
           v-for="item of group.entities"
           v-bind:key="item.id"
         >
-          <v-card
-            class="mt-3"
-            color="#fff2d5"
-            :to="'/entity/' + item._id"
-            style="height: 280px; overflow: hidden"
-          >
-            <v-card-title> {{ item.name }}</v-card-title>
+          <v-card class="mt-3" color="#fff2d5" :to="'/entity/' + item._id">
+            <v-card-subtitle class="mb-0 pb-0">{{
+              item.location.name
+            }}</v-card-subtitle>
+            <v-card-title
+              class="mt-0 pt-0 pb-1"
+              style="border-bottom: 1px #bbb solid"
+            >
+              {{ item.name }}</v-card-title
+            >
 
-            <v-card-text style="max-height: 210px; overflow: hidden">
-              <strong>{{ item.location.name }}</strong
-              ><br />
-              {{ item.attributes.length }} Attributes<br />{{
-                item.links.people.length
-              }}
-              People
-              <div class="mt-3">
-                <status-chip :status="item.status"> </status-chip>
-                <location-chip :location="item.location.type"></location-chip>
-                <div class="mt-3">
+            <v-card-subtitle class="mt-3 pb-0">CONNECTIONS</v-card-subtitle>
+            <v-card-text style="overflow: hidden">
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="mr-4" style="font-size: 32px; float: left">
+                    {{ item.attributes.length }}
+                  </div>
+                  Attributes
+                </div>
+                <div class="col-sm-6">
+                  <div class="mr-4" style="font-size: 32px; float: left">
+                    {{ item.links.people.length }}
+                  </div>
+                  People
+                </div>
+              </div>
+
+              <div class="mt-3"></div>
+            </v-card-text>
+
+            <v-card-actions style="display: block; height: 92px;">
+              <div class="mb-3" style="height: 32px; overflow: hidden">
+                <div class="mb-3">
                   <v-chip
                     class="mr-2"
                     v-for="tag of item.tags"
@@ -105,7 +133,13 @@
                   </v-chip>
                 </div>
               </div>
-            </v-card-text>
+
+              <div style="height: 32px; overflow: hidden">
+                <status-chip :status="item.status"> </status-chip>
+                <location-chip :location="item.location.type"></location-chip>
+                <entity-type-chip :type="item.entity_type"></entity-type-chip>
+              </div>
+            </v-card-actions>
           </v-card>
         </div>
       </div>
@@ -132,6 +166,7 @@ export default {
     domainFilter: false,
     programFilter: [],
     locationFilter: [],
+    typeFilter: [],
   }),
   created() {
     axios
@@ -231,13 +266,16 @@ export default {
         }
       }
 
-      if (this.searchFilter.length > 0) {
-        let searchText = this.searchFilter.toLowerCase().trim();
+      if (this.typeFilter.length > 0) {
         let toRemove = [];
+        let includeDomains = this.typeFilter.indexOf("Domain table") >= 0;
 
         for (let entity of filteredList) {
-          let nameTest = entity.name.toLowerCase();
-          if (nameTest.indexOf(searchText) == -1) toRemove.push(entity);
+          if (entity.is_domain && includeDomains) continue;
+
+          if (this.typeFilter.indexOf(entity.entity_type) == -1) {
+            toRemove.push(entity);
+          }
         }
 
         for (let remove of toRemove) {
@@ -246,8 +284,34 @@ export default {
         }
       }
 
-      if (this.domainFilter) {
-        console.log("FILTERING BY DOMAIN");
+      if (this.searchFilter.length > 0) {
+        let searchText = this.searchFilter.toLowerCase().trim();
+        let toRemove = [];
+
+        for (let entity of filteredList) {
+          let nameTest = entity.name.toLowerCase();
+          let tags = "";
+
+          if (entity.tags) {
+            tags = entity.tags.reduce((t, i) => {
+              return t + " " + i.toLowerCase();
+            });
+          }
+
+          if (
+            nameTest.indexOf(searchText) == -1 &&
+            tags.indexOf(searchText) == -1
+          )
+            toRemove.push(entity);
+        }
+
+        for (let remove of toRemove) {
+          let remIdx = filteredList.indexOf(remove);
+          filteredList.splice(remIdx, 1);
+        }
+      }
+
+      /* if (this.domainFilter) {
         let toRemove = [];
 
         for (let entity of filteredList) {
@@ -258,7 +322,7 @@ export default {
           let remIdx = filteredList.indexOf(remove);
           filteredList.splice(remIdx, 1);
         }
-      }
+      } */
 
       this.filteredEntities = filteredList;
       this.makeGroups();
