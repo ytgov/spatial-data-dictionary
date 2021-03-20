@@ -38,6 +38,11 @@ export const sections = [
         name: "People",
         url: "/people",
         icon: "mdi-account-group"
+    },
+    {
+        name: "Changes",
+        url: "/change",
+        icon: "mdi-hammer-wrench"
     }
 ];
 export const environment = process.env.NODE_ENV;

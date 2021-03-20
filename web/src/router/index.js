@@ -17,6 +17,9 @@ import Programs from "../views/Programs";
 import People from "../views/People";
 import EntityMap from "../views/EntityMap";
 import EntityChangeRequest from "../views/EntityChangeRequest";
+import EntityChangeList from "../views/EntityChangeList";
+import EntityChangeDetail from "../views/EntityChangeDetail";
+import ChangeList from "../views/ChangeList";
 
 Vue.use(VueRouter);
 
@@ -99,6 +102,22 @@ const routes = [
     }
   },
   {
+    path: "/entity/:id/changes",
+    name: "Entity change list",
+    component: EntityChangeList,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/:id/changes/:changeId",
+    name: "Entity change",
+    component: EntityChangeDetail,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
     path: "/location",
     name: "Locations",
     component: Locations,
@@ -126,6 +145,14 @@ const routes = [
     path: "/people",
     name: "People",
     component: People,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/change",
+    name: "ChangeList",
+    component: ChangeList,
     meta: {
       //requiresAuth: true
     }

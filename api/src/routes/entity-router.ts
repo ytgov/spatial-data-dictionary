@@ -3,9 +3,10 @@ import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
 import { Attribute, AuthUser, Entity, Storage } from "../data";
 import { EntityService, GenericService, LocationService, ProgramService, UserService } from "../services";
-import { ObjectId } from "mongodb";
+import { ChangeStream, ObjectId } from "mongodb";
 import { v4 as uuidV4 } from "uuid";
 import { GraphBuilder } from "../utils/directed-graph";
+import moment from "moment";
 
 export const entityRouter = express.Router();
 
@@ -41,6 +42,64 @@ entityRouter.post("/", RequiresData, async (req: Request, res: Response) => {
     let results = await db.create(req.user, req.body);
 
     return res.json({ data: results });
+});
+
+entityRouter.get("/changes", RequiresData, async (req: Request, res: Response) => {
+    const db = req.store.Entities as EntityService;
+    const changeDb = req.store.Changes as GenericService;
+
+
+    let results = await changeDb.getAll();
+
+    for (let item of results) {
+        let entity = await db.getById(item.entity_id);
+
+        if (entity) {
+            item.entity = entity;
+            await buildConnections(item.entity, req);
+        }
+    }
+
+    return res.json({ data: results });
+});
+
+entityRouter.get("/changes/:id", RequiresData, async (req: Request, res: Response) => {
+    const db = req.store.Entities as EntityService;
+    const changeDb = req.store.Changes as GenericService;
+    let { id } = req.params;
+
+    let change = await changeDb.getById(id)
+
+    if (change) {
+        return res.json({ data: change });
+    }
+
+    res.status(404).send();
+});
+
+entityRouter.put("/:id/changes/:changeId", RequiresData, async (req: Request, res: Response) => {
+    const db = req.store.Entities as EntityService;
+    const changeDb = req.store.Changes as GenericService;
+    let { id, changeId } = req.params;
+
+    let change = await changeDb.getById(changeId);
+
+    if (change) {
+        let { complete_date, newStatus, assigned_user, description, comments } = req.body;
+
+        change.complete_date = complete_date;
+        change.status = newStatus || change.status;
+        change.assigned_user = assigned_user;
+        change.description = description;
+
+        change.comments = comments;
+
+        await changeDb.update(change._id, change);
+
+        return res.json({ data: change });
+    }
+
+    res.status(404).send();
 });
 
 entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
@@ -82,7 +141,6 @@ entityRouter.get("/:id/graph-data", [param("id").notEmpty().isMongoId()], Requir
         return res.json({ data: graph });
     });
 
-
 entityRouter.get("/:id/request-change", [param("id").notEmpty().isMongoId()], RequiresData,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -103,8 +161,6 @@ entityRouter.get("/:id/request-change", [param("id").notEmpty().isMongoId()], Re
         res.status(404).send();
     });
 
-
-
 entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], RequiresData,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -114,7 +170,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
         }
 
         const db = req.store.Entities as EntityService;
-        const changeDb = req.store.ChangeRequests as GenericService;
+        const requestDb = req.store.ChangeRequests as GenericService;
         let { id } = req.params;
         let entity = await db.getById(id)
 
@@ -126,7 +182,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
             change.status = "Open";
             change.comments = [];
 
-            let results = await changeDb.create(change);
+            let results = await requestDb.create(change);
 
             return res.json({
                 data: results, messages: [{ text: "Change request added", variant: "success" }]
@@ -135,6 +191,111 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
 
         res.status(404).send();
     });
+
+entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMongoId()], RequiresData,
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const db = req.store.Entities as EntityService;
+        const requestDb = req.store.ChangeRequests as GenericService;
+        let { id, changeId } = req.params;
+        let { description, reason, status, title } = req.body;
+        let entity = await db.getById(id)
+
+        if (entity) {
+            let change = await requestDb.getById(changeId)
+            change.reason = reason;
+            change.status = status;
+            change.title = title;
+            change.description = description;
+
+            let results = await requestDb.update(changeId, change);
+
+            return res.json({
+                data: results, messages: [{ text: "Change request updated", variant: "success" }]
+            });
+        }
+
+        res.status(404).send();
+    });
+
+entityRouter.post("/:id/request-change/:changeId/approve",
+    [param("id").notEmpty().isMongoId(),
+    param("changeId").notEmpty().isMongoId()], RequiresData,
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const db = req.store.Entities as EntityService;
+        const requestDb = req.store.ChangeRequests as GenericService;
+        const changeDb = req.store.Changes as GenericService;
+        let { id, changeId } = req.params;
+        let { description, reason, title, date } = req.body;
+        let entity = await db.getById(id)
+
+        if (entity) {
+            let req = await requestDb.getById(changeId)
+            req.reason = reason;
+            req.status = "Approved";
+            req.title = title;
+            req.description = description;
+            req.date = date;
+
+            await requestDb.update(changeId, req);
+
+            let change = {
+                create_date: new Date(),
+                title,
+                status: "Open",
+                description,
+                reason,
+                request_id: req._id,
+                assigned_user: 'User 1', // TODO: This should be current user 
+                complete_date: date,
+                location: entity.location,
+                programs: entity.links.programs,
+                entity_id: entity._id
+            }
+
+            let result = await changeDb.create(change)
+
+            return res.json({
+                data: result, messages: [{ text: "Change request updated", variant: "success" }]
+            });
+        }
+
+        res.status(404).send();
+    });
+
+entityRouter.get("/:id/changes", [param("id").notEmpty().isMongoId()], RequiresData, async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const db = req.store.Entities as EntityService;
+    const changeDb = req.store.Changes as GenericService;
+    let { id } = req.params;
+    let entity = await db.getById(id)
+
+    if (entity) {
+        //await buildConnections(entity, req);
+
+        let results = await changeDb.getAll({ entity_id: entity._id })
+
+        return res.json({ data: results });
+    }
+
+    res.status(404).send();
+});
 
 entityRouter.put("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
     async (req: Request, res: Response) => {

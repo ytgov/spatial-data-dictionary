@@ -7,7 +7,7 @@
         { text: 'Dashboard', href: '/dashboard' },
         { text: 'Entities', href: '/entity' },
         { text: entity.name, href: '/entity/' + entity._id },
-        { text: 'Change Requests' },
+        { text: 'Changes' },
       ]"
     ></v-breadcrumbs>
 
@@ -19,6 +19,7 @@
 
           <status-chip :status="entity.status"></status-chip>
           <location-chip :location="entity.location.type"></location-chip>
+          <entity-type-chip :type="entity.entity_type"></entity-type-chip>
 
           <br />
           <v-chip
@@ -51,89 +52,32 @@
     <hr class="mb-1" />
 
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-8">
         <v-card color="#fff2d5">
-          <v-card-title>Request Change to Entity</v-card-title>
+          <v-card-title>Changes</v-card-title>
           <v-card-text>
-            <v-menu
-              v-model="changeDateMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              left
-              nudge-top="26"
-              offset-y
-              min-width="auto"
+            <v-data-table
+              :items="changes"
+              :headers="[
+                { text: 'Change date', value: 'date' },
+                { text: 'Change title', value: 'title' },
+                { text: 'Reason', value: 'reason' },
+                { text: 'Status', value: 'status' },
+              ]"
+              @click:row="changeClick"
+              :sort-by="['date']"
+              :sort-desc="['true']"
             >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="changeDate"
-                  label="Change date"
-                  append-icon="mdi-calendar"
-                  readonly
-                  outlined
-                  dense
-                  background-color="white"
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
+              <template v-slot:item.date="{ item }">
+                {{ formatDate(item.date) }}
               </template>
-              <v-date-picker
-                v-model="changeDate"
-                :min="changeDateMin"
-                @input="changeDateMenu = false"
-              ></v-date-picker>
-            </v-menu>
-
-            <v-select
-              :items="reasonOptions"
-              v-model="changeReason"
-              outlined
-              dense
-              label="Reason for change"
-              background-color="white"
-            ></v-select>
-
-            <v-text-field
-              label="Change title"
-              v-model="changeTitle"
-              dense
-              outlined
-              background-color="white"
-            ></v-text-field>
-
-            <v-textarea
-              label="Change description"
-              v-model="changeDescription"
-              dense
-              outlined
-              background-color="white"
-            ></v-textarea>
-
-            <v-btn color="primary" @click="save">Save</v-btn>
+            </v-data-table>
           </v-card-text>
         </v-card>
       </div>
-      <div class="col-md-6">
-        <h3>Change Request History</h3>
-        <v-data-table
-          :items="changeRequests"
-          :headers="[
-            { text: 'Change date', value: 'date' },
-            { text: 'Change title', value: 'title' },
-            { text: 'Reason', value: 'reason' },
-            { text: 'Status', value: 'status' },
-          ]"
-          @click:row="changeClick"
-          :sort-by="['date']"
-          :sort-desc="['true']"
-        >
-          <template v-slot:item.date="{ item }">
-            {{ formatDate(item.date) }}
-          </template>
-        </v-data-table>
-      </div>
+      <div class="col-md-6"></div>
     </div>
-
+    <!-- 
     <v-dialog v-model="changeDialogOpen" persistent max-width="600px">
       <v-container class="pb-3" style="background-color: white">
         <h2>
@@ -217,7 +161,7 @@
         </v-btn>
       </v-container>
     </v-dialog>
-
+ -->
     <v-snackbar v-model="snackbar" right color="success">
       <v-icon class="mr-3">mdi-thumb-up-outline</v-icon>
       {{ apiSuccess }}
@@ -229,7 +173,6 @@
 import axios from "axios";
 import moment from "moment";
 import { ENTITY_URL } from "../urls";
-import _ from "lodash";
 import router from "../router";
 
 export default {
@@ -259,7 +202,7 @@ export default {
     changeTitle: "",
     changeDescription: "",
 
-    changeRequests: [],
+    changes: [],
 
     changeDialogOpen: null,
     changeItem: {},
@@ -284,10 +227,9 @@ export default {
   created() {
     this.entity_id = this.$route.params.id;
     this.loadEntity(this.entity_id);
-    this.loadChangeRequests(this.entity_id);
+    this.loadChanges(this.entity_id);
   },
   methods: {
-    initialize() {},
     loadEntity(id) {
       axios
         .get(`${ENTITY_URL}/${id}`)
@@ -298,58 +240,11 @@ export default {
           console.log(err);
         });
     },
-    loadChangeRequests(id) {
+    loadChanges(id) {
       axios
-        .get(`${ENTITY_URL}/${id}/request-change`)
+        .get(`${ENTITY_URL}/${id}/changes`)
         .then((result) => {
-          this.changeRequests = result.data.data;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    updateEntity() {
-      axios
-        .put(`${ENTITY_URL}/${this.entity._id}`, this.entity)
-        .then((result) => {
-          this.entity = result.data.data.value;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    save() {
-      let body = {
-        title: this.changeTitle,
-        description: this.changeDescription,
-        date: this.changeDate,
-        reason: this.changeReason,
-      };
-
-      axios
-        .post(`${ENTITY_URL}/${this.entity._id}/request-change`, body)
-        .then((result) => {
-          console.log(result.data.data.value);
-          this.loadChangeRequests(this.entity_id);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-
-    update() {
-      let body = this.changeItem;
-
-      axios
-        .put(
-          `${ENTITY_URL}/${this.entity._id}/request-change/${body._id}`,
-          body
-        )
-        .then((result) => {
-          console.log(result.data.data.value);
-          this.loadChangeRequests(this.entity_id);
-          this.changeDialogOpen = null;
-          this.changeItem = {};
+          this.changes = result.data.data;
         })
         .catch((err) => {
           console.log(err);
@@ -360,25 +255,9 @@ export default {
       return moment(date).format("YYYY-MM-DD");
     },
     changeClick(item) {
-      this.changeItem = _.clone(item);
-      this.changeDialogOpen = true;
-    },
-    approve() {
-      let body = this.changeItem;
-      axios
-        .post(
-          `${ENTITY_URL}/${this.entity._id}/request-change/${body._id}/approve`,
-          body
-        )
-        .then((result) => {
-          console.log(result.data.data.ops[0]);
-          //this.loadChangeRequests(this.entity_id);
-
-          router.push(`/entity/${this.entity_id}/changes/${result.data.data.ops[0]._id}`);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      /* this.changeItem = _.clone(item);
+      this.changeDialogOpen = true; */
+      router.push(`/entity/${item.entity_id}/changes/${item._id}`);
     },
   },
 };
