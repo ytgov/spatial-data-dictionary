@@ -297,6 +297,29 @@ entityRouter.get("/:id/changes", [param("id").notEmpty().isMongoId()], RequiresD
     res.status(404).send();
 });
 
+entityRouter.get("/:id/complete-changes", [param("id").notEmpty().isMongoId()], RequiresData, async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const db = req.store.Entities as EntityService;
+    const changeDb = req.store.Changes as GenericService;
+    let { id } = req.params;
+    let entity = await db.getById(id)
+
+    if (entity) {
+        //await buildConnections(entity, req);
+
+        let results = await changeDb.getAll({ entity_id: entity._id, status: "Complete" })
+
+        return res.json({ data: results });
+    }
+
+    res.status(404).send();
+});
+
 entityRouter.put("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);

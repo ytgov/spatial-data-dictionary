@@ -269,7 +269,8 @@
               </v-data-table>
             </v-tab-item>
             <v-tab-item key="3">
-              <v-data-table :headers="changeHeaders"> </v-data-table
+              <v-data-table :items="changes" :headers="changeHeaders" @click:row="changeClick">
+              </v-data-table
             ></v-tab-item>
           </v-tabs-items>
         </v-card>
@@ -437,6 +438,7 @@
 <script>
 import axios from "axios";
 import { ENTITY_URL } from "../urls";
+import router from "../router";
 
 export default {
   name: "Form",
@@ -476,9 +478,9 @@ export default {
       { text: "Source", value: "source" },
     ],
     changeHeaders: [
-      { text: "Date", value: "id" },
-      { text: "Name", value: "id" },
-      { text: "Description", value: "id" },
+      { text: "Date", value: "complete_date" },
+      { text: "Title", value: "title" },
+      { text: "Description", value: "description" },
     ],
 
     dialog: false,
@@ -501,6 +503,8 @@ export default {
     connectionEntity: {},
     downEntity: {},
     personIndex: -1,
+
+    changes: [],
   }),
   computed: {
     formTitle() {
@@ -528,7 +532,7 @@ export default {
   },
   created() {
     this.entity_id = this.$route.params.id;
-    this.loadEntity(this.entity_id);
+    //this.loadEntity(this.entity_id);
   },
   methods: {
     initialize() {},
@@ -544,11 +548,23 @@ export default {
 
           if (!this.entity.values) this.entity.values = new Array();
           this.values = this.entity.values;
+
+          this.loadChanges(id);
         })
         .catch((err) => {
           console.log(err);
         });
     },
+
+    loadChanges(id) {
+      axios
+        .get(`${ENTITY_URL}/${id}/complete-changes`)
+        .then((resp) => {
+          this.changes = resp.data.data;
+        })
+        .catch((error) => console.log(error));
+    },
+
     updateEntity() {
       axios
         .put(`${ENTITY_URL}/${this.entity._id}`, this.entity)
@@ -742,6 +758,10 @@ export default {
       this.entity.links.people.splice(this.personIndex, 1);
       this.updateEntity();
     },
+
+    changeClick(item) {
+      router.push(`/entity/${this.entity_id}/changes/${item._id}`)
+    }
   },
 };
 </script>
