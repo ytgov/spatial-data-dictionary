@@ -17,6 +17,8 @@
           outlined
           dense
           hint="Press enter to search"
+          @keydown="searchKeyUp"
+          @click:append="doSearch"
         ></v-text-field>
         <v-divider class="mt-0 mb-2"></v-divider>
         <v-list-item
@@ -39,7 +41,7 @@
         <v-subheader>
           My watchlist<v-spacer></v-spacer>
           <v-icon size="" class="mr-5">mdi-star</v-icon>
-          </v-subheader>
+        </v-subheader>
 
         <v-list-item link nav>
           <v-list-item-icon> </v-list-item-icon>
@@ -169,19 +171,28 @@ export default {
     },
   },
   methods: {
-    nav: function (location) {
+    nav(location) {
       router.push(location);
       console.log(location);
     },
-    toggleHeader: function () {
+    toggleHeader() {
       this.headerShow = !this.headerShow;
     },
-    toggleMenu: function () {
+    toggleMenu() {
       this.menuShow = !this.menuShow;
     },
-    signOut: function () {
+    signOut() {
       store.dispatch("signOut");
       router.push("/");
+    },
+    searchKeyUp(event) {
+      if (event.code == "Enter") {
+        this.doSearch();
+      }
+    },
+    doSearch() {
+      router.push("/search?term=" + this.search);
+      this.search = "";
     },
   },
 };

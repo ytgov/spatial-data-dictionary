@@ -48,6 +48,8 @@ export interface Entity { // a table or layer or file
     attributes: Attribute[];
     properties: Property[];
     links: any;
+    tags?: string[];
+    search_reason?: string;
 }
 
 export enum EntityStatus {
@@ -82,4 +84,10 @@ export interface DomainValue {
     id?: string;
     value: string | number;
     description: string;
+}
+
+export interface SearchResult {
+    entities?: Entity[];
+    programs?: Program[];
+    attribute?: Attribute[];
 }

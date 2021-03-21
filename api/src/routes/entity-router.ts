@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { Attribute, AuthUser, Entity, Storage } from "../data";
+import { Attribute, AuthUser, Entity, SearchResult, Storage } from "../data";
 import { EntityService, GenericService, LocationService, ProgramService, UserService } from "../services";
 import { ChangeStream, ObjectId } from "mongodb";
 import { v4 as uuidV4 } from "uuid";
@@ -101,6 +101,26 @@ entityRouter.put("/:id/changes/:changeId", RequiresData, async (req: Request, re
 
     res.status(404).send();
 });
+
+entityRouter.post("/search",
+    [
+        body("term").isString().notEmpty(),
+        body("types").isArray().notEmpty()
+    ], RequiresData, async (req: Request, res: Response) => {
+        const db = req.store.Entities as EntityService;
+        const changeDb = req.store.Changes as GenericService;
+
+        let { term, types } = req.body;
+        let allEntities = await db.getAll();
+
+        let searchResult: SearchResult;
+        searchResult = {
+            entities: await db.search(term),
+        };
+
+
+        res.json({ data: searchResult });
+    });
 
 entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
     async (req: Request, res: Response) => {

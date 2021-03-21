@@ -46,4 +46,52 @@ export class EntityService {
     async findDownLinks(id: string): Promise<any> {
         return this.db.find({ 'links.entities.id': id.toString() }).toArray();
     }
+
+    async search(term: string): Promise<Entity[]> {
+        term = term.toLowerCase().trim();
+
+        let all = await this.getAll();
+        let matches = new Array<Entity>();
+
+        for (let e of all) {
+            let eName = e.name.toLowerCase();
+            if (eName.indexOf(term) >= 0) {
+                e.search_reason = "Name match";
+                matches.push(e)
+                continue;
+            }
+
+            let tags = "";
+            if (e.tags)
+                tags = e.tags.reduce((a, t) => { return a + " " + t.toLowerCase() })
+
+            if (tags.indexOf(term) >= 0) {
+                e.search_reason = "Tag match";
+                matches.push(e)
+                continue;
+            }
+
+            let attr = "";
+            if (e.attributes) {
+                for (let a of e.attributes) {
+                    attr += " " + a.name.toLowerCase();
+
+                    if (a.domain && a.domain.name) {
+                        attr += " " + a.domain.name.toLowerCase();
+                    }
+
+                    if (attr.indexOf(term) >= 0) {
+                        e.search_reason = `Attribute match (${a.name})`;
+                        matches.push(e);
+                        break;
+                    }
+                }
+                console.log(attr)
+
+            }
+        }
+
+
+        return matches;
+    }
 }

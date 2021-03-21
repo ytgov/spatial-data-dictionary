@@ -20,6 +20,7 @@ import EntityChangeRequest from "../views/EntityChangeRequest";
 import EntityChangeList from "../views/EntityChangeList";
 import EntityChangeDetail from "../views/EntityChangeDetail";
 import ChangeList from "../views/ChangeList";
+import Search from "../views/Search";
 
 Vue.use(VueRouter);
 
@@ -153,6 +154,14 @@ const routes = [
     path: "/change",
     name: "ChangeList",
     component: ChangeList,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/search",
+    name: "Search",
+    component: Search,
     meta: {
       //requiresAuth: true
     }
