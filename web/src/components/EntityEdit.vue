@@ -191,14 +191,14 @@
                   :items="['Feature class','Domain table', 'Table', 'View', 'Web service']"
                 ></v-select>
               </div>
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <v-switch
                   label="Is Domain Table?"
                   v-model="entity.is_domain"
                   dense
                   outlined
                 ></v-switch>
-              </div>
+              </div> -->
               <div class="col-md-6">
                 <v-combobox
                   dense
