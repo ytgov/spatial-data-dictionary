@@ -114,8 +114,14 @@ entityRouter.post("/search",
         let allEntities = await db.getAll();
 
         let searchResult: SearchResult;
+        let entityMatches = await db.search(term)
+
+        for (let e of entityMatches) {
+            await buildConnections(e, req);
+        }
+
         searchResult = {
-            entities: await db.search(term),
+            entities: entityMatches,
         };
 
 

@@ -51,9 +51,15 @@
             :headers="[
               { text: 'Entity', value: 'name' },
               { text: 'Reason', value: 'search_reason' },
+              { text: 'Type', value: 'entity_type' },
+              { text: 'Location', value: 'location.name' },
+              { text: 'Programs', value: 'links.programs' },
             ]"
             @click:row="rowClick"
           >
+          <template v-slot:item.links.programs="{item}">
+            {{item.links.programs.map(p => p.name).join(", ")}}
+          </template>
           </v-data-table>
         </v-card>
       </div>
