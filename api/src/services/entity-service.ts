@@ -61,36 +61,55 @@ export class EntityService {
                 continue;
             }
 
-            let tags = "";
-            if (e.tags)
-                tags = e.tags.reduce((a, t) => { return a + " " + t.toLowerCase() })
+            if (e.tags) {
+                for (let tag of e.tags) {
 
-            if (tags.indexOf(term) >= 0) {
-                e.search_reason = "Tag match";
-                matches.push(e)
-                continue;
+                    if (tag.toLowerCase().indexOf(term) >= 0) {
+                        e.search_reason = `Tag match (${tag})`;
+                        matches.push(e)
+                        continue;
+                    }
+                }
             }
 
-            let attr = "";
             if (e.attributes) {
                 for (let a of e.attributes) {
-                    attr += " " + a.name.toLowerCase();
+                    let attr = a.name.toLowerCase();
 
-                    if (a.domain && a.domain.name) {
-                        attr += " " + a.domain.name.toLowerCase();
-                    }
+                    if (a.description)
+                        attr += " " + a.description.toLowerCase();
+
+                    if (a.type)
+                        attr += " " + a.type.toLowerCase();
 
                     if (attr.indexOf(term) >= 0) {
                         e.search_reason = `Attribute match (${a.name})`;
                         matches.push(e);
                         break;
                     }
-                }
-                console.log(attr)
 
+                    if (a.domain && a.domain.name) {
+                        if (a.domain.name.toLowerCase().indexOf(term) >= 0) {
+                            e.search_reason = `Domain match (${a.name})`;
+                            matches.push(e);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (e.properties) {
+                for (let a of e.properties) {
+                    let prop = a.name.toLowerCase() + " " + a.value.toLowerCase();
+
+                    if (prop.indexOf(term) >= 0) {
+                        e.search_reason = `Property match (${a.name})`;
+                        matches.push(e);
+                        break;
+                    }
+                }
             }
         }
-
 
         return matches;
     }

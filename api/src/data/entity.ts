@@ -62,6 +62,8 @@ export enum EntityStatus {
 export interface Attribute {
     _id?: string;
     name: string;
+    description?: string;
+    type?: string;
     domain: Domain;
     source: any;
     properties: Property[];

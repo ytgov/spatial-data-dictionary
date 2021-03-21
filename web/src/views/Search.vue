@@ -52,6 +52,7 @@
               { text: 'Entity', value: 'name' },
               { text: 'Reason', value: 'search_reason' },
             ]"
+            @click:row="rowClick"
           >
           </v-data-table>
         </v-card>
@@ -62,6 +63,7 @@
 
 <script>
 import axios from "axios";
+import router from "../router";
 import { ENTITY_URL } from "../urls";
 
 export default {
@@ -108,6 +110,9 @@ export default {
       if (event.code == "Enter") {
         this.doSearch();
       }
+    },
+    rowClick(item) {
+      router.push(`/entity/${item._id}`);
     },
   },
 };
