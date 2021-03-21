@@ -268,10 +268,10 @@ export default {
 
       if (this.typeFilter.length > 0) {
         let toRemove = [];
-        let includeDomains = this.typeFilter.indexOf("Domain table") >= 0;
+        //let includeDomains = this.typeFilter.indexOf("Domain table") >= 0;
 
         for (let entity of filteredList) {
-          if (entity.is_domain && includeDomains) continue;
+          //if (entity.is_domain && includeDomains) continue;
 
           if (this.typeFilter.indexOf(entity.entity_type) == -1) {
             toRemove.push(entity);
