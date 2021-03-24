@@ -1,17 +1,23 @@
 import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { ProgramService } from "../services";
+import { GenericService, ProgramService } from "../services";
 
 export const programRouter = express.Router();
 
 programRouter.get("/", RequiresData,
     async (req: Request, res: Response) => {
         let db = req.store.Programs as ProgramService;
-        return res.json({ data: await db.getAll() });
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list });
     });
 
-    programRouter.post("/", RequiresData,
+programRouter.post("/", RequiresData,
     [body("name").notEmpty().isString()],
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -23,10 +29,16 @@ programRouter.get("/", RequiresData,
         let db = req.store.Programs as ProgramService;
         await db.create(req.body);
 
-        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location created" }] });
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list, messages: [{ variant: "success", text: "Location created" }] });
     });
 
-    programRouter.put("/:id", RequiresData,
+programRouter.put("/:id", RequiresData,
     [
         param("id").notEmpty().isMongoId(),
         body("name").notEmpty().isString()
@@ -42,10 +54,16 @@ programRouter.get("/", RequiresData,
         let { id } = req.params;
 
         await db.update(id, req.body);
-        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location edited" }] });
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list, messages: [{ variant: "success", text: "Location edited" }] });
     });
 
-    programRouter.delete("/:id", RequiresData,
+programRouter.delete("/:id", RequiresData,
     [
         param("id").notEmpty().isMongoId()
     ],
@@ -60,5 +78,20 @@ programRouter.get("/", RequiresData,
         let { id } = req.params;
 
         await db.delete(id);
-        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location removed" }] });
+
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list, messages: [{ variant: "success", text: "Location removed" }] });
     });
+
+async function buildConnections(item: any, req: Request) {
+    let personDb = req.store.Persons as GenericService;
+    let person = await personDb.getById(item.approver_id);
+
+    if (person)
+        item.approver_name = `${person.first_name} ${person.last_name}`;
+}

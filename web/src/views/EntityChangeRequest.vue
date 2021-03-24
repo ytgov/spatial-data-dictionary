@@ -114,6 +114,17 @@
         </v-card>
       </div>
       <div class="col-md-6">
+        <v-card color="#fff2d5" class="mb-5">
+          <v-card-title>Required Approvals</v-card-title>
+          <v-card-text>
+            <h3>Location: {{ entity.location.name }}: <span style="font-weight: 400">{{ entity.location.approver_name }}</span></h3>
+
+            <h3 v-for="program of entity.links.programs" v-bind:key="program.id">
+              Program: {{ program.name }}: <span style="font-weight: 400">{{ program.approver_name }}</span>
+            </h3>
+          </v-card-text>
+        </v-card>
+
         <h3>Change Request History</h3>
         <v-data-table
           :items="changeRequests"
@@ -263,6 +274,9 @@ export default {
 
     changeDialogOpen: null,
     changeItem: {},
+
+    locationApprovalName: "asdf",
+    programApprovalName: "e33e",
   }),
   computed: {},
   watch: {
@@ -374,7 +388,9 @@ export default {
           console.log(result.data.data.ops[0]);
           //this.loadChangeRequests(this.entity_id);
 
-          router.push(`/entity/${this.entity_id}/changes/${result.data.data.ops[0]._id}`);
+          router.push(
+            `/entity/${this.entity_id}/changes/${result.data.data.ops[0]._id}`
+          );
         })
         .catch((err) => {
           console.log(err);

@@ -558,6 +558,12 @@ async function buildConnections(entity: Entity, req: Request) {
             entity.location.name = location.name;
             entity.location.type = location.type;
             entity.location.description = location.description;
+            entity.location.approver_id = location.approver_id;
+
+            let approver = await userDB.getById(location.approver_id);
+
+            if (approver)
+                entity.location.approver_name = `${approver.first_name} ${approver.last_name}`;
         }
     }
 
@@ -586,8 +592,6 @@ async function buildConnections(entity: Entity, req: Request) {
                 }
             }
         }
-
-
     }
 
     if (entity.links) {
@@ -627,6 +631,12 @@ async function buildConnections(entity: Entity, req: Request) {
 
                 if (program) {
                     item.name = program.name;
+                    item.approver_id = program.approver_id;
+
+                    let approver = await userDB.getById(program.approver_id);
+        
+                    if (approver)
+                        item.approver_name = `${approver.first_name} ${approver.last_name}`;
                 }
             }
         }

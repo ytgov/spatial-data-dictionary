@@ -44,12 +44,11 @@
               ></v-text-field>
 
               <v-select
-                label="Managers"
+                label="Program Manager"
                 :items="peopleOptions"
-                v-model="editPeople"
+                v-model="editManager"
                 item-text="display_name"
                 item-value="_id"
-                multiple
                 dense
                 outlined
                 background-color="white"
@@ -89,12 +88,12 @@ export default {
     showForm: false,
     editId: "",
     editName: "",
-    editPeople: [],
+    editManager: {},
     peopleOptions: [],
     items: [],
     itemHeaders: [
       { text: "Name", value: "name" },
-      { text: "People", value: "people.length" },
+      { text: "Program Manager", value: "approver_name" },
     ],
   }),
   created() {
@@ -119,7 +118,7 @@ export default {
     createClick() {
       this.editId = "";
       this.editName = "";
-      this.editPeople = [];
+      this.editManager = {};
       this.isCreate = true;
       this.showForm = true;
     },
@@ -128,14 +127,14 @@ export default {
     rowClick(item) {
       this.isCreate = false;
       this.editName = item.name;
-      this.editPeople = item.people;
+      this.editManager = item.approver_id;
       this.editId = item._id;
       this.showForm = true;
     },
     saveClick() {
       if (this.isCreate) {
         axios
-          .post(PROGRAM_URL, { name: this.editName, people: this.editPeople })
+          .post(PROGRAM_URL, { name: this.editName, approver_id: this.editManager })
           .then((result) => {
             if (result && result.data.data) {
               this.items = result.data.data;
@@ -149,7 +148,7 @@ export default {
         axios
           .put(`${PROGRAM_URL}/${this.editId}`, {
             name: this.editName,
-            people: this.editPeople,
+            approver_id: this.editManager,
           })
           .then((result) => {
             if (result && result.data.data) {

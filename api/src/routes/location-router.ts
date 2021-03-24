@@ -91,7 +91,6 @@ locationRouter.delete("/:id", RequiresData,
         return res.json({ data: list, messages: [{ variant: "success", text: "Location removed" }] });
     });
 
-
 async function buildConnections(item: any, req: Request) {
     let personDb = req.store.Persons as GenericService;
     let person = await personDb.getById(item.approver_id);
