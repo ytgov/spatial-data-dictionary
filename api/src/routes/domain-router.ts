@@ -7,5 +7,5 @@ export const domainRouter = express.Router();
 domainRouter.get("/", RequiresData,
     async (req: Request, res: Response) => {
         let db = req.store.Entities as EntityService;
-        return res.json({ data: await db.getAll({ is_domain: true }) });
+        return res.json({ data: await db.getAll({ entity_type: "Domain table" }) });
     });
