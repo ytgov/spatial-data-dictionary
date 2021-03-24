@@ -66,6 +66,17 @@
                 outlined
                 background-color="white"
               ></v-textarea>
+
+              <v-select
+                label="Approver"
+                :items="peopleOptions"
+                v-model="editApprover"
+                item-text="display_name"
+                item-value="_id"
+                dense
+                outlined
+                background-color="white"
+              ></v-select>
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -92,7 +103,7 @@
 
 <script>
 import axios from "axios";
-import { LOCATION_URL } from "../urls";
+import { LOCATION_URL, PERSON_URL } from "../urls";
 
 export default {
   name: "Locations",
@@ -104,6 +115,7 @@ export default {
     editType: "Database",
     editDescription: "",
     editDetails: "",
+    editApprover: {},
     typeOptions: ["Database", "Geodatabase", "Web", "Directory"],
     items: [],
     itemHeaders: [
@@ -111,13 +123,23 @@ export default {
       { text: "Type", value: "type" },
       { text: "Details", value: "details" },
       { text: "Description", value: "description" },
+      { text: "Approver", value: "approver_name" },
     ],
+    peopleOptions: [],
   }),
   created() {
     axios
       .get(LOCATION_URL)
       .then((result) => {
         this.items = result.data.data;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    axios
+      .get(`${PERSON_URL}`)
+      .then((result) => {
+        this.peopleOptions = result.data.data;
       })
       .catch((error) => {
         console.error(error);
@@ -132,6 +154,7 @@ export default {
       this.editDetails = "";
       this.isCreate = true;
       this.showForm = true;
+      this.editApprover = {};
     },
     updateLocation() {},
     removeLocation() {},
@@ -143,6 +166,7 @@ export default {
       this.editDescription = item.description;
       this.editDetails = item.details;
       this.showForm = true;
+      this.editApprover = item.approver_id;
     },
     saveClick() {
       if (this.isCreate) {
@@ -151,7 +175,8 @@ export default {
             name: this.editName,
             type: this.editType,
             description: this.editDescription,
-            details: this.editDetails
+            details: this.editDetails,
+            approver_id: this.editApprover,
           })
           .then((result) => {
             if (result && result.data.data) {
@@ -168,7 +193,8 @@ export default {
             name: this.editName,
             type: this.editType,
             description: this.editDescription,
-            details: this.editDetails
+            details: this.editDetails,
+            approver_id: this.editApprover,
           })
           .then((result) => {
             if (result && result.data.data) {

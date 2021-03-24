@@ -1,14 +1,20 @@
 import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { LocationService } from "../services";
+import { GenericService, LocationService } from "../services";
 
 export const locationRouter = express.Router();
 
 locationRouter.get("/", RequiresData,
     async (req: Request, res: Response) => {
         let db = req.store.Locations as LocationService;
-        return res.json({ data: await db.getAll() });
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list });
     });
 
 locationRouter.post("/", RequiresData,
@@ -23,7 +29,13 @@ locationRouter.post("/", RequiresData,
         let db = req.store.Locations as LocationService;
         await db.create(req.body);
 
-        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location created" }] });
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list, messages: [{ variant: "success", text: "Location created" }] });
     });
 
 locationRouter.put("/:id", RequiresData,
@@ -43,7 +55,15 @@ locationRouter.put("/:id", RequiresData,
         let { id } = req.params;
 
         await db.update(id, req.body);
-        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location edited" }] });
+
+
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list, messages: [{ variant: "success", text: "Location edited" }] });
     });
 
 locationRouter.delete("/:id", RequiresData,
@@ -61,5 +81,21 @@ locationRouter.delete("/:id", RequiresData,
         let { id } = req.params;
 
         await db.delete(id);
-        return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location removed" }] });
+
+        let list = await db.getAll();
+
+        for (let item of list) {
+            await buildConnections(item, req);
+        }
+
+        return res.json({ data: list, messages: [{ variant: "success", text: "Location removed" }] });
     });
+
+
+async function buildConnections(item: any, req: Request) {
+    let personDb = req.store.Persons as GenericService;
+    let person = await personDb.getById(item.approver_id);
+
+    if (person)
+        item.approver_name = `${person.first_name} ${person.last_name}`;
+}
