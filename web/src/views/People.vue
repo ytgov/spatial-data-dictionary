@@ -3,10 +3,7 @@
     <v-breadcrumbs
       class="pl-0"
       divider="/"
-      :items="[
-        { text: 'Dashboard', href: '/dashboard' },
-        { text: 'People' },
-      ]"
+      :items="[{ text: 'Dashboard', href: '/dashboard' }, { text: 'People' }]"
     ></v-breadcrumbs>
 
     <v-btn color="primary" class="float-right mt-0" @click="createClick"
@@ -14,7 +11,10 @@
     >
     <h1>People</h1>
     <hr class="mb-3" />
-    <p>People are tied to programs and entities and may or may not have an account in this system.</p>
+    <p>
+      People are tied to programs and entities and may or may not have an
+      account in this system.
+    </p>
 
     <div class="row mt-5" style="clear: both">
       <div class="col-md-8">
@@ -61,8 +61,19 @@
               ></v-text-field>
 
               <v-select
+                label="Status"
                 v-model="editStatus"
                 :items="['Active', 'Inactive']"
+                outlined
+                dense
+                background-color="white"
+              ></v-select>
+              <v-select
+                label="Additional roles"
+                v-model="editRoles"
+                clearable
+                multiple
+                :items="['Implementer', 'Admin']"
                 outlined
                 dense
                 background-color="white"
@@ -105,13 +116,15 @@ export default {
     editLastName: "",
     editEmail: "",
     editStatus: "Active",
+    editRoles: [],
     peopleOptions: [],
     items: [],
     itemHeaders: [
       { text: "First name", value: "first_name" },
       { text: "Last name", value: "last_name" },
       { text: "Email", value: "email" },
-      { text: "Active", value: "status" },
+      { text: "Status", value: "status" },
+      { text: "Roles", value: "roles" },
     ],
   }),
   created() {
@@ -131,6 +144,7 @@ export default {
       this.editLastName = "";
       this.editEmail = "";
       this.editStatus = "Active";
+      this.editRoles = [];
       this.isCreate = true;
       this.showForm = true;
     },
@@ -143,6 +157,7 @@ export default {
       this.editLastName = item.last_name;
       this.editEmail = item.email;
       this.editStatus = item.status;
+      this.editRoles = item.roles;
       this.showForm = true;
     },
     saveClick() {
@@ -153,6 +168,7 @@ export default {
             last_name: this.editLastName,
             email: this.editEmail,
             status: this.editStatus,
+            roles: this.editRoles,
           })
           .then((result) => {
             if (result && result.data.data) {
@@ -170,6 +186,7 @@ export default {
             last_name: this.editLastName,
             email: this.editEmail,
             status: this.editStatus,
+            roles: this.editRoles,
           })
           .then((result) => {
             if (result && result.data.data) {
