@@ -22,10 +22,10 @@ export const NODE_ENV = process.env.NODE_ENV;
 export const AUTH_REDIRECT = process.env.AUTH_REDIRECT || "";
 
 export const VIVVO_CONFIG = {
-  issuer: 'https://yukon.vivvocloud.com/',
-  authorizationURL: 'https://yukon.vivvocloud.com/oauth/v2/authorize',
-  tokenURL: 'https://yukon.vivvocloud.com/oauth/v2/token',
-  userInfoURL: 'https://yukon.vivvocloud.com/oauth/v2/userinfo',
+  issuer: 'https://yukon.vivvocloud.com.com/',
+  authorizationURL: 'https://yukon.vivvocloud.com/oauth2/auth',
+  tokenURL: 'https://yukon.vivvocloud.com/oauth2/token',
+  userInfoURL: 'https://yukon.vivvocloud.com/userinfo',
   clientID: process.env.VIVVO_CLIENT_ID || "",
   clientSecret: process.env.VIVVO_CLIENT_SECRET || "",
   callbackURL: process.env.VIVVO_CALLBACK_URL || "",
