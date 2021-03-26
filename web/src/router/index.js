@@ -17,6 +17,7 @@ import Programs from "../views/Programs";
 import People from "../views/People";
 import EntityMap from "../views/EntityMap";
 import EntityChangeRequest from "../views/EntityChangeRequest";
+import EntityChangeRequestDetail from "../views/EntityChangeRequestDetail";
 import EntityChangeList from "../views/EntityChangeList";
 import EntityChangeDetail from "../views/EntityChangeDetail";
 import ChangeList from "../views/ChangeList";
@@ -98,6 +99,14 @@ const routes = [
     path: "/entity/:id/change-request",
     name: "Entity change request",
     component: EntityChangeRequest,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/:id/change-request/:changeRequestId",
+    name: "EntityChangeRequestDetail",
+    component: EntityChangeRequestDetail,
     meta: {
       //requiresAuth: true
     }

@@ -21,8 +21,8 @@ export class GenericService {
         return this.db.deleteOne({ _id: new ObjectId(id) });
     }
 
-    async getAll(query?: FilterQuery<any>): Promise<any[]> {
-        return this.db.find(query).sort({ name: 1 }).toArray();
+    async getAll(query?: FilterQuery<any>, sort?: any): Promise<any[]> {
+        return this.db.find(query).sort(sort).toArray();
     }
 
     async getById(id: string): Promise<any | null> {

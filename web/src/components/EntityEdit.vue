@@ -188,7 +188,13 @@
                   dense
                   hide-details
                   outlined
-                  :items="['Feature class','Domain table', 'Table', 'View', 'Web service']"
+                  :items="[
+                    'Feature class',
+                    'Domain table',
+                    'Table',
+                    'View',
+                    'Web service',
+                  ]"
                 ></v-select>
               </div>
               <!-- <div class="col-md-6">

@@ -50,7 +50,14 @@
             }}</router-link></span
           >
         </h2>
-        <v-btn color="info" :to="'/entity/' + entity._id + '/edit'">Edit</v-btn>
+        <v-btn class="mr-5" color="info" :to="'/entity/' + entity._id + '/edit'"
+          >Edit</v-btn
+        >
+        <v-btn
+          color="secondary"
+          :to="'/entity/' + entity._id + '/change-request'"
+          >Request Change</v-btn
+        >
       </div>
     </div>
 
@@ -67,6 +74,7 @@
             <v-tab key="1">Properties</v-tab>
             <v-tab key="2">Values</v-tab>
             <v-tab key="3">Changes</v-tab>
+            <v-tab key="4">Change Requests</v-tab>
           </v-tabs>
 
           <v-tabs-items v-model="tab" style="padding: 20px">
@@ -269,7 +277,24 @@
               </v-data-table>
             </v-tab-item>
             <v-tab-item key="3">
-              <v-data-table :items="changes" :headers="changeHeaders" @click:row="changeClick">
+              <v-data-table
+                :items="changes"
+                :headers="changeHeaders"
+                @click:row="changeClick"
+              >
+              </v-data-table
+            ></v-tab-item>
+            <v-tab-item key="4">
+              <v-data-table
+                :items="changeRequests"
+                :headers="[
+                  { text: 'Date', value: 'date' },
+                  { text: 'Title', value: 'title' },
+                  { text: 'Status', value: 'status' },
+                  { text: 'Initiator', value: 'create_user' },
+                ]"
+                @click:row="changeRequestClick"
+              >
               </v-data-table
             ></v-tab-item>
           </v-tabs-items>
@@ -505,6 +530,8 @@ export default {
     personIndex: -1,
 
     changes: [],
+
+    changeRequests: [],
   }),
   computed: {
     formTitle() {
@@ -550,6 +577,7 @@ export default {
           this.values = this.entity.values;
 
           this.loadChanges(id);
+          this.loadChangeRequests(id);
         })
         .catch((err) => {
           console.log(err);
@@ -563,6 +591,17 @@ export default {
           this.changes = resp.data.data;
         })
         .catch((error) => console.log(error));
+    },
+
+    loadChangeRequests(id) {
+      axios
+        .get(`${ENTITY_URL}/${id}/request-change`)
+        .then((result) => {
+          this.changeRequests = result.data.data;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
 
     updateEntity() {
@@ -665,6 +704,7 @@ export default {
       this.updateEntity();
       this.close();
     },
+
     saveValue() {
       if (this.editedIndex > -1) {
         Object.assign(this.values[this.editedIndex], this.editedItem);
@@ -678,10 +718,6 @@ export default {
     addConnection() {
       this.$refs.conn.openDialog();
     },
-
-    /* closeConnection() {
-      this.connectionDialogVisible = null;
-    }, */
 
     saveConnection(args) {
       axios
@@ -709,17 +745,11 @@ export default {
       this.connectionEntity = connection;
       this.$refs.upConn.openDialog();
     },
-    /* closeConnectionDialog() {
-      //this.$refs.upConn.closeDialog();
-    }, */
 
     openDownConnectionDialog(connection) {
       this.downEntity = connection;
       this.$refs.downConn.openDialog();
     },
-    /* closeDownConnectionDialog() {
-      this.$refs.downConn.closeDialog();
-    }, */
 
     removeConnection(item) {
       console.log("REMOVING CONECOITN TO ", item);
@@ -739,9 +769,6 @@ export default {
         });
     },
 
-    /*  openSourceLink(item) {
-      alert("Source is " + item.source.name);
-    }, */
     openDomainLink(item) {
       this.$refs.domainDialog.openDialog(item.domain);
     },
@@ -760,8 +787,12 @@ export default {
     },
 
     changeClick(item) {
-      router.push(`/entity/${this.entity_id}/changes/${item._id}`)
-    }
+      router.push(`/entity/${this.entity_id}/changes/${item._id}`);
+    },
+
+    changeRequestClick(item) {
+      router.push(`/entity/${this.entity_id}/change-request/${item._id}`);
+    },
   },
 };
 </script>

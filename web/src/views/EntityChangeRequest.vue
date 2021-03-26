@@ -55,6 +55,17 @@
         <v-card color="#fff2d5">
           <v-card-title>Request Change to Entity</v-card-title>
           <v-card-text>
+            <v-select
+              label="Change type"
+              v-model="changeType"
+              :items="['Normal', 'Standard']"
+              outlined
+              dense
+              background-color="white"
+              @change="typeChange"
+            >
+            </v-select>
+
             <v-menu
               v-model="changeDateMenu"
               :close-on-content-click="false"
@@ -109,42 +120,39 @@
               background-color="white"
             ></v-textarea>
 
-            <v-btn color="primary" @click="save">Save</v-btn>
+            <v-btn color="primary" @click="save">Create Request</v-btn>
           </v-card-text>
         </v-card>
       </div>
       <div class="col-md-6">
         <v-card color="#fff2d5" class="mb-5">
           <v-card-title>Required Approvals</v-card-title>
-          <v-card-text>
-            <h3>Location: {{ entity.location.name }}: <span style="font-weight: 400">{{ entity.location.approver_name }}</span></h3>
+          <v-card-text v-if="showApprovals">
+            <h3>
+              Location: {{ entity.location.name }}:
+              <span style="font-weight: 400">{{
+                entity.location.approver_name
+              }}</span>
+            </h3>
 
-            <h3 v-for="program of entity.links.programs" v-bind:key="program.id">
-              Program: {{ program.name }}: <span style="font-weight: 400">{{ program.approver_name }}</span>
+            <h3
+              v-for="program of entity.links.programs"
+              v-bind:key="program.id"
+            >
+              Program: {{ program.name }}:
+              <span style="font-weight: 400">{{ program.approver_name }}</span>
+            </h3>
+          </v-card-text>
+          <v-card-text v-if="!showApprovals">
+            <h3>
+              Approvals are not required for Standard Changes, but the change
+              must still be logged.
             </h3>
           </v-card-text>
         </v-card>
-
-        <h3>Change Request History</h3>
-        <v-data-table
-          :items="changeRequests"
-          :headers="[
-            { text: 'Change date', value: 'date' },
-            { text: 'Change title', value: 'title' },
-            { text: 'Reason', value: 'reason' },
-            { text: 'Status', value: 'status' },
-          ]"
-          @click:row="changeClick"
-          :sort-by="['date']"
-          :sort-desc="['true']"
-        >
-          <template v-slot:item.date="{ item }">
-            {{ formatDate(item.date) }}
-          </template>
-        </v-data-table>
       </div>
     </div>
-
+    <!-- 
     <v-dialog v-model="changeDialogOpen" persistent max-width="600px">
       <v-container class="pb-3" style="background-color: white">
         <h2>
@@ -227,7 +235,7 @@
           ><v-icon class="mr-3">mdi-hammer-wrench</v-icon> Approve
         </v-btn>
       </v-container>
-    </v-dialog>
+    </v-dialog> -->
 
     <v-snackbar v-model="snackbar" right color="success">
       <v-icon class="mr-3">mdi-thumb-up-outline</v-icon>
@@ -240,7 +248,7 @@
 import axios from "axios";
 import moment from "moment";
 import { ENTITY_URL } from "../urls";
-import _ from "lodash";
+//import _ from "lodash";
 import router from "../router";
 
 export default {
@@ -266,17 +274,14 @@ export default {
     changeDateMenu: null,
     changeDate1Menu: null,
 
+    changeType: "Normal",
     changeReason: "",
     changeTitle: "",
     changeDescription: "",
 
+    showApprovals: true,
+
     changeRequests: [],
-
-    changeDialogOpen: null,
-    changeItem: {},
-
-    locationApprovalName: "asdf",
-    programApprovalName: "e33e",
   }),
   computed: {},
   watch: {
@@ -298,35 +303,13 @@ export default {
   created() {
     this.entity_id = this.$route.params.id;
     this.loadEntity(this.entity_id);
-    this.loadChangeRequests(this.entity_id);
   },
   methods: {
-    initialize() {},
     loadEntity(id) {
       axios
         .get(`${ENTITY_URL}/${id}`)
         .then((result) => {
           this.entity = result.data.data;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    loadChangeRequests(id) {
-      axios
-        .get(`${ENTITY_URL}/${id}/request-change`)
-        .then((result) => {
-          this.changeRequests = result.data.data;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    updateEntity() {
-      axios
-        .put(`${ENTITY_URL}/${this.entity._id}`, this.entity)
-        .then((result) => {
-          this.entity = result.data.data.value;
         })
         .catch((err) => {
           console.log(err);
@@ -338,13 +321,23 @@ export default {
         description: this.changeDescription,
         date: this.changeDate,
         reason: this.changeReason,
+        change_type: this.changeType,
       };
 
       axios
         .post(`${ENTITY_URL}/${this.entity._id}/request-change`, body)
         .then((result) => {
-          console.log(result.data.data.value);
-          this.loadChangeRequests(this.entity_id);
+          let newId = result.data.data.ops[0]._id;
+
+          if (this.changeType == "Standard") {
+            router.push(
+              `/entity/${this.entity_id}/changes/${newId}`
+            );
+          } else {
+            router.push(
+              `/entity/${this.entity_id}/change-request/${newId}`
+            );
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -370,31 +363,9 @@ export default {
         });
     },
 
-    formatDate(date) {
-      return moment(date).format("YYYY-MM-DD");
-    },
-    changeClick(item) {
-      this.changeItem = _.clone(item);
-      this.changeDialogOpen = true;
-    },
-    approve() {
-      let body = this.changeItem;
-      axios
-        .post(
-          `${ENTITY_URL}/${this.entity._id}/request-change/${body._id}/approve`,
-          body
-        )
-        .then((result) => {
-          console.log(result.data.data.ops[0]);
-          //this.loadChangeRequests(this.entity_id);
-
-          router.push(
-            `/entity/${this.entity_id}/changes/${result.data.data.ops[0]._id}`
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    typeChange() {
+      if (this.changeType == "Normal") this.showApprovals = true;
+      else this.showApprovals = false;
     },
   },
 };

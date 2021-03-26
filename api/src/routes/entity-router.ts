@@ -181,7 +181,7 @@ entityRouter.get("/:id/request-change", [param("id").notEmpty().isMongoId()], Re
         let entity = await db.getById(id)
 
         if (entity) {
-            return res.json({ data: await changeDb.getAll({ entity_id: id }) });
+            return res.json({ data: await changeDb.getAll({ entity_id: id }, { date: -1 }) });
         }
 
         res.status(404).send();
@@ -197,22 +197,85 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
 
         const db = req.store.Entities as EntityService;
         const requestDb = req.store.ChangeRequests as GenericService;
+        const changeDb = req.store.Changes as GenericService;
         let { id } = req.params;
         let entity = await db.getById(id)
 
         if (entity) {
-            let change = req.body;
-            change.entity_id = id;
-            change.create_user = 'User 1';
-            change.create_date = new Date();
-            change.status = "Open";
-            change.comments = [];
+            let { change_type } = req.body;
 
-            let results = await requestDb.create(change);
+            if (change_type == "Standard") {
+                let { date, description, reason, title } = req.body;
 
-            return res.json({
-                data: results, messages: [{ text: "Change request added", variant: "success" }]
-            });
+                let change = {
+                    create_date: new Date(),
+                    title,
+                    status: "Open",
+                    description,
+                    reason,
+                    assigned_user: 'User 1', // TODO: This should be current user 
+                    complete_date: date,
+                    location: entity.location,
+                    programs: entity.links.programs,
+                    entity_id: entity._id,
+                    comments: new Array<any>()
+                }
+
+                change.comments.push({
+                    date: moment().format("YYYY-MM-DD"),
+                    user: "PERSON NAME",
+                    action: "Created Standard Change",
+                    description: ""
+                })
+
+                let result = await changeDb.create(change)
+
+                return res.json({
+                    data: result, messages: [{ text: "Change added", variant: "success" }]
+                });
+            }
+            else {
+                let change = req.body;
+                change.entity_id = id;
+                change.create_user = 'User 1';
+                change.create_date = new Date();
+                change.status = "Open";
+                change.comments = [];
+
+                change.comments.push({
+                    date: moment().format("YYYY-MM-DD"),
+                    user: "PERSON NAME",
+                    action: "Created Change Request",
+                    description: ""
+                })
+
+                let results = await requestDb.create(change);
+
+                return res.json({
+                    data: results, messages: [{ text: "Change request added", variant: "success" }]
+                });
+            }
+
+        }
+
+        res.status(404).send();
+    });
+
+entityRouter.get("/:id/request-change/:changeId", [param("id").notEmpty().isMongoId()], RequiresData,
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const requestDb = req.store.ChangeRequests as GenericService;
+        let { changeId } = req.params;
+
+        let change = await requestDb.getById(changeId)
+
+        if (change) {
+            return res.json({ data: change });
         }
 
         res.status(404).send();
@@ -228,8 +291,9 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
 
         const db = req.store.Entities as EntityService;
         const requestDb = req.store.ChangeRequests as GenericService;
+        const changeDb = req.store.Changes as GenericService;
         let { id, changeId } = req.params;
-        let { description, reason, status, title } = req.body;
+        let { description, reason, status, title, comments } = req.body;
         let entity = await db.getById(id)
 
         if (entity) {
@@ -238,6 +302,63 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
             change.status = status;
             change.title = title;
             change.description = description;
+            change.comments = comments;
+
+            await buildConnections(entity, req);
+
+            if (status == "Open") {
+
+                let approveNames = change.comments
+                    .filter((f: any) => f.action.indexOf("Approve") >= 0)
+                    .map((f: any) => f.user);
+
+                let requiredNames = [entity.location.approver_name];
+
+                entity.links.programs.forEach((p: any) => {
+                    requiredNames.push(p.approver_name);
+                });
+
+                let missingApprovals = new Array<any>();
+
+                requiredNames.forEach((n) => {
+                    if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
+                });
+
+                console.log("MISSING", missingApprovals);
+
+                if (missingApprovals.length == 0) {
+                    change.status = "Approved";
+
+                    let c1 = {
+                        create_date: new Date(),
+                        title,
+                        status: "Open",
+                        description,
+                        reason,
+                        request_id: changeId,
+                        assigned_user: 'User 1', // TODO: This should be current user 
+                        complete_date: change.date,
+                        location: entity.location,
+                        programs: entity.links.programs,
+                        entity_id: entity._id,
+                        comments: new Array<any>()
+                    }
+
+                    c1.comments.push({
+                        date: moment().format("YYYY-MM-DD"),
+                        user: "PERSON NAME",
+                        action: "Change Request fully approved",
+                        description: ""
+                    })
+
+                    await requestDb.update(changeId, change);
+                    let result = await changeDb.create(c1)
+
+                    return res.json({
+                        data: result, messages: [{ text: "Change added", variant: "success" }]
+                    });
+                }
+            }
 
             let results = await requestDb.update(changeId, change);
 
@@ -625,6 +746,8 @@ async function buildConnections(entity: Entity, req: Request) {
         }
 
         if (entity.links.programs) {
+            let toRemove = [];
+
             for (let item of entity.links.programs) {
                 item.name = "Unknown";
                 let program = await programDB.getById(item.id)
@@ -634,10 +757,17 @@ async function buildConnections(entity: Entity, req: Request) {
                     item.approver_id = program.approver_id;
 
                     let approver = await userDB.getById(program.approver_id);
-        
+
                     if (approver)
                         item.approver_name = `${approver.first_name} ${approver.last_name}`;
                 }
+                else {
+                    toRemove.push(item);
+                }
+            }
+
+            for (let item of toRemove) {
+                entity.links.programs.splice(entity.links.programs.indexOf(item), 1);
             }
         }
 

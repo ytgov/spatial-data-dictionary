@@ -169,6 +169,7 @@
           <v-card-text>
             <h3>Comments</h3>
             <v-data-table
+              "
               :items="change.comments"
               :headers="[
                 { text: 'Date', value: 'date' },
