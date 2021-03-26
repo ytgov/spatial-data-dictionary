@@ -167,9 +167,52 @@
 
         <v-card class="mt-5" color="#fff2d5">
           <v-card-text>
-            <h3>Comments</h3>
-            <v-data-table
+            <h3>History</h3>
+
+            <div
+              class="mb-3 py-3 px-3"
+              style="
+                background-color: #fff;
+                border: 1px #999 solid;
+                border-radius: 4px;
+                color: #323232;
               "
+            >
+              <div class="float-left"><v-icon class="mr-3" color="green">mdi-check-outline</v-icon><strong>Steph Curry</strong> (Location Approved)</div>
+              <div class="float-right"><strong>2021-03-12</strong></div>
+              <p class="pt-3 mb-0" style="clear: both">
+                This seems reasonable.
+              </p>
+            </div>
+
+            <div
+              class="mb-3 py-3 px-3"
+              style="
+                background-color: #fff;
+                border: 1px #999 solid;
+                border-radius: 4px;
+                color: #323232;
+              "
+            >
+              <div class="float-left"><v-icon class="mr-3" color="red">mdi-close-outline</v-icon><strong>John Snow</strong> (Program Rejected)</div>
+              <div class="float-right"><strong>2021-03-12</strong></div>
+              <p class="pt-3 mb-0" style="clear: both">This will break everything. Not happening</p>
+            </div>
+            <div
+              class="mb-3 py-3 px-3"
+              style="
+                background-color: #fff;
+                border: 1px #999 solid;
+                border-radius: 4px;
+                color: #323232;
+              "
+            >
+              <div class="float-left"><strong>Michael Johnson</strong> (Requester)</div>
+              <div class="float-right"><strong>2021-03-12</strong></div>
+              <p class="pt-3 mb-0" style="clear: both">Thanks for nothing.</p>
+            </div>
+
+            <!-- <v-data-table
               :items="change.comments"
               :headers="[
                 { text: 'Date', value: 'date' },
@@ -183,7 +226,7 @@
               <template v-slot:item.date="{ item }">
                 {{ formatDate(item.date) }}
               </template>
-            </v-data-table>
+            </v-data-table> -->
           </v-card-text></v-card
         >
       </div>
