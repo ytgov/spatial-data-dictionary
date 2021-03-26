@@ -14,30 +14,30 @@
 
     <div class="row mt-5" style="clear: both">
       <div class="col-md-4">
+        <h3>Available Entities</h3>
         <!-- <v-card class="" color="#fff2d5"> -->
-          <v-treeview
-            dense
-            :items="entityTree"
-            v-model="selected"
-            @input="treeChange"
-            selectable
-          ></v-treeview>
+        <v-treeview
+          dense
+          :items="entityTree"
+          v-model="selected"
+          @input="treeChange"
+          selectable
+        ></v-treeview>
         <!-- </v-card> -->
       </div>
-      <div
-        class="col-md-8"
-        style="font-family: consolas !important; font-size: 0.8rem"
-      >
-      <h3>Generated SQL Statement</h3>
-        <pre
-          style="
-            padding: 10px;
-            background-color: #bbb;
-            border-radius: 4px;
-            border: 1px #666 solid;
-          "
-          >{{ queryText }}</pre
-        >
+      <div class="col-md-8">
+        <h3>Generated SQL Statement</h3>
+        <div style="font-family: consolas !important; font-size: 0.8rem">
+          <pre
+            style="
+              padding: 10px;
+              background-color: #bbb;
+              border-radius: 4px;
+              border: 1px #666 solid;
+            "
+            >{{ queryText }}</pre
+          >
+        </div>
 
         <!-- <v-textarea style=";"
           rows="20"
@@ -99,7 +99,7 @@ export default {
         }
 
         this.entityTree.push(tree);
-        this.treeChange()
+        this.treeChange();
       }
     },
     treeChange() {
@@ -110,7 +110,7 @@ export default {
       );
 
       if (this.selected.length == 0) {
-        this.queryText = "Choose Locations, Tables and Attibutes to the right"
+        this.queryText = "Choose Locations, Tables and Attibutes to the right";
         return;
       }
 
