@@ -22,6 +22,7 @@ import EntityChangeList from "../views/EntityChangeList";
 import EntityChangeDetail from "../views/EntityChangeDetail";
 import ChangeList from "../views/ChangeList";
 import Search from "../views/Search";
+import QueryBuilder from "../views/QueryBuilder";
 
 Vue.use(VueRouter);
 
@@ -171,6 +172,14 @@ const routes = [
     path: "/search",
     name: "Search",
     component: Search,
+    meta: {
+      //requiresAuth: true
+    }
+  },
+  {
+    path: "/query-builder",
+    name: "Search",
+    component: QueryBuilder,
     meta: {
       //requiresAuth: true
     }
