@@ -16,8 +16,6 @@ export function configureLocalAuthentication(app: Express) {
     }));
 
     authLocalRouter.get("/login", (req: Request, res: Response) => {
-        console.log("SENDING SIGN IN TO", `${FRONTEND_URL}/sign-in-local`);
-
         res.redirect(302, `${FRONTEND_URL}/sign-in-local`);
     })
 
@@ -43,7 +41,6 @@ export function configureLocalAuthentication(app: Express) {
             }
 
             let db = req.store.LocalUsers as AuthService;
-
             let { username, password } = req.body;
             let s = req.session as any;
             let data = await db.login(username, password);
@@ -51,8 +48,6 @@ export function configureLocalAuthentication(app: Express) {
             if (data) {
                 data.display_name = `${data.given_name} ${data.family_name}`
                 s.user = data;
-                console.log("SETTING SESS USER", s.user)
-
                 req.session.save();
 
                 return res.json({ data, messages: [{ variant: "success", text: "Sign in complete" }] })

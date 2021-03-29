@@ -10,16 +10,17 @@
     <hr class="mb-1" />
 
     <div class="row">
-      <div class="col-md-8">
+      <div class="col-md-12">
         <v-card class="" color="#fff2d5">
           <v-data-table
             :items="changes"
             :headers="[
+              { text: 'Status', value: 'status' },
               { text: 'Entity', value: 'entity.name' },
               { text: 'Location', value: 'entity.location.name' },
               { text: 'Change title', value: 'title' },
               { text: 'Reason', value: 'reason' },
-              { text: 'Status', value: 'status' },
+              { text: 'Assigned to', value: 'assigned_user'}
             ]"
             @click:row="changeClick"
             :sort-by="['date']"
@@ -28,7 +29,6 @@
           </v-data-table>
         </v-card>
       </div>
-      <div class="col-md-6"></div>
     </div>
   </div>
 </template>

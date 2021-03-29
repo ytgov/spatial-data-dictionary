@@ -91,7 +91,6 @@ entityRouter.put("/:id/changes/:changeId", RequiresData, async (req: Request, re
         change.status = newStatus || change.status;
         change.assigned_user = assigned_user;
         change.description = description;
-
         change.comments = comments;
 
         await changeDb.update(change._id, change);

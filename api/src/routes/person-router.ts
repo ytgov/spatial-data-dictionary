@@ -14,11 +14,24 @@ personRouter.get("/", RequiresData,
 
         return res.json({ data: list });
     });
+
 personRouter.get("/active", RequiresData,
     async (req: Request, res: Response) => {
         let db = req.store.Persons as GenericService;
 
         let list = await db.getAll({ status: 'Active' });
+        list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}`)
+
+        return res.json({ data: list });
+    });
+
+personRouter.get("/implementer", RequiresData,
+    async (req: Request, res: Response) => {
+        let db = req.store.Persons as GenericService;
+
+        let list = await db.getAll({ status: 'Active' });
+        list = list.filter(p => p.roles.indexOf("Implementer") > -1)
+
         list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}`)
 
         return res.json({ data: list });

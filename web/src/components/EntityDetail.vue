@@ -503,9 +503,10 @@ export default {
       { text: "Source", value: "source" },
     ],
     changeHeaders: [
+      { text: "Status", value: "status" },
       { text: "Date", value: "complete_date" },
       { text: "Title", value: "title" },
-      { text: "Description", value: "description" },
+      { text: "Assigned to", value: "assigned_user" },
     ],
 
     dialog: false,
@@ -586,7 +587,7 @@ export default {
 
     loadChanges(id) {
       axios
-        .get(`${ENTITY_URL}/${id}/complete-changes`)
+        .get(`${ENTITY_URL}/${id}/changes`)
         .then((resp) => {
           this.changes = resp.data.data;
         })

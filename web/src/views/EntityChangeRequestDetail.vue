@@ -392,7 +392,7 @@ export default {
     addComment() {
       let comment = {
         date: moment().format("YYYY-MM-DD"),
-        user: "PERSON NAME",
+        user: this.currentUser,
         action: "Commented:",
         description: this.commentText,
       };

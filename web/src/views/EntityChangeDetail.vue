@@ -160,16 +160,28 @@
               background-color="white"
             >
             </v-select>
+            <v-select
+              :items="assignOptions"
+              v-model="newAssign"
+              item-text="display_name"
+              item-value="display_name"
+              label="Assigned to"
+              dense
+              outlined
+              background-color="white"
+            >
+            </v-select>
 
             <v-btn color="primary" @click="addComment">Add comment</v-btn>
           </v-card-text>
         </v-card>
 
         <v-card class="mt-5" color="#fff2d5">
+          <v-card-title>History</v-card-title>
           <v-card-text>
-            <h3>History</h3>
-
             <div
+              v-for="item of change.comments"
+              v-bind:key="item.create_date"
               class="mb-3 py-3 px-3"
               style="
                 background-color: #fff;
@@ -178,57 +190,18 @@
                 color: #323232;
               "
             >
-              <div class="float-left"><v-icon class="mr-3" color="green">mdi-check-outline</v-icon><strong>Steph Curry</strong> (Location Approved)</div>
-              <div class="float-right"><strong>2021-03-12</strong></div>
+              <div class="float-left">
+                <strong>{{ item.user }}</strong>
+              </div>
+              <div class="float-right">
+                <strong>{{ item.date }}</strong>
+              </div>
               <p class="pt-3 mb-0" style="clear: both">
-                This seems reasonable.
+                <strong>{{ item.action }}</strong> {{ item.description }}
               </p>
             </div>
-
-            <div
-              class="mb-3 py-3 px-3"
-              style="
-                background-color: #fff;
-                border: 1px #999 solid;
-                border-radius: 4px;
-                color: #323232;
-              "
-            >
-              <div class="float-left"><v-icon class="mr-3" color="red">mdi-close-outline</v-icon><strong>John Snow</strong> (Program Rejected)</div>
-              <div class="float-right"><strong>2021-03-12</strong></div>
-              <p class="pt-3 mb-0" style="clear: both">This will break everything. Not happening</p>
-            </div>
-            <div
-              class="mb-3 py-3 px-3"
-              style="
-                background-color: #fff;
-                border: 1px #999 solid;
-                border-radius: 4px;
-                color: #323232;
-              "
-            >
-              <div class="float-left"><strong>Michael Johnson</strong> (Requester)</div>
-              <div class="float-right"><strong>2021-03-12</strong></div>
-              <p class="pt-3 mb-0" style="clear: both">Thanks for nothing.</p>
-            </div>
-
-            <!-- <v-data-table
-              :items="change.comments"
-              :headers="[
-                { text: 'Date', value: 'date' },
-                { text: 'Status', value: 'status' },
-                { text: 'Comment', value: 'text' },
-              ]"
-              @click:row="changeClick"
-              :sort-by="['create_date']"
-              :sort-desc="['true']"
-            >
-              <template v-slot:item.date="{ item }">
-                {{ formatDate(item.date) }}
-              </template>
-            </v-data-table> -->
-          </v-card-text></v-card
-        >
+          </v-card-text>
+        </v-card>
       </div>
     </div>
 
@@ -242,9 +215,9 @@
 <script>
 import axios from "axios";
 import moment from "moment";
-import { ENTITY_URL } from "../urls";
+import { ENTITY_URL, PERSON_URL } from "../urls";
 import _ from "lodash";
-import router from "../router";
+import store from "../store";
 
 export default {
   name: "Form",
@@ -275,12 +248,17 @@ export default {
 
     newComment: "",
     newStatus: "",
+    newAssign: "",
+    currentUser: "",
+
+    assignOptions: [],
   }),
   created() {
     this.entity_id = this.$route.params.id;
     this.changeId = this.$route.params.changeId;
     this.loadEntity(this.entity_id);
     this.loadChange(this.changeId);
+    this.currentUser = store.getters.fullName;
   },
   methods: {
     initialize() {},
@@ -303,8 +281,24 @@ export default {
 
           this.newComment = "";
           this.newStatus = this.change.status;
+          this.newAssign = this.change.assigned_user;
+
+          this.loadImplementers();
 
           if (!this.change.comments) this.change.comments = new Array();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    loadImplementers() {
+      axios
+        .get(`${PERSON_URL}/implementer`)
+        .then((result) => {
+          this.assignOptions = result.data.data;
+
+          if (this.assignOptions.indexOf(this.newAssign) == -1)
+            this.assignOptions.push({ display_name: this.newAssign });
         })
         .catch((err) => {
           console.log(err);
@@ -316,8 +310,7 @@ export default {
 
       axios
         .put(`${ENTITY_URL}/${this.entity._id}/changes/${body._id}`, body)
-        .then((result) => {
-          console.log(result.data);
+        .then(() => {
           this.loadChange(body._id);
         })
         .catch((err) => {
@@ -326,42 +319,28 @@ export default {
     },
 
     addComment() {
-      this.change.comments.push({
-        text: this.newComment,
-        status: this.newStatus,
-        create_date: new Date(),
-      });
+      if (this.change.assigned_user != this.newAssign) {
+        this.change.comments.push({
+          description: this.newComment,
+          status: this.newStatus,
+          date: moment().format("YYYY-MM-DD"),
+          user: this.currentUser,
+          action: `Assigned change to ${this.newAssign}:`,
+        });
+      } else {
+        this.change.comments.push({
+          description: this.newComment,
+          status: this.newStatus,
+          date: moment().format("YYYY-MM-DD"),
+          user: this.currentUser,
+          action: "Commented:",
+        });
+      }
 
       this.change.newStatus = this.newStatus;
+      this.change.assigned_user = this.newAssign;
 
       this.save();
-    },
-
-    formatDate(date) {
-      return moment(date).format("YYYY-MM-DD");
-    },
-    changeClick(item) {
-      this.changeItem = _.clone(item);
-      this.changeDialogOpen = true;
-    },
-    approve() {
-      let body = this.changeItem;
-      axios
-        .post(
-          `${ENTITY_URL}/${this.entity._id}/request-change/${body._id}/approve`,
-          body
-        )
-        .then((result) => {
-          console.log(result.data.data.ops[0]);
-          //this.loadChangeRequests(this.entity_id);
-
-          router.push(
-            `/entity/${this.entity_id}/changes/${result.data.data.ops[0]._id}`
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
     },
   },
 };
