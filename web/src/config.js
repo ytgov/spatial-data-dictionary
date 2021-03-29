@@ -43,6 +43,11 @@ export const sections = [
         name: "Changes",
         url: "/change",
         icon: "mdi-hammer-wrench"
+    },
+    {
+        name: "Query Builder",
+        url: "/query-builder",
+        icon: "mdi-database-edit"
     }
 ];
 export const environment = process.env.NODE_ENV;
