@@ -3,7 +3,6 @@ import VueRouter from "vue-router";
 import Home from "../components/Home.vue";
 import Dashboard from "../components/Dashboard.vue";
 import NotFound from "../views/NotFound.vue";
-import Form from "../components/Form";
 import Login from "../components/Login";
 import LoginComplete from "../components/LoginComplete";
 import Profile from "../components/Profile";
@@ -23,6 +22,9 @@ import EntityChangeDetail from "../views/EntityChangeDetail";
 import ChangeList from "../views/ChangeList";
 import Search from "../views/Search";
 import QueryBuilder from "../views/QueryBuilder";
+import AuthLocal from "../views/AuthLocal";
+
+import store from "../store";
 
 Vue.use(VueRouter);
 
@@ -37,15 +39,7 @@ const routes = [
     name: "Dashboard",
     component: Dashboard,
     meta: {
-      //requiresAuth: true
-    }
-  },
-  {
-    path: "/form",
-    name: "Basic Form",
-    component: Form,
-    meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -53,7 +47,7 @@ const routes = [
     name: "Categories",
     component: CategoryList,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -61,7 +55,7 @@ const routes = [
     name: "Entities",
     component: EntityList,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -69,7 +63,7 @@ const routes = [
     name: "EntityCreate",
     component: EntityCreate,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -77,7 +71,7 @@ const routes = [
     name: "Entity detail",
     component: EntityDetail,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -85,7 +79,7 @@ const routes = [
     name: "Entity attributes",
     component: EntityEdit,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -93,7 +87,7 @@ const routes = [
     name: "Entity map",
     component: EntityMap,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -101,7 +95,7 @@ const routes = [
     name: "Entity change request",
     component: EntityChangeRequest,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -109,7 +103,7 @@ const routes = [
     name: "EntityChangeRequestDetail",
     component: EntityChangeRequestDetail,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -117,7 +111,7 @@ const routes = [
     name: "Entity change list",
     component: EntityChangeList,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -125,7 +119,7 @@ const routes = [
     name: "Entity change",
     component: EntityChangeDetail,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -133,7 +127,7 @@ const routes = [
     name: "Locations",
     component: Locations,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -141,7 +135,7 @@ const routes = [
     name: "Programs",
     component: Programs,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   /* {
@@ -157,7 +151,7 @@ const routes = [
     name: "People",
     component: People,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -165,7 +159,7 @@ const routes = [
     name: "ChangeList",
     component: ChangeList,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -173,15 +167,15 @@ const routes = [
     name: "Search",
     component: Search,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
     path: "/query-builder",
-    name: "Search",
+    name: "QueryBuilder",
     component: QueryBuilder,
     meta: {
-      //requiresAuth: true
+      requiresAuth: true
     }
   },
   {
@@ -198,6 +192,14 @@ const routes = [
     path: "/profile",
     name: "Profile",
     component: Profile,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/sign-in-local",
+    name: "AuthLocal",
+    component: AuthLocal,
     meta: {
       //requiresAuth: true
     }
@@ -222,14 +224,14 @@ router.beforeEach(async (to, from, next) => {
     return next();
   }
 
-  /* await store.dispatch("checkAuthentication");
+  await store.dispatch("checkAuthentication");
   var isAuthenticated = store.getters.isAuthenticated;
 
   if (requiresAuth && !isAuthenticated) {
-    console.log("You aren't authenticatd, redirecting to sign-in")
+    console.log("You aren't authenticatd, redirecting to sign-in");
     next("/sign-in");
     return;
-  } */
+  }
 
   return next();
 });

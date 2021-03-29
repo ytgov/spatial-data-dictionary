@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { MONGO_URL, MONGO_DB } from "../config";
-import { CategoryService, EntityService, GenericService, LocationService, ProgramService, SessionService, UserService } from "../services";
+import { AuthService, CategoryService, EntityService, GenericService, LocationService, ProgramService, SessionService, UserService } from "../services";
 import { Entity } from "./entity";
 
 export class Storage {
@@ -17,6 +17,7 @@ export class Storage {
     Persons!: GenericService;
     ChangeRequests!: GenericService;
     Changes!: GenericService;
+    LocalUsers!: AuthService;
 
     constructor() {
     }
@@ -40,6 +41,7 @@ export class Storage {
                     this.Persons = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Persons"));
                     this.ChangeRequests = new GenericService(this.mongoConnection.db(MONGO_DB).collection("ChangeRequests"));
                     this.Changes = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Changes"));
+                    this.LocalUsers = new AuthService(this.mongoConnection.db(MONGO_DB).collection("LocalUsers"));
                     this.isInitialized = true;
                     resolve("Connected");
                 })

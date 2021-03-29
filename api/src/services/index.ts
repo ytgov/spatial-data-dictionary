@@ -1,6 +1,7 @@
 
 export * from "./generic-service";
 
+export * from "./auth-service";
 export * from "./category-service";
 export * from "./entity-service";
 export * from "./location-service";

@@ -12,6 +12,7 @@ import EntityConnectionDialog from "./components/EntityConnectionDialog";
 import DownEntityConnectionDialog from "./components/DownEntityConnectionDialog";
 import PersonConnectionDialog from "./components/PersonConnectionDialog";
 import DomainDialog from "./components/DomainDialog";
+import Notifications from "./components/Notifications";
 
 Vue.config.productionTip = false;
 
@@ -25,6 +26,8 @@ Vue.component('entityconnection-dialog', EntityConnectionDialog);
 Vue.component('downentityconnection-dialog', DownEntityConnectionDialog);
 Vue.component('personconnection-dialog', PersonConnectionDialog);
 Vue.component('domain-dialog', DomainDialog);
+
+Vue.component("notifications", Notifications)
 
 new Vue({
   router,

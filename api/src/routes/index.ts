@@ -1,5 +1,6 @@
 
 export * from "./auth";
+export * from "./auth-local";
 export * from "./category-router";
 export * from "./domain-router";
 export * from "./entity-router";

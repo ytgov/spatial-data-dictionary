@@ -42,17 +42,6 @@
         ></v-text-field>
       </div>
     </div>
-    <v-divider class="mt-0 mb-4"></v-divider>
-
-    <h2>Subscriptions</h2>
-    <div class="row">
-      <div class="col-md-6" v-for="team in teams" v-bind:key="team.name">
-        <v-card color="#fff2d5">
-          <v-card-title> {{ team.name }}</v-card-title>
-          <v-card-text>Role: {{ team.role }}</v-card-text>
-        </v-card>
-      </div>
-    </div>
   </div>
 </template>
 

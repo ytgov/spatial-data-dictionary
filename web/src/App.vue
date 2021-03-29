@@ -123,16 +123,15 @@
 
 <script>
 import router from "./router";
-//import { mapState } from "vuex";
+import { mapState } from "vuex";
 import store from "./store";
 import * as config from "./config";
-//import { mapState } from "vuex";
 
 export default {
   name: "App",
   components: {},
   computed: {
-    //...mapState("isAuthenticated"),
+    ...mapState(["isAuthenticated"]),
     username() {
       return store.getters.fullName;
     },
@@ -160,14 +159,14 @@ export default {
     if (!this.isAuthenticated) this.hasSidebar = false;
     else this.hasSidebar = config.hasSidebar;
 
-    this.hasSidebar = true;
+    //this.hasSidebar = true;
   },
   watch: {
     isAuthenticated: function (val) {
       if (!val) this.hasSidebar = false;
       else this.hasSidebar = config.hasSidebar;
 
-      this.hasSidebar = true;
+      //this.hasSidebar = true;
     },
   },
   methods: {

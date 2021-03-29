@@ -4,9 +4,11 @@ import path from "path";
 import helmet from "helmet";
 import * as config from './config';
 import { doHealthCheck } from "./utils/healthCheck";
-import { categoryRouter, userRouter, configureAuthentication, sessionRouter, entityRouter, locationRouter, programRouter, domainRouter } from "./routes";
+import { categoryRouter, userRouter, sessionRouter, entityRouter, locationRouter, programRouter, domainRouter } from "./routes";
 import { RequiresData } from "./middleware";
 import { personRouter } from "./routes/person-router";
+
+import { configureAuthentication, configureLocalAuthentication } from "./routes";
 
 const app = express();
 app.use(express.json()); // for parsing application/json
@@ -35,7 +37,10 @@ app.use(cors({
   credentials: true
 }));
 
-configureAuthentication(app);
+if (config.USE_LOCAL_AUTH)
+  configureLocalAuthentication(app);
+else
+  configureAuthentication(app);
 
 app.get("/api/healthCheck", RequiresData, (req: Request, res: Response) => {
   doHealthCheck(req, res);

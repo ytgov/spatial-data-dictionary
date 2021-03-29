@@ -3,7 +3,7 @@ import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
 import { Attribute, AuthUser, Entity, SearchResult, Storage } from "../data";
 import { EntityService, GenericService, LocationService, ProgramService, UserService } from "../services";
-import { ChangeStream, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import { v4 as uuidV4 } from "uuid";
 import { GraphBuilder } from "../utils/directed-graph";
 import moment from "moment";
@@ -199,7 +199,8 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
         const requestDb = req.store.ChangeRequests as GenericService;
         const changeDb = req.store.Changes as GenericService;
         let { id } = req.params;
-        let entity = await db.getById(id)
+        let entity = await db.getById(id);
+        let currentUser = (req.session as any).user;
 
         if (entity) {
             let { change_type } = req.body;
@@ -223,7 +224,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
 
                 change.comments.push({
                     date: moment().format("YYYY-MM-DD"),
-                    user: "PERSON NAME",
+                    user: currentUser.display_name,
                     action: "Created Standard Change",
                     description: ""
                 })
@@ -244,7 +245,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
 
                 change.comments.push({
                     date: moment().format("YYYY-MM-DD"),
-                    user: "PERSON NAME",
+                    user: currentUser.display_name,
                     action: "Created Change Request",
                     description: ""
                 })
@@ -295,6 +296,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
         let { id, changeId } = req.params;
         let { description, reason, status, title, comments } = req.body;
         let entity = await db.getById(id)
+        let currentUser = (req.session as any).user;
 
         if (entity) {
             let change = await requestDb.getById(changeId)
@@ -324,8 +326,6 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
                     if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
                 });
 
-                console.log("MISSING", missingApprovals);
-
                 if (missingApprovals.length == 0) {
                     change.status = "Approved";
 
@@ -336,7 +336,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
                         description,
                         reason,
                         request_id: changeId,
-                        assigned_user: 'User 1', // TODO: This should be current user 
+                        assigned_user: currentUser.display_name, // TODO: This should be current user 
                         complete_date: change.date,
                         location: entity.location,
                         programs: entity.links.programs,
@@ -346,7 +346,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
 
                     c1.comments.push({
                         date: moment().format("YYYY-MM-DD"),
-                        user: "PERSON NAME",
+                        user: currentUser.display_name,
                         action: "Change Request fully approved",
                         description: ""
                     })
@@ -385,7 +385,8 @@ entityRouter.post("/:id/request-change/:changeId/approve",
         const changeDb = req.store.Changes as GenericService;
         let { id, changeId } = req.params;
         let { description, reason, title, date } = req.body;
-        let entity = await db.getById(id)
+        let entity = await db.getById(id);
+        let currentUser = (req.session as any).user;
 
         if (entity) {
             let req = await requestDb.getById(changeId)
@@ -404,7 +405,7 @@ entityRouter.post("/:id/request-change/:changeId/approve",
                 description,
                 reason,
                 request_id: req._id,
-                assigned_user: 'User 1', // TODO: This should be current user 
+                assigned_user: currentUser.display_name, // TODO: This should be current user 
                 complete_date: date,
                 location: entity.location,
                 programs: entity.links.programs,
@@ -520,10 +521,7 @@ entityRouter.post("/:id/attribute", RequiresData,
 
         if (entity) {
             let attributes = entity.attributes;
-
             let existing = attributes.filter(a => a._id == _id);
-
-            console.log("EXISTIN", existing);
 
             if (existing) {
                 if (existing.length == 0) {
@@ -532,11 +530,8 @@ entityRouter.post("/:id/attribute", RequiresData,
                 } else {
                     let aIndex = attributes.indexOf(existing[0]);
                     entity.attributes[aIndex] = req.body;
-                    console.log("SET EXISTN TO", entity.attributes[aIndex])
                 }
             }
-            //console.log("RESULT OF POST", entity)
-
             let results = await db.update(id, entity);
 
             await buildConnections(entity, req);

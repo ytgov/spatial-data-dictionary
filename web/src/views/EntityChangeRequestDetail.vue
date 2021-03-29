@@ -233,6 +233,7 @@ import moment from "moment";
 import { ENTITY_URL } from "../urls";
 import _ from "lodash";
 import router from "../router";
+import store from "../store";
 
 export default {
   name: "Form",
@@ -274,6 +275,7 @@ export default {
 
     approvedNames: [],
     missingText: "",
+    currentUser: "",
   }),
   computed: {},
   watch: {
@@ -295,7 +297,7 @@ export default {
   created() {
     this.entity_id = this.$route.params.id;
     this.changeRequestId = this.$route.params.changeRequestId;
-    //this.loadEntity(this.entity_id);
+    this.currentUser = store.getters.fullName;
   },
   methods: {
     loadEntity(id) {
@@ -341,8 +343,6 @@ export default {
             if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
           });
 
-          console.log(missingApprovals);
-
           if (missingApprovals.length > 0) {
             this.missingText = `Awaiting approval from ${_.uniq(
               missingApprovals
@@ -352,6 +352,7 @@ export default {
           if (this.changeRequest.status == "Rejected") {
             this.userCanApprove = false;
             this.canSave = false;
+            this.missingText = "This request has been rejected.";
           }
         })
         .catch((err) => {
@@ -404,7 +405,7 @@ export default {
       // this needs to make sure it's the right person and right time
       let comment = {
         date: moment().format("YYYY-MM-DD"),
-        user: "Michael Johnson",
+        user: this.currentUser,
         action: "Approved:",
         description: this.commentText,
       };
@@ -417,7 +418,7 @@ export default {
       // this needs to make sure it's the right person and right time
       let comment = {
         date: moment().format("YYYY-MM-DD"),
-        user: "PERSON NAME",
+        user: this.currentUser,
         action: "Rejected:",
         description: this.commentText,
       };

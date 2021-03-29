@@ -39,3 +39,5 @@ export const MONGO_PORT = process.env.MONGO_PORT || "27017";
 export const MONGO_DB = process.env.MONGO_DB || "SDD";
 
 export const MONGO_URL = `mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`
+
+export const USE_LOCAL_AUTH = process.env.USE_LOCAL_AUTH == "true";
