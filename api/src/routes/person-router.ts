@@ -30,7 +30,7 @@ personRouter.get("/implementer", RequiresData,
         let db = req.store.Persons as GenericService;
 
         let list = await db.getAll({ status: 'Active' });
-        list = list.filter(p => p.roles.indexOf("Implementer") > -1)
+        list = list.filter(p => p.roles && p.roles.indexOf("Implementer") > -1)
 
         list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}`)
 
