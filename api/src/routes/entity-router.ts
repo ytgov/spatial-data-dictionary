@@ -213,7 +213,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                     status: "Open",
                     description,
                     reason,
-                    assigned_user: 'User 1', // TODO: This should be current user 
+                    assigned_user: currentUser.display_name,
                     complete_date: date,
                     location: entity.location,
                     programs: entity.links.programs,
@@ -237,7 +237,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
             else {
                 let change = req.body;
                 change.entity_id = id;
-                change.create_user = 'User 1';
+                change.create_user = currentUser.display_name;
                 change.create_date = new Date();
                 change.status = "Open";
                 change.comments = [];

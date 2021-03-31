@@ -343,7 +343,12 @@ export default {
             if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
           });
 
+          this.userCanApprove = false;
+
           if (missingApprovals.length > 0) {
+            if (missingApprovals.indexOf(this.currentUser) > -1)
+              this.userCanApprove = true;
+
             this.missingText = `Awaiting approval from ${_.uniq(
               missingApprovals
             ).join(", ")}`;
