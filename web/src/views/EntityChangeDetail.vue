@@ -319,27 +319,27 @@ export default {
     },
 
     addComment() {
-      if (this.change.assigned_user != this.newAssign) {
-        this.change.comments.push({
-          description: this.newComment,
-          status: this.newStatus,
-          date: moment().format("YYYY-MM-DD"),
-          user: this.currentUser,
-          action: `Assigned change to ${this.newAssign}:`,
-        });
-      } else {
-        this.change.comments.push({
-          description: this.newComment,
-          status: this.newStatus,
-          date: moment().format("YYYY-MM-DD"),
-          user: this.currentUser,
-          action: "Commented:",
-        });
-      }
+      let assignChanged = this.change.assigned_user != this.newAssign;
+      let statusChanged = this.change.status != this.newStatus;
+      let actionText = "Commented:";
+
+      if (assignChanged && statusChanged)
+        actionText = `Assigned change to ${this.newAssign} and changed status to ${this.newStatus}:`;
+      else if (assignChanged)
+        actionText = `Assigned change to ${this.newAssign}:`;
+      else if (statusChanged)
+        actionText = `Changed status to ${this.newStatus}:`;
+
+      this.change.comments.push({
+        description: this.newComment,
+        status: this.newStatus,
+        date: moment().format("YYYY-MM-DD @ h:mm a"),
+        user: this.currentUser,
+        action: actionText,
+      });
 
       this.change.newStatus = this.newStatus;
       this.change.assigned_user = this.newAssign;
-
       this.save();
     },
   },

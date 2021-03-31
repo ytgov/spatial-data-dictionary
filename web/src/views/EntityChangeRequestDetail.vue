@@ -396,7 +396,7 @@ export default {
 
     addComment() {
       let comment = {
-        date: moment().format("YYYY-MM-DD"),
+        date: moment().format("YYYY-MM-DD @ h:mm a"),
         user: this.currentUser,
         action: "Commented:",
         description: this.commentText,
@@ -409,7 +409,7 @@ export default {
     approve() {
       // this needs to make sure it's the right person and right time
       let comment = {
-        date: moment().format("YYYY-MM-DD"),
+        date: moment().format("YYYY-MM-DD @ h:mm a"),
         user: this.currentUser,
         action: "Approved:",
         description: this.commentText,
@@ -422,7 +422,7 @@ export default {
     reject() {
       // this needs to make sure it's the right person and right time
       let comment = {
-        date: moment().format("YYYY-MM-DD"),
+        date: moment().format("YYYY-MM-DD @ h:mm a"),
         user: this.currentUser,
         action: "Rejected:",
         description: this.commentText,

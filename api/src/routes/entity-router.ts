@@ -222,7 +222,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                 }
 
                 change.comments.push({
-                    date: moment().format("YYYY-MM-DD"),
+                    date: moment().format("YYYY-MM-DD @ h:mm a"),
                     user: currentUser.display_name,
                     action: "Created Standard Change",
                     description: ""
@@ -243,7 +243,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                 change.comments = [];
 
                 change.comments.push({
-                    date: moment().format("YYYY-MM-DD"),
+                    date: moment().format("YYYY-MM-DD @ h:mm a"),
                     user: currentUser.display_name,
                     action: "Created Change Request",
                     description: ""
