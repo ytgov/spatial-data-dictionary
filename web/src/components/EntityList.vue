@@ -119,7 +119,7 @@
               <div class="mt-3"></div>
             </v-card-text>
 
-            <v-card-actions style="display: block; height: 92px;">
+            <v-card-actions style="display: block; height: 92px">
               <div class="mb-3" style="height: 32px; overflow: hidden">
                 <div class="mb-3">
                   <v-chip
@@ -295,7 +295,7 @@ export default {
           if (entity.tags) {
             tags = entity.tags.reduce((t, i) => {
               return t + " " + i.toLowerCase();
-            });
+            }, "");
           }
 
           if (
