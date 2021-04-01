@@ -63,6 +63,67 @@ entityRouter.get("/changes", RequiresData, async (req: Request, res: Response) =
     return res.json({ data: results });
 });
 
+entityRouter.get("/changes/open", RequiresData, async (req: Request, res: Response) => {
+    const db = req.store.Entities as EntityService;
+    const changeDb = req.store.Changes as GenericService;
+
+    let currentUser = (req.session as any).user;
+    let results = await changeDb.getAll({ assigned_user: currentUser.display_name });
+
+    for (let item of results) {
+        let entity = await db.getById(item.entity_id);
+
+        if (entity) {
+            item.entity = entity;
+            await buildConnections(item.entity, req);
+        }
+    }
+
+    return res.json({ data: results });
+});
+
+entityRouter.get("/request-change/open", RequiresData, async (req: Request, res: Response) => {
+    const db = req.store.Entities as EntityService;
+    const requestDb = req.store.ChangeRequests as GenericService;
+
+    let currentUser = (req.session as any).user;
+    let results = await requestDb.getAll({ status: "Open" });
+    let awaiting = new Array();
+
+    for (let item of results) {
+        let entity = await db.getById(item.entity_id);
+
+        if (entity) {
+            await buildConnections(entity, req);
+            
+            let approveNames = item.comments
+                .filter((f: any) => f.action.indexOf("Approve") >= 0)
+                .map((f: any) => f.user);
+
+            let requiredNames = [entity.location.approver_name];
+
+            entity.links.programs.forEach((p: any) => {
+                requiredNames.push(p.approver_name);
+            });
+
+            let missingApprovals = new Array<any>();
+
+            requiredNames.forEach((n) => {
+                if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
+            });
+
+            console.log("MISSING APPROVALS", missingApprovals)
+            if (missingApprovals.indexOf(currentUser.display_name) >= 0) {
+                item.entity = entity;
+                awaiting.push(item)
+            }
+        }
+    }
+
+    return res.json({ data: awaiting });
+});
+
+
 entityRouter.get("/changes/:id", RequiresData, async (req: Request, res: Response) => {
     const db = req.store.Entities as EntityService;
     const changeDb = req.store.Changes as GenericService;
@@ -648,15 +709,6 @@ entityRouter.get("/:id/attribute", RequiresData,
 
         res.status(404).send();
     });
-
-/*
-    name: this.editName,
-    description: this.editDescription,
-    type: this.editType,
-    alias: this.editAlias,
-    domain: this.editDomain,
-    required: this.editRequired,
-*/
 
 async function buildConnections(entity: Entity, req: Request) {
     const db = req.store.Entities as EntityService;

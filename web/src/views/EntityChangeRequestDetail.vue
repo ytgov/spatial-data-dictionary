@@ -169,7 +169,7 @@
               Program: {{ program.name }}:
               <span style="font-weight: 400">{{ program.approver_name }}</span>
             </h3>
-            <h2 class="mt-5">** {{ missingText }}</h2>
+            <h2 class="mt-5" v-if="missingText">** {{ missingText }}</h2>
           </v-card-text>
           <v-card-text v-if="!showApprovals">
             <h3>
