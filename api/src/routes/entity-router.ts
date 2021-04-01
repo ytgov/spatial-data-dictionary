@@ -95,7 +95,7 @@ entityRouter.get("/request-change/open", RequiresData, async (req: Request, res:
 
         if (entity) {
             await buildConnections(entity, req);
-            
+
             let approveNames = item.comments
                 .filter((f: any) => f.action.indexOf("Approve") >= 0)
                 .map((f: any) => f.user);
@@ -112,10 +112,9 @@ entityRouter.get("/request-change/open", RequiresData, async (req: Request, res:
                 if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
             });
 
-            console.log("MISSING APPROVALS", missingApprovals)
             if (missingApprovals.indexOf(currentUser.display_name) >= 0) {
                 item.entity = entity;
-                awaiting.push(item)
+                awaiting.push(item);
             }
         }
     }
