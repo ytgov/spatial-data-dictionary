@@ -5,7 +5,7 @@ import { GenericService, ProgramService } from "../services";
 
 export const programRouter = express.Router();
 
-programRouter.get("/", RequiresData,
+programRouter.get("/", RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         let db = req.store.Programs as ProgramService;
         let list = await db.getAll();
@@ -17,7 +17,7 @@ programRouter.get("/", RequiresData,
         return res.json({ data: list });
     });
 
-programRouter.post("/", RequiresData,
+programRouter.post("/", RequiresData, RequiresAuthentication,
     [body("name").notEmpty().isString()],
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -38,7 +38,7 @@ programRouter.post("/", RequiresData,
         return res.json({ data: list, messages: [{ variant: "success", text: "Location created" }] });
     });
 
-programRouter.put("/:id", RequiresData,
+programRouter.put("/:id", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId(),
         body("name").notEmpty().isString()
@@ -63,7 +63,7 @@ programRouter.put("/:id", RequiresData,
         return res.json({ data: list, messages: [{ variant: "success", text: "Location edited" }] });
     });
 
-programRouter.delete("/:id", RequiresData,
+programRouter.delete("/:id", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId()
     ],

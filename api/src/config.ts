@@ -21,7 +21,7 @@ export const NODE_ENV = process.env.NODE_ENV;
 
 export const AUTH_REDIRECT = process.env.AUTH_REDIRECT || "";
 
-export const VIVVO_CONFIG = {
+/* export const VIVVO_CONFIG = {
   issuer: 'https://c1dev.vivvocloud.com.com/',
   authorizationURL: 'https://c1dev.vivvocloud.com/oauth2/auth',
   tokenURL: 'https://c1dev.vivvocloud.com/oauth2/token',
@@ -30,7 +30,7 @@ export const VIVVO_CONFIG = {
   clientSecret: process.env.VIVVO_CLIENT_SECRET || "",
   callbackURL: process.env.VIVVO_CALLBACK_URL || "",
   scope: 'profile email phone address'
-}
+} */
 
 export const MONGO_USER = process.env.MONGO_USER || "admin";
 export const MONGO_PASS = process.env.MONGO_PASS || "password";

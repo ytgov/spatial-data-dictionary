@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { Attribute, AuthUser, Entity, SearchResult, Storage } from "../data";
-import { EntityService, GenericService, LocationService, ProgramService, UserService } from "../services";
+import { Attribute, AuthUser, Entity, SearchResult } from "../data";
+import { EntityService, GenericService, LocationService, ProgramService } from "../services";
 import { ObjectId } from "mongodb";
 import { v4 as uuidV4 } from "uuid";
 import { GraphBuilder } from "../utils/directed-graph";
@@ -10,7 +10,7 @@ import moment from "moment";
 
 export const entityRouter = express.Router();
 
-entityRouter.get("/", RequiresData, async (req: Request, res: Response) => {
+entityRouter.get("/", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     let db = req.store.Entities as EntityService;
     //let query = { 'user.username': "datajohnson" };
 
@@ -23,7 +23,7 @@ entityRouter.get("/", RequiresData, async (req: Request, res: Response) => {
     return res.json({ data: allEntities });
 });
 
-entityRouter.post("/", RequiresData, async (req: Request, res: Response) => {
+entityRouter.post("/", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     let db = req.store.Entities as EntityService;
     //let query = { 'user.username': "datajohnson" };
 
@@ -44,7 +44,7 @@ entityRouter.post("/", RequiresData, async (req: Request, res: Response) => {
     return res.json({ data: results });
 });
 
-entityRouter.get("/changes", RequiresData, async (req: Request, res: Response) => {
+entityRouter.get("/changes", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const db = req.store.Entities as EntityService;
     const changeDb = req.store.Changes as GenericService;
 
@@ -63,11 +63,11 @@ entityRouter.get("/changes", RequiresData, async (req: Request, res: Response) =
     return res.json({ data: results });
 });
 
-entityRouter.get("/changes/open", RequiresData, async (req: Request, res: Response) => {
+entityRouter.get("/changes/open", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const db = req.store.Entities as EntityService;
     const changeDb = req.store.Changes as GenericService;
 
-    let currentUser = (req.session as any).user;
+    let currentUser = req.user as AuthUser;
     let results = await changeDb.getAll({ assigned_user: currentUser.display_name });
 
     for (let item of results) {
@@ -82,11 +82,11 @@ entityRouter.get("/changes/open", RequiresData, async (req: Request, res: Respon
     return res.json({ data: results });
 });
 
-entityRouter.get("/request-change/open", RequiresData, async (req: Request, res: Response) => {
+entityRouter.get("/request-change/open", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const db = req.store.Entities as EntityService;
     const requestDb = req.store.ChangeRequests as GenericService;
 
-    let currentUser = (req.session as any).user;
+    let currentUser = req.user as AuthUser;
     let results = await requestDb.getAll({ status: "Open" });
     let awaiting = new Array();
 
@@ -122,8 +122,7 @@ entityRouter.get("/request-change/open", RequiresData, async (req: Request, res:
     return res.json({ data: awaiting });
 });
 
-
-entityRouter.get("/changes/:id", RequiresData, async (req: Request, res: Response) => {
+entityRouter.get("/changes/:id", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const db = req.store.Entities as EntityService;
     const changeDb = req.store.Changes as GenericService;
     let { id } = req.params;
@@ -137,7 +136,7 @@ entityRouter.get("/changes/:id", RequiresData, async (req: Request, res: Respons
     res.status(404).send();
 });
 
-entityRouter.put("/:id/changes/:changeId", RequiresData, async (req: Request, res: Response) => {
+entityRouter.put("/:id/changes/:changeId", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const db = req.store.Entities as EntityService;
     const changeDb = req.store.Changes as GenericService;
     let { id, changeId } = req.params;
@@ -187,7 +186,7 @@ entityRouter.post("/search",
         res.json({ data: searchResult });
     });
 
-entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -208,7 +207,7 @@ entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
         res.status(404).send();
     });
 
-entityRouter.get("/:id/graph-data", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.get("/:id/graph-data", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -226,7 +225,7 @@ entityRouter.get("/:id/graph-data", [param("id").notEmpty().isMongoId()], Requir
         return res.json({ data: graph });
     });
 
-entityRouter.get("/:id/request-change", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.get("/:id/request-change", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -246,7 +245,7 @@ entityRouter.get("/:id/request-change", [param("id").notEmpty().isMongoId()], Re
         res.status(404).send();
     });
 
-entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -321,7 +320,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
         res.status(404).send();
     });
 
-entityRouter.get("/:id/request-change/:changeId", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.get("/:id/request-change/:changeId", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -341,7 +340,7 @@ entityRouter.get("/:id/request-change/:changeId", [param("id").notEmpty().isMong
         res.status(404).send();
     });
 
-entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -431,7 +430,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
 
 entityRouter.post("/:id/request-change/:changeId/approve",
     [param("id").notEmpty().isMongoId(),
-    param("changeId").notEmpty().isMongoId()], RequiresData,
+    param("changeId").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -481,7 +480,7 @@ entityRouter.post("/:id/request-change/:changeId/approve",
         res.status(404).send();
     });
 
-entityRouter.get("/:id/changes", [param("id").notEmpty().isMongoId()], RequiresData, async (req: Request, res: Response) => {
+entityRouter.get("/:id/changes", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -504,7 +503,7 @@ entityRouter.get("/:id/changes", [param("id").notEmpty().isMongoId()], RequiresD
     res.status(404).send();
 });
 
-entityRouter.get("/:id/complete-changes", [param("id").notEmpty().isMongoId()], RequiresData, async (req: Request, res: Response) => {
+entityRouter.get("/:id/complete-changes", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -527,7 +526,7 @@ entityRouter.get("/:id/complete-changes", [param("id").notEmpty().isMongoId()], 
     res.status(404).send();
 });
 
-entityRouter.put("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.put("/:id", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -546,7 +545,7 @@ entityRouter.put("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
         return res.json({ data: results });
     });
 
-entityRouter.delete("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
+entityRouter.delete("/:id", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
 
@@ -561,7 +560,7 @@ entityRouter.delete("/:id", [param("id").notEmpty().isMongoId()], RequiresData,
         return res.json({ messages: [{ variant: "success", text: "Entity deleted" }] });
     });
 
-entityRouter.post("/:id/attribute", RequiresData,
+entityRouter.post("/:id/attribute", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId(),
         body("name").notEmpty()
@@ -600,7 +599,7 @@ entityRouter.post("/:id/attribute", RequiresData,
         res.status(404).send();
     });
 
-entityRouter.post("/:id/connection", RequiresData,
+entityRouter.post("/:id/connection", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId(),
         body("connectionType").notEmpty(),
@@ -651,7 +650,7 @@ entityRouter.post("/:id/connection", RequiresData,
         res.status(404).send();
     });
 
-entityRouter.delete("/:id/connection/:connectionId", RequiresData,
+entityRouter.delete("/:id/connection/:connectionId", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId(),
         param("connectionId").notEmpty(),
@@ -687,7 +686,7 @@ entityRouter.delete("/:id/connection/:connectionId", RequiresData,
         res.status(404).send();
     });
 
-entityRouter.get("/:id/attribute", RequiresData,
+entityRouter.get("/:id/attribute", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId()
     ],

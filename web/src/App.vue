@@ -182,7 +182,9 @@ export default {
     },
     signOut() {
       store.dispatch("signOut");
-      router.push("/");
+      window.setTimeout(() => {
+        router.push("/");
+      }, 250);
     },
     searchKeyUp(event) {
       if (event.code == "Enter") {

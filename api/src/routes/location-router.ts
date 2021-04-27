@@ -5,7 +5,7 @@ import { GenericService, LocationService } from "../services";
 
 export const locationRouter = express.Router();
 
-locationRouter.get("/", RequiresData,
+locationRouter.get("/", RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         let db = req.store.Locations as LocationService;
         let list = await db.getAll();
@@ -17,7 +17,7 @@ locationRouter.get("/", RequiresData,
         return res.json({ data: list });
     });
 
-locationRouter.post("/", RequiresData,
+locationRouter.post("/", RequiresData, RequiresAuthentication,
     [body("name").notEmpty().isString()],
     async (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -38,7 +38,7 @@ locationRouter.post("/", RequiresData,
         return res.json({ data: list, messages: [{ variant: "success", text: "Location created" }] });
     });
 
-locationRouter.put("/:id", RequiresData,
+locationRouter.put("/:id", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId(),
         body("name").notEmpty().isString(),
@@ -66,7 +66,7 @@ locationRouter.put("/:id", RequiresData,
         return res.json({ data: list, messages: [{ variant: "success", text: "Location edited" }] });
     });
 
-locationRouter.delete("/:id", RequiresData,
+locationRouter.delete("/:id", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId()
     ],

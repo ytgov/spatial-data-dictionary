@@ -4,7 +4,6 @@ import { body, validationResult } from "express-validator";
 import { RequiresData } from "../middleware";
 import { FRONTEND_URL } from "../config";
 import { AuthService } from "../services";
-import { contentSecurityPolicy } from "helmet";
 
 export const authLocalRouter = express.Router();
 

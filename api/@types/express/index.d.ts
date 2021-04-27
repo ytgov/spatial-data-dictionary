@@ -5,6 +5,7 @@ namespace Express {
         //isAuthenticated?: boolean;
         //sessionId?: string;
         store?: any;
+        oidc: any;
 
         isAuthenticated(): boolean;
     }

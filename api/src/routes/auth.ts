@@ -1,11 +1,10 @@
-import { Express, Request, Response } from "express"
+import { Express, NextFunction, Request, Response } from "express"
 import * as ExpressSession from "express-session";
 import { AuthUser, Storage } from "../data";
-import { AUTH_REDIRECT, VIVVO_CONFIG } from "../config";
+import { AUTH_REDIRECT } from "../config";
 import { RequiresData } from "../middleware";
 
-let OidcStrategy = require('passport-openidconnect').Strategy;
-let passport = require('passport');
+import { auth } from "express-openid-connect";
 
 export function configureAuthentication(app: Express) {
     app.use(ExpressSession.default({
@@ -14,54 +13,60 @@ export function configureAuthentication(app: Express) {
         saveUninitialized: true
     }));
 
-    app.use(passport.initialize());
-    app.use(passport.session());
+    app.use(auth({
+        authRequired: false,
+        auth0Logout: false,
+        authorizationParams: {
+            response_type: 'code',
+            audience: '',
+            scope: 'openid profile email',
+        },
+        routes: {
+            login: "/api/auth/login",
+            //logout: "/api/auth/logout",
+            postLogoutRedirect: "/custom-logout"
+        }
+    }));
 
-    passport.serializeUser((user: any, next: any) => {
-        let authUser = AuthUser.fromPassport(user);
-        next(null, authUser)
+    app.use("/", async (req: Request, res: Response, next: NextFunction) => {
+        if (req.oidc.isAuthenticated()) {
+            req.user = AuthUser.fromOpenId(req.oidc.user);
+            (req.session as any).user = req.user;
+        }
+
+        next();
     });
 
-    passport.deserializeUser((obj: any, next: any) => {
-        next(null, obj)
+    app.get("/", RequiresData, async (req: Request, res: Response) => {
+        if (req.oidc.isAuthenticated()) {
+            let user = AuthUser.fromOpenId(req.oidc.user) as AuthUser;
+            req.user = user;
+
+            let db = req.store as Storage;
+            await db.Sessions.begin(req.user, req.sessionID);
+
+            // Add them to the users list
+            let userMatch = await db.Persons.getAll({ email: user.email })
+
+            if (userMatch.length == 0)
+                await db.Persons.create(user);
+
+            res.redirect(AUTH_REDIRECT);
+        }
     });
 
-    passport.use('oidc', new OidcStrategy(VIVVO_CONFIG,
-        (issuer: any, sub: any, profile: any, accessToken: any, refreshToken: any, done: any) => {
-            return done(null, profile)
-        }));
-
-    app.use('/api/auth/login', passport.authenticate('oidc'));
-
-    app.get('/api/auth/logout', RequiresData, async (req: any, res) => {
-        let db = req.store as Storage;
-
-        await db.Sessions.end(req.sessionID);
-        req.logout();
-        req.session.destroy();
-        res.status(202).send();
-    });
-
-    app.use("/api/auth/isAuthenticated", (req: Request, res: Response) => {
-        if (req.isAuthenticated()) {
-            return res.send(req.user);
+    app.get("/api/auth/isAuthenticated", (req: Request, res: Response) => {
+        if (req.oidc.isAuthenticated()) {
+            return res.send({ data: req.user });
         }
 
         return res.status(401).send();
     });
 
-    app.use('/authorization-code/callback', RequiresData,
-        passport.authenticate('oidc', { failureRedirect: '/api/error' }),
-        async (req, res) => {
-            let db = req.store as Storage;
-    
-            await db.Sessions.begin(AuthUser.fromPassport(req.user), req.sessionID)
-            res.redirect(AUTH_REDIRECT);
-        }
-    );
-
-    app.use("/api/error", (req: Request, res: Response) => {
-        console.error(req)
-        res.status(500).send("Authentication error");
+    app.get('/api/auth/logout', RequiresData, async (req: any, res) => {
+        let db = req.store as Storage;
+        await db.Sessions.end(req.sessionID);
+        req.session.destroy();
+        (res as any).oidc.logout({ returnTo: "/" });
     });
 }

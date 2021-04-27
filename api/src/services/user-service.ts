@@ -20,6 +20,10 @@ export class UserService {
         return this._people.findOne({ _id: new ObjectID(id) });
     }
 
+    async getUserByEmail(email: string): Promise<any> {
+        return this._people.findOne({ email });
+    }
+
     async search(term: string): Promise<any> {
         return this._people.find(
             {

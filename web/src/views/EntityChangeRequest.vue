@@ -241,6 +241,8 @@
       <v-icon class="mr-3">mdi-thumb-up-outline</v-icon>
       {{ apiSuccess }}
     </v-snackbar>
+
+    <notifications ref="notifier"></notifications>
   </div>
 </template>
 
@@ -316,6 +318,16 @@ export default {
         });
     },
     save() {
+      this.changeTitle = this.changeTitle.trim();
+      this.changeDescription = this.changeDescription.trim();
+
+      if (!this.changeTitle || !this.changeReason || !this.changeDescription) {
+        this.$refs.notifier.showError(
+          "Change title, Reason for change and Change description are all required."
+        );
+        return;
+      }
+
       let body = {
         title: this.changeTitle,
         description: this.changeDescription,
@@ -330,13 +342,9 @@ export default {
           let newId = result.data.data.ops[0]._id;
 
           if (this.changeType == "Standard") {
-            router.push(
-              `/entity/${this.entity_id}/changes/${newId}`
-            );
+            router.push(`/entity/${this.entity_id}/changes/${newId}`);
           } else {
-            router.push(
-              `/entity/${this.entity_id}/change-request/${newId}`
-            );
+            router.push(`/entity/${this.entity_id}/change-request/${newId}`);
           }
         })
         .catch((err) => {

@@ -5,7 +5,7 @@ import { GenericService } from "../services";
 
 export const personRouter = express.Router();
 
-personRouter.get("/", RequiresData,
+personRouter.get("/", RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         let db = req.store.Persons as GenericService;
 
@@ -15,7 +15,7 @@ personRouter.get("/", RequiresData,
         return res.json({ data: list });
     });
 
-personRouter.get("/active", RequiresData,
+personRouter.get("/active", RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         let db = req.store.Persons as GenericService;
 
@@ -25,7 +25,7 @@ personRouter.get("/active", RequiresData,
         return res.json({ data: list });
     });
 
-personRouter.get("/implementer", RequiresData,
+personRouter.get("/implementer", RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         let db = req.store.Persons as GenericService;
 
@@ -37,7 +37,7 @@ personRouter.get("/implementer", RequiresData,
         return res.json({ data: list });
     });
 
-personRouter.post("/", RequiresData,
+personRouter.post("/", RequiresData, RequiresAuthentication,
     [
         body("first_name").notEmpty().isString(),
         body("last_name").notEmpty().isString(),
@@ -56,7 +56,7 @@ personRouter.post("/", RequiresData,
         return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location created" }] });
     });
 
-personRouter.put("/:id", RequiresData,
+personRouter.put("/:id", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId(),
         body("first_name").notEmpty().isString(),
@@ -77,7 +77,7 @@ personRouter.put("/:id", RequiresData,
         return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location edited" }] });
     });
 
-personRouter.delete("/:id", RequiresData,
+personRouter.delete("/:id", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId()
     ],
