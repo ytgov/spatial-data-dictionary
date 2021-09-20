@@ -5,8 +5,8 @@ services:
     image: mongo
     restart: unless-stopped
     environment: 
-      - MONGO_INITDB_ROOT_USERNAME_FILE=./mongodb/username
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=./mongodb/password
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
     volumes: 
       - mongo-data:/data/db
       - ./dump:/dump
