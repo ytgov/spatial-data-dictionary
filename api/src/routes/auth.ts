@@ -1,7 +1,7 @@
 import { Express, NextFunction, Request, Response } from "express"
 import * as ExpressSession from "express-session";
 import { AuthUser, Storage } from "../data";
-import { AUTH_REDIRECT } from "../config";
+import { AUTH_REDIRECT, FRONTEND_URL } from "../config";
 import { RequiresData } from "../middleware";
 
 import { auth } from "express-openid-connect";
@@ -24,7 +24,7 @@ export function configureAuthentication(app: Express) {
         routes: {
             login: "/api/auth/login",
             //logout: "/api/auth/logout",
-            postLogoutRedirect: "/custom-logout"
+            postLogoutRedirect: FRONTEND_URL
         }
     }));
 
@@ -52,6 +52,11 @@ export function configureAuthentication(app: Express) {
                 await db.Persons.create(user);
 
             res.redirect(AUTH_REDIRECT);
+        }
+        else {
+            // this is hard-coded to accomodate strage behaving in sendFile not allowing `../` in the path.
+            // this won't hit in development because web access is served by the Vue CLI - only an issue in Docker
+            res.sendFile("/home/node/app/dist/web/index.html")
         }
     });
 
