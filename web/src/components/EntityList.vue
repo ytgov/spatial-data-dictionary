@@ -74,6 +74,7 @@
       </div>
     </div>
 
+    <v-progress-linear :active="isLoading" indeterminate dark></v-progress-linear>
     <hr class="mb-3" />
 
     <div v-for="group of groupList" v-bind:key="group.id">
@@ -167,8 +168,10 @@ export default {
     programFilter: [],
     locationFilter: [],
     typeFilter: [],
+    isLoading: false,
   }),
   created() {
+    this.isLoading = true;
     axios
       .get(ENTITY_URL)
       .then((results) => {
@@ -191,6 +194,9 @@ export default {
       })
       .catch((err) => {
         console.err(err);
+      })
+      .finally(() => {
+        this.isLoading = false;
       });
 
     axios
