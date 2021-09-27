@@ -82,6 +82,11 @@ export default {
 
     buildTree() {
       this.entityTree = [];
+
+      this.entities = this.entities.filter(
+        (e) => e.attributes && e.attributes.length > 0
+      );
+
       let locations = _.uniq(this.entities.map((e) => e.location.name));
 
       for (let loc of locations) {
