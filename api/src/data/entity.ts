@@ -1,9 +1,4 @@
 
-
-//Surface Management
-
-
-
 export interface Program { // asset category
     id?: string;
     name: string;
@@ -17,17 +12,6 @@ export interface Person {
     email: string;
     phone?: string;
     role?: string;
-}
-
-let surfaceManagement: Program;
-
-surfaceManagement = {
-    name: "Surface Management",
-    description: "Road surfaces",
-    managers: [
-        { name: "Ken", email: "ken@yukon.ca", role: "Data Steward" },
-        { name: "Dave Comchi", email: "dave.comchi@yukon.ca", role: "Manager" }
-    ]
 }
 
 export interface Repository { // database or ALRS
@@ -50,6 +34,8 @@ export interface Entity { // a table or layer or file
     links: any;
     tags?: string[];
     search_reason?: string;
+    create_date: Date;
+    create_user: string;
 }
 
 export enum EntityStatus {

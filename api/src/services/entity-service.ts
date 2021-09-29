@@ -10,6 +10,9 @@ export class EntityService {
     }
 
     async create(user: AuthUser, entity: Entity): Promise<any> {
+        entity.create_user = user.display_name;
+        entity.create_date = new Date();
+
         return this.db.insertOne(entity);
     }
 

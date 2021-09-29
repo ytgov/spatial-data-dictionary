@@ -18,6 +18,7 @@ export class Storage {
     ChangeRequests!: GenericService;
     Changes!: GenericService;
     LocalUsers!: AuthService;
+    EntityWatch!: GenericService;
 
     constructor() {
     }
@@ -42,6 +43,7 @@ export class Storage {
                     this.ChangeRequests = new GenericService(this.mongoConnection.db(MONGO_DB).collection("ChangeRequests"));
                     this.Changes = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Changes"));
                     this.LocalUsers = new AuthService(this.mongoConnection.db(MONGO_DB).collection("LocalUsers"));
+                    this.EntityWatch = new GenericService(this.mongoConnection.db(MONGO_DB).collection("EntityWatch"));
                     this.isInitialized = true;
                     resolve("Connected");
                 })

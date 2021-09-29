@@ -33,7 +33,7 @@
 
     <v-card>
       <v-tabs v-model="tab" background-color="#fff2d5" color="primary">
-        <v-tab key="0">Properties</v-tab>
+        <v-tab key="0">Entity Details</v-tab>
         <v-tab key="1">Attributes</v-tab>
       </v-tabs>
 

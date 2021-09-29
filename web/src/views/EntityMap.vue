@@ -16,10 +16,18 @@
       <div style="float: left">
         <h1>
           {{ entity.name }}
-          <br />
-
+          <v-btn
+            color="primary"
+            icon
+            style="margin: 4px 0 12px 8px"
+            small
+            @click="toggleWatched()"
+            ><v-icon v-if="isWatched" title="Remove from watchlist">mdi-star</v-icon
+            ><v-icon v-if="!isWatched" title="Add to watchlist">mdi-star-outline</v-icon></v-btn
+          ><br />
           <status-chip :status="entity.status"></status-chip>
           <location-chip :location="entity.location.type"></location-chip>
+          <entity-type-chip :type="entity.entity_type"></entity-type-chip>
 
           <br />
           <v-chip
@@ -34,13 +42,19 @@
         </h1>
       </div>
       <div style="float: right; text-align: right">
-        <h2 class="mb-1">
-          {{ entity.location.name }}<br />
+         <h2 class="mb-1">
+          <router-link :to="'/entity?location=' + entity.location.id">{{
+            entity.location.name
+          }}</router-link
+          ><br />
           <span
             class="program-link"
             v-for="program of entity.links.programs"
             v-bind:key="program.id"
-            >{{ program.name }}</span
+          >
+            <router-link :to="'/entity?program=' + program.id">{{
+              program.name
+            }}</router-link></span
           >
         </h2>
       </div>
@@ -52,6 +66,8 @@
     <hr class="mb-1" />
 
     <div id="graph"></div>
+
+    <notifications ref="notifier"></notifications>
   </div>
 </template>
 
@@ -68,6 +84,7 @@
 import axios from "axios";
 import moment from "moment";
 import { ENTITY_URL } from "../urls";
+import store from "../store";
 
 import cytoscape from "cytoscape";
 import cola from 'cytoscape-cola';
@@ -93,6 +110,8 @@ export default {
     changeDateMin: moment().format("YYYY-MM-DD"),
     changeDate: moment().add(7, "days").format("YYYY-MM-DD"),
     changeDateMenu: null,
+
+    isWatched: false,
   }),
   computed: {},
   watch: {
@@ -121,8 +140,9 @@ export default {
     loadEntity(id) {
       axios
         .get(`${ENTITY_URL}/${id}`)
-        .then((result) => {
+        .then(async (result) => {
           this.entity = result.data.data;
+          this.isWatched= await store.dispatch("profile/isWatched", id);
         })
         .catch((err) => {
           console.log(err);
@@ -197,6 +217,21 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    toggleWatched() {
+      if (this.isWatched) {
+        store.dispatch("profile/removeWatchlist", this.entity);
+        this.$refs.notifier.showSuccess(
+          `${this.entity.name} has been removed from your watchlist`
+        );
+      } else {
+        store.dispatch("profile/addWatchlist", this.entity);
+        this.$refs.notifier.showSuccess(
+          `${this.entity.name} has been added to your watchlist`
+        );
+      }
+
+      this.isWatched = !this.isWatched;
     },
   },
 };

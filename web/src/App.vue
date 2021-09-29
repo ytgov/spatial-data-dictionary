@@ -42,11 +42,17 @@
           My watchlist<v-spacer></v-spacer>
           <v-icon size="" class="mr-5">mdi-star</v-icon>
         </v-subheader>
-
-        <v-list-item link nav>
-          <v-list-item-icon> </v-list-item-icon>
+        <v-list-item
+          link
+          nav
+          v-for="(item, i) of watchlist"
+          :key="i"
+          :to="'/entity/' + item.id"
+        >
+          <v-list-item-icon><v-icon>mdi-database-marker</v-icon></v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>Empty</v-list-item-title>
+            <v-list-item-title>{{ item.name }}</v-list-item-title>
+            <v-list-item-subtitle>{{item.location}}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -132,11 +138,15 @@ export default {
   components: {},
   computed: {
     ...mapState(["isAuthenticated"]),
+    ...mapState("profile", ["watchlist"]),
     username() {
       return store.getters.fullName;
     },
     isAuthenticated() {
       return store.getters.isAuthenticated;
+    },
+    watchlist() {
+      return store.getters["profile/watchlist"];
     },
   },
   data: () => ({
@@ -160,6 +170,8 @@ export default {
     else this.hasSidebar = config.hasSidebar;
 
     //this.hasSidebar = true;
+
+    store.dispatch('profile/loadWatchlist');
   },
   watch: {
     isAuthenticated: function (val) {
@@ -172,7 +184,6 @@ export default {
   methods: {
     nav(location) {
       router.push(location);
-      console.log(location);
     },
     toggleHeader() {
       this.headerShow = !this.headerShow;

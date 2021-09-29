@@ -89,3 +89,7 @@ a {
 .v-banner.problem .v-icon {
     color: #9b1b27 !important;
 }
+
+.error-text {
+    color: #ff5252 !important;
+}

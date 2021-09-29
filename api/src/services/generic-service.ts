@@ -21,13 +21,17 @@ export class GenericService {
         return this.db.deleteOne({ _id: new ObjectId(id) });
     }
 
+    async deleteWhere(query: FilterQuery<any>): Promise<any> {
+        return this.db.deleteMany(query);
+    }
+
     async getAll(query?: FilterQuery<any>, sort?: any): Promise<any[]> {
         return this.db.find(query).sort(sort).toArray();
     }
 
     async getById(id: string): Promise<any | null> {
         try {
-            return this.db.findOne<Entity>({ _id: new ObjectId(id) });
+            return this.db.findOne<any>({ _id: new ObjectId(id) });
         }
         catch (e) { }
 

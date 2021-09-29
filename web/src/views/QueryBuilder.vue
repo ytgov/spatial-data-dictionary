@@ -15,6 +15,11 @@
     <div class="row mt-5" style="clear: both">
       <div class="col-md-4">
         <h3>Available Entities</h3>
+        <v-progress-linear
+          :active="isLoading"
+          indeterminate
+          dark
+        ></v-progress-linear>
         <!-- <v-card class="" color="#fff2d5"> -->
         <v-treeview
           dense
@@ -63,20 +68,24 @@ export default {
     entities: [],
     entityTree: [],
     selected: [],
+    isLoading: false,
   }),
   created() {
     this.loadEntities();
   },
   methods: {
     loadEntities() {
+      this.isLoading = true;
       axios
         .get(ENTITY_URL)
         .then((results) => {
           this.entities = results.data.data;
           this.buildTree();
+          this.isLoading= false;
         })
         .catch((err) => {
           console.err(err);
+          this.isLoading= false;
         });
     },
 

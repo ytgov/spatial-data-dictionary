@@ -17,6 +17,7 @@
     "express-session": "^1.17.1",
     "express-validator": "^6.10.1",
     "helmet": "^4.5.0",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mongodb": "^3.6.6",
     "uuid": "^8.3.2"
@@ -28,6 +29,7 @@
     "@types/express-session": "^1.17.3",
     "@types/express-validator": "^3.0.0",
     "@types/helmet": "^4.0.0",
+    "@types/lodash": "^4.14.175",
     "@types/mongodb": "^3.6.12",
     "@types/uuid": "^8.3.0",
     "nodemon": "^2.0.7",

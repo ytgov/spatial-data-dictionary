@@ -4,8 +4,8 @@
       class="pl-0"
       divider="/"
       :items="[
-        { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Entities', href: '/entity' },
+        { text: 'Dashboard', to: '/dashboard' },
+        { text: 'Entities', to: '/entity', exact: true },
         { text: entity.name },
       ]"
     ></v-breadcrumbs>
@@ -14,8 +14,14 @@
       <div style="float: left">
         <h1>
           {{ entity.name }}
-          <v-btn color="primary" icon style="margin: 4px 0 12px 8px" small
-            ><v-icon>mdi-star</v-icon></v-btn
+          <v-btn
+            color="primary"
+            icon
+            style="margin: 4px 0 12px 8px"
+            small
+            @click="toggleWatched()"
+            ><v-icon v-if="isWatched" title="Remove from watchlist">mdi-star</v-icon
+            ><v-icon v-if="!isWatched" title="Add to watchlist">mdi-star-outline</v-icon></v-btn
           ><br />
 
           <status-chip :status="entity.status"></status-chip>
@@ -30,7 +36,7 @@
             link
             :to="'/tags/' + tag"
           >
-            <v-icon left> mdi-tag </v-icon>{{ tag }}
+            <v-icon left>mdi-tag</v-icon>{{ tag }}
           </v-chip>
         </h1>
       </div>
@@ -50,21 +56,65 @@
             }}</router-link></span
           >
         </h2>
-        <v-btn class="mr-5" color="info" :to="'/entity/' + entity._id + '/edit'"
+        <!-- <v-btn class="mr-5" color="info" :to="'/entity/' + entity._id + '/edit'"
           >Edit</v-btn
-        >
-        <v-btn
+        > -->
+        <!-- <v-btn
           color="secondary"
           :to="'/entity/' + entity._id + '/change-request'"
           >Request Change</v-btn
-        >
+        > -->
+
+        <v-menu bottom left>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn v-bind="attrs" v-on="on" color="secondary" class="pl-1">
+              <v-icon class="mr-2">mdi-menu-down</v-icon> Actions
+            </v-btn>
+          </template>
+
+          <v-list dense>
+            <v-list-item :to="'/entity/' + entity._id + '/change-request'">
+              <v-list-item-icon
+                ><v-icon>mdi-hammer-wrench</v-icon></v-list-item-icon
+              >
+              <v-list-item-title>Request Change</v-list-item-title>
+            </v-list-item>
+            <v-list-item :to="'/entity/' + entity._id + '/edit'">
+              <v-list-item-icon><v-icon>mdi-pencil</v-icon></v-list-item-icon>
+              <v-list-item-title>Edit</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="showDuplicateDialog()">
+              <v-list-item-icon>
+                <v-icon>mdi-content-copy</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Duplicate</v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="addConnection()">
+              <v-list-item-icon>
+                <v-icon>mdi-link-variant-plus</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Add Connection</v-list-item-title>
+            </v-list-item>
+
+            <v-divider></v-divider>
+            <v-list-item @click="showEntityDelete()">
+              <v-list-item-icon
+                ><v-icon color="error">mdi-delete</v-icon></v-list-item-icon
+              >
+              <v-list-item-title
+                ><span style="color: #ff5252">Delete</span></v-list-item-title
+              >
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
     </div>
 
-    <p class="lead" style="clear: both">
+    <p class="lead" style="clear: left">
       {{ entity.description }}
     </p>
-    <hr class="mb-1" />
+    <hr class="mb-1" style="clear: both" />
 
     <div class="row">
       <div class="col-md-8">
@@ -305,15 +355,6 @@
           <span class="float-left"
             ><v-icon color="#323232">mdi-link-variant</v-icon> Connections</span
           >
-          <v-btn
-            icon
-            class="float-right my-0"
-            title="Add Connection"
-            color="primary"
-            @click="addConnection()"
-            style="height: auto; width: auto"
-            ><v-icon>mdi-link-variant-plus</v-icon></v-btn
-          >
           <div style="clear: both"></div>
         </h3>
 
@@ -340,7 +381,8 @@
               <strong
                 ><a>{{ item.name }}</a></strong
               >
-              <br />{{ item.role }}</v-card-text
+              <br />Location: {{ item.location.name }} <br />Type:
+              {{ item.role }}</v-card-text
             >
           </v-card>
         </div>
@@ -360,7 +402,8 @@
               <strong
                 ><a>{{ item.name }}</a></strong
               >
-              <br />Destination</v-card-text
+              <br />Location: {{ item.location.name }} <br />Type:
+              Destination</v-card-text
             >
           </v-card>
         </div>
@@ -381,19 +424,19 @@
             >
           </v-card>
         </div>
-
+        <!--
         <hr class="my-5" />
         <h3 class="mb-4 mt-5">
           <v-icon color="#323232">mdi-hammer-wrench</v-icon> Change Requests
         </h3>
 
-        <v-btn
+         <v-btn
           color="secondary"
           :to="'/entity/' + entity._id + '/change-request'"
           style="width: 100%"
         >
           <v-icon class="mr-4">mdi-hammer-wrench</v-icon> Request Change</v-btn
-        >
+        > -->
       </div>
     </div>
 
@@ -446,6 +489,64 @@
       @updatePersonConnection="updatePersonConnection"
       @removePersonConnection="removePersonConnection"
     ></domain-dialog>
+
+    <v-dialog
+      ref="entityDeleteDialog"
+      v-model="showEntityDeleteDialog"
+      max-width="600px"
+    >
+      <v-container class="pb-3" style="background-color: white">
+        <h2>Delete '{{ entity.name }}'?</h2>
+        <hr class="mb-4" />
+        <p>This action cannot be undone.</p>
+        <h3 class="error-text">
+          <strong>Are you sure you want to do this? </strong>
+        </h3>
+        <v-btn color="error" @click="doEntityDelete()"
+          ><v-icon class="mr-2">mdi-delete</v-icon> YES
+        </v-btn>
+        <v-btn
+          color="secondary"
+          class="float-right"
+          @click="showEntityDeleteDialog = false"
+          >No
+        </v-btn>
+      </v-container>
+    </v-dialog>
+    <v-dialog v-model="duplicationDialogVisible" max-width="600px">
+      <v-container class="pb-3" style="background-color: white">
+        <v-form v-model="duplicateIsValid">
+          <h2>Duplicate Entity</h2>
+          <p>
+            This will duplicate the entire entity including all attributes and
+            connections.
+          </p>
+          <hr class="mb-4" />
+          <v-text-field
+            v-model="duplicateName"
+            dense
+            outlined
+            label="New entity name"
+            :rules="duplicateRequiredRule"
+          ></v-text-field>
+
+          <v-btn
+            color="primary"
+            @click="doDuplicate()"
+            :disabled="!duplicateIsValid"
+            ><v-icon class="mr-2">mdi-content-copy</v-icon> Duplicate
+          </v-btn>
+          <v-btn
+            color="secondary"
+            class="float-right"
+            @click="duplicationDialogVisible = false"
+            >Cancel
+          </v-btn>
+        </v-form>
+      </v-container>
+    </v-dialog>
+
+    <notifications ref="notifier"></notifications>
   </div>
 </template>
 
@@ -464,10 +565,13 @@
 import axios from "axios";
 import { ENTITY_URL } from "../urls";
 import router from "../router";
+import store from "../store";
 
 export default {
   name: "Form",
   data: () => ({
+    showEntityDeleteDialog: false,
+
     tab: 0,
     showError: null,
     snackbar: null,
@@ -533,6 +637,13 @@ export default {
     changes: [],
 
     changeRequests: [],
+
+    duplicateName: "",
+    duplicationDialogVisible: false,
+    duplicateIsValid: true,
+    duplicateRequiredRule: [(v) => !!v || "New entity name is required"],
+
+    isWatched: false,
   }),
   computed: {
     formTitle() {
@@ -567,7 +678,7 @@ export default {
     loadEntity(id) {
       axios
         .get(`${ENTITY_URL}/${id}`)
-        .then((result) => {
+        .then(async (result) => {
           this.entity = result.data.data;
           this.attributes = this.entity.attributes;
 
@@ -577,11 +688,14 @@ export default {
           if (!this.entity.values) this.entity.values = new Array();
           this.values = this.entity.values;
 
+          this.isWatched= await store.dispatch("profile/isWatched", id);
+
           this.loadChanges(id);
           this.loadChangeRequests(id);
         })
         .catch((err) => {
           console.log(err);
+          router.push("/entity");
         });
     },
 
@@ -753,16 +867,12 @@ export default {
     },
 
     removeConnection(item) {
-      console.log("REMOVING CONECOITN TO ", item);
-
       axios
         .delete(
           `${ENTITY_URL}/${this.entity_id}/connection/${item._id || item.id}`
         )
         .then((results) => {
-          console.log(results);
           this.entity = results.data.data;
-          //this.closeConnectionDialog();
           this.$refs.upConn.closeDialog();
         })
         .catch((error) => {
@@ -793,6 +903,56 @@ export default {
 
     changeRequestClick(item) {
       router.push(`/entity/${this.entity_id}/change-request/${item._id}`);
+    },
+
+    showEntityDelete() {
+      this.showEntityDeleteDialog = true;
+    },
+
+    doEntityDelete() {
+      axios
+        .delete(`${ENTITY_URL}/${this.entity_id}`)
+        .then(() => {
+          router.push(`/entity`);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
+    showDuplicateDialog() {
+      this.duplicateName = "";
+      this.duplicationDialogVisible = true;
+    },
+    doDuplicate() {
+      axios
+        .post(`${ENTITY_URL}/${this.entity_id}/duplicate`, {
+          name: this.duplicateName,
+        })
+        .then((results) => {
+          router.push(`/entity/${results.data.data.insertedId}`);
+          this.duplicationDialogVisible = false;
+          this.notifier;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
+    toggleWatched() {
+      if (this.isWatched) {
+        store.dispatch("profile/removeWatchlist", this.entity);
+        this.$refs.notifier.showSuccess(
+          `${this.entity.name} has been removed from your watchlist`
+        );
+      } else {
+        store.dispatch("profile/addWatchlist", this.entity);
+        this.$refs.notifier.showSuccess(
+          `${this.entity.name} has been added to your watchlist`
+        );
+      }
+
+      this.isWatched = !this.isWatched;
     },
   },
 };

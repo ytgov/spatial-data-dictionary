@@ -5,7 +5,7 @@
       divider="/"
       :items="[
         { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Entities', href:'/entity' },
+        { text: 'Entities', href: '/entity' },
         { text: 'Create Entity' },
       ]"
     ></v-breadcrumbs>
@@ -44,6 +44,7 @@
             outlined
             label="Location (required)"
             required
+            :rules="requiredRule"
             hide-details
             item-value="_id"
             item-text="name"
@@ -73,7 +74,9 @@
             required
             multiple
             item-value="_id"
-            item-text="name"
+            item-text="display_name"
+            hint="Location: Name"
+            persistent-hint
           ></v-autocomplete>
         </div>
       </div>
@@ -118,6 +121,7 @@ export default {
       (v) => !!v || "Name is required",
       (v) => (v && v.length > 2) || "Name must be more than 2 characters",
     ],
+    requiredRule: [(v) => !!v || "This is required"],
     description: "",
     location: "",
     programs: [],
@@ -130,6 +134,10 @@ export default {
       .get(ENTITY_URL)
       .then((results) => {
         this.list = results.data.data;
+
+        this.list.map(
+          (e) => (e.display_name = `${e.location.name}: ${e.name}`)
+        );
       })
       .catch((err) => {
         console.err(err);

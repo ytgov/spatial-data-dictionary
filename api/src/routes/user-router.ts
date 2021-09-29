@@ -10,6 +10,27 @@ userRouter.get("/me", RequiresAuthentication, async (req: Request, res: Response
     return res.json({ data: currentUser });
 });
 
+userRouter.get("/me/watchlist", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
+    let currentUser = req.user as AuthUser;
+
+    let db = req.store as Storage;
+    let watchlistObj = await db.EntityWatch.getAll({ email: currentUser.email });
+
+    if (watchlistObj && watchlistObj.length > 0)
+    return res.json({ data: watchlistObj[0].watchlist });
+});
+
+userRouter.post("/me/watchlist", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
+    let currentUser = req.user as AuthUser;
+
+    let { watchlist } = req.body;
+    let db = req.store as Storage;
+    await db.EntityWatch.deleteWhere({ email: currentUser.email });
+    await db.EntityWatch.create({ email: currentUser.email, watchlist });
+
+    return res.json({ data: [{ name: "Poop", id: "1234" }] });
+});
+
 userRouter.get("/", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     let db = req.store as Storage;
 

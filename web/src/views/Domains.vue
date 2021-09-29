@@ -8,6 +8,13 @@
 
     <div class="row mt-5" style="clear: both">
       <div class="col-md-8">
+        <v-text-field
+          v-model="search"
+          label="Search"
+          dense
+          outlined
+          clearable
+        ></v-text-field>
         <v-card class="" color="#fff2d5">
           <v-data-table
             :headers="itemHeaders"
@@ -19,6 +26,8 @@
         <v-card class="mt-5" v-if="showForm" color="#fff2d5">
           <v-card-title>Values for {{editName}}</v-card-title>
           <v-data-table
+            :search="search"
+            dense
             :headers="valueHeaders"
             :items="editValues"
           ></v-data-table>
@@ -109,6 +118,7 @@ export default {
       { text: "Value", value: "value" },
       { text: "Description", value: "description" },
     ],
+    search: "",
   }),
   created() {
     axios

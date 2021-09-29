@@ -12,16 +12,18 @@
         label="Connection Type"
       ></v-select>
 
-      <v-select
+      <v-autocomplete
         :items="entityOptions"
         v-if="connectionType == 'Source Entity'"
         v-model="selectedEntity"
-        item-text="name"
+        item-text="display_name"
         item-value="_id"
         dense
         outlined
+        hint="Location: Name"
+        persistent-hint
         label="Select a Source Entity"
-      ></v-select>
+      ></v-autocomplete>
 
       <v-select
         :items="personOptions"
@@ -132,6 +134,9 @@ export default {
       .get(ENTITY_URL)
       .then((result) => {
         this.allEntities = result.data.data;
+        this.allEntities.map(
+          (e) => (e.display_name = `${e.location.name}: ${e.name}`)
+        );
       })
       .catch((error) => {
         console.error(error);
@@ -155,18 +160,15 @@ export default {
     openDialog() {
       this.isOpen = true;
 
-
       let existingIds = this.existingEntities.map((e) => e.id);
       this.entityOptions = [];
 
-      console.log("EXIST", existingIds)
+      console.log("EXIST", existingIds);
 
       this.allEntities.forEach((e) => {
         if (existingIds.indexOf(e._id) == -1 && this.self._id != e._id)
           this.entityOptions.push(e);
       });
-
-
     },
     closeDialog() {
       this.isOpen = null;
@@ -177,8 +179,11 @@ export default {
       this.connectionType = "Source Entity";
       this.selectedPerson = this.personOptions[0];
       this.selectedEntity = null;
-      this.personRole = this.newPersonFirstName = this.newPersonLastName = this.newPersonEmail =
-        "";
+      this.personRole =
+        this.newPersonFirstName =
+        this.newPersonLastName =
+        this.newPersonEmail =
+          "";
     },
     displayName(person) {
       return `${person.first_name} ${person.last_name}`;

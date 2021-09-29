@@ -18,8 +18,16 @@
     <p>Programs represent business areas of management sectors. Entities are assigned to one or more programs. </p>
     <div class="row mt-5" style="clear: both">
       <div class="col-md-8">
+        <v-text-field
+          v-model="search"
+          label="Search"
+          dense
+          outlined
+          clearable
+        ></v-text-field>
         <v-card class="" color="#fff2d5">
           <v-data-table
+            :search="search"
             :headers="itemHeaders"
             :items="items"
             @click:row="rowClick"
@@ -95,6 +103,7 @@ export default {
       { text: "Name", value: "name" },
       { text: "Program Manager", value: "approver_name" },
     ],
+    search: "",
   }),
   created() {
     axios

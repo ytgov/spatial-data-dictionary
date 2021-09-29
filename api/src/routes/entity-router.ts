@@ -3,10 +3,10 @@ import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
 import { Attribute, AuthUser, Entity, SearchResult } from "../data";
 import { EntityService, GenericService, LocationService, ProgramService } from "../services";
-import { ObjectId } from "mongodb";
 import { v4 as uuidV4 } from "uuid";
 import { GraphBuilder } from "../utils/directed-graph";
 import moment from "moment";
+import _ from "lodash";
 
 export const entityRouter = express.Router();
 
@@ -25,19 +25,7 @@ entityRouter.get("/", RequiresData, RequiresAuthentication, async (req: Request,
 
 entityRouter.post("/", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     let db = req.store.Entities as EntityService;
-    //let query = { 'user.username': "datajohnson" };
-
-    if (req.body.links && req.body.links.people) {
-        req.body.links.people.forEach((element: any) => {
-            element.id = new ObjectId(element.id);
-        });
-    }
-
-    if (req.body.links && req.body.links.entities) {
-        req.body.links.entities.forEach((element: any) => {
-            element.id = new ObjectId(element.id);
-        });
-    }
+    req.body.entity_type = "Table";
 
     let results = await db.create(req.user, req.body);
 
@@ -555,6 +543,48 @@ entityRouter.delete("/:id", [param("id").notEmpty().isMongoId()], RequiresData, 
 
         let db = req.store.Entities as EntityService;
         let { id } = req.params;
+        let entity = await db.getById(id);
+
+        if (entity) {
+            // find all of the connections to this entity and remove them first
+            let entityAttrIds = entity.attributes.map(a => a._id);
+            let childLinks = await db.findDownLinks(entity._id);
+
+            if (childLinks && childLinks.length > 0) {
+
+                for (let link of childLinks) {
+                    let childEntity = await db.getById(link._id);
+
+                    if (childEntity) {
+                        childEntity.links.entities = childEntity.links.entities.filter((e: any) => e.id != id);
+
+                        for (let attr of childEntity.attributes) {
+                            if (attr.source && attr.source.id && entityAttrIds.indexOf(attr.source.id) >= 0) {
+                                delete attr.source;
+                                delete (attr as any).oldName;
+                            }
+                        }
+
+                        await db.update(childEntity._id, childEntity);
+                    }
+                }
+            }
+
+            const requestDb = req.store.ChangeRequests as GenericService;
+            const changeDb = req.store.Changes as GenericService;
+
+            let requests = await requestDb.getAll({ entity_id: id });
+            let changes = await changeDb.getAll({ entity_id: id });
+
+            for (let request of requests) {
+                await requestDb.delete(request._id);
+            }
+
+            for (let change of changes) {
+                await changeDb.delete(change._id);
+            }
+        }
+
         let results = await db.delete(id);
 
         return res.json({ messages: [{ variant: "success", text: "Entity deleted" }] });
@@ -599,6 +629,32 @@ entityRouter.post("/:id/attribute", RequiresData, RequiresAuthentication,
         res.status(404).send();
     });
 
+entityRouter.post("/:id/duplicate", RequiresData, RequiresAuthentication,
+    [param("id").notEmpty().isMongoId(), body("name").notEmpty()],
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        let db = req.store.Entities as EntityService;
+        let { id } = req.params;
+        let { name } = req.body;
+        let entity = await db.getById(id);
+
+        if (entity) {
+            let newEntity = _.clone(entity) as Entity;
+            newEntity.name = name;
+            delete newEntity._id;
+            delete newEntity.id;
+            newEntity = await db.create(req.user, newEntity);
+            return res.json({ data: newEntity });
+        }
+
+        res.status(404).send();
+    });
+
 entityRouter.post("/:id/connection", RequiresData, RequiresAuthentication,
     [
         param("id").notEmpty().isMongoId(),
@@ -616,13 +672,6 @@ entityRouter.post("/:id/connection", RequiresData, RequiresAuthentication,
         let { id } = req.params;
         let { connectionType, selectedEntity, selectedPerson, personRole, newPersonEmail, newPersonFirstName, newPersonLastName } = req.body;
         console.log("ADDING CONNECTION TO ", req.body)
-
-        /* connectionType: "Person"
-        newPersonEmail: "michael@icefoganalytics.com"
-        newPersonFirstName: "Michael"
-        newPersonLastName: "Johnson"
-        personRole: "Manager"
-        selectedEntity: null */
 
         let entity = await db.getById(id);
 
@@ -714,10 +763,12 @@ async function buildConnections(entity: Entity, req: Request) {
     const programDB = req.store.Programs as ProgramService;
     const locationDB = req.store.Locations as LocationService;
 
+    const allLocations = await locationDB.getAll({});
+
     if (entity.location) {
         entity.location.name = "Unknown";
 
-        let location = await locationDB.getById(entity.location.id);
+        let location = allLocations.filter(l => l._id == entity.location.id)[0];// await locationDB.getById(entity.location.id);
 
         if (location) {
             entity.location.name = location.name;
@@ -777,14 +828,14 @@ async function buildConnections(entity: Entity, req: Request) {
         if (entity.links.entities) {
             for (let item of entity.links.entities) {
                 item.name = "Unknown";
-                let entity = await db.getById(item.id);
+                let le = await db.getById(item.id);
 
-                if (entity) {
-                    item.name = entity.name;
-                    item.attributes = entity.attributes;
-                    item.description = entity.description;
-                    item.status = entity.status;
-                    item.location = entity.location;
+                if (le) {
+                    item.name = le.name;
+                    item.attributes = le.attributes;
+                    item.description = le.description;
+                    item.status = le.status;
+                    item.location = allLocations.filter(l => l._id == le?.location.id)[0];
                 }
             }
         }
@@ -817,6 +868,11 @@ async function buildConnections(entity: Entity, req: Request) {
 
         let childLinks = await db.findDownLinks(entity._id);
         if (childLinks && childLinks.length > 0) {
+
+            for (let item of childLinks) {
+                item.location = allLocations.filter(l => l._id == item?.location.id)[0];
+            }
+
             entity.links.downstream = childLinks;
         }
     }
