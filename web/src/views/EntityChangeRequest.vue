@@ -19,6 +19,7 @@
 
           <status-chip :status="entity.status"></status-chip>
           <location-chip :location="entity.location.type"></location-chip>
+          <entity-type-chip :type="entity.entity_type"></entity-type-chip>
 
           <br />
           <v-chip
@@ -33,15 +34,23 @@
         </h1>
       </div>
       <div style="float: right; text-align: right">
-        <h2 class="mb-1">
-          {{ entity.location.name }}<br />
-          <span
-            class="program-link"
-            v-for="program of entity.links.programs"
-            v-bind:key="program.id"
-            >{{ program.name }}</span
-          >
-        </h2>
+        <div style="float: right; text-align: right">
+          <h2 class="mb-1">
+            <router-link :to="'/entity?location=' + entity.location.id">{{
+              entity.location.name
+            }}</router-link
+            ><br />
+            <span
+              class="program-link"
+              v-for="program of entity.links.programs"
+              v-bind:key="program.id"
+            >
+              <router-link :to="'/entity?program=' + program.id">{{
+                program.name
+              }}</router-link></span
+            >
+          </h2>
+        </div>
       </div>
     </div>
 
@@ -128,20 +137,42 @@
         <v-card color="#fff2d5" class="mb-5">
           <v-card-title>Required Approvals</v-card-title>
           <v-card-text v-if="showApprovals">
-            <h3>
-              Location: {{ entity.location.name }}:
-              <span style="font-weight: 400">{{
-                entity.location.approver_name
-              }}</span>
-            </h3>
+            <h3 class="mb-0">Location:  <span style="font-weight: 400">{{ entity.location.name }}</span></h3>
 
-            <h3
+            <ul class="mb-3">
+              <li
+                style="font-weight: 400"
+                v-for="(ca, idx) of entity.location.change_approvers"
+                :key="idx"
+              >
+                {{ ca.name }} (
+                <span v-for="mem of ca.members" :key="mem._id">
+                  {{ mem.first_name }} {{ mem.last_name }}
+                </span>
+                )
+              </li>
+            </ul>
+
+            <div
               v-for="program of entity.links.programs"
               v-bind:key="program.id"
             >
-              Program: {{ program.name }}:
-              <span style="font-weight: 400">{{ program.approver_name }}</span>
-            </h3>
+              <h3 class="mb-0">Program: <span style="font-weight: 400">{{ program.name }}</span></h3>
+
+              <ul class="mb-3">
+                <li
+                  
+                  v-for="(ca, idx) of program.change_approvers"
+                  :key="idx"
+                >
+                  {{ ca.name }} (
+                  <span v-for="mem of ca.members" :key="mem._id" class="person-list">
+                    {{ mem.first_name }} {{ mem.last_name }}<span class="person-sep"> or</span>
+                  </span>
+                  )
+                </li>
+              </ul>
+            </div>
           </v-card-text>
           <v-card-text v-if="!showApprovals">
             <h3>

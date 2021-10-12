@@ -93,3 +93,7 @@ a {
 .error-text {
     color: #ff5252 !important;
 }
+
+.person-list:last-child .person-sep {
+    display:none;
+}

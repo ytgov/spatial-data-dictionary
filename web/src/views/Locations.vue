@@ -76,11 +76,23 @@
               ></v-textarea>
 
               <v-select
-                label="Approver"
-                :items="peopleOptions"
-                v-model="editApprover"
-                item-text="display_name"
+                label="Change approval role"
+                :items="roleOptions"
+                v-model="editChangeApprover"
+                item-text="name"
                 item-value="_id"
+                multiple
+                dense
+                outlined
+                background-color="white"
+              ></v-select>
+              <v-select
+                label="Implementer role"
+                :items="roleOptions"
+                v-model="editImplementer"
+                item-text="name"
+                item-value="_id"
+                multiple
                 dense
                 outlined
                 background-color="white"
@@ -111,7 +123,7 @@
 
 <script>
 import axios from "axios";
-import { LOCATION_URL, PERSON_URL } from "../urls";
+import { LOCATION_URL, PERSON_URL, ROLE_URL } from "../urls";
 
 export default {
   name: "Locations",
@@ -123,7 +135,8 @@ export default {
     editType: "Database",
     editDescription: "",
     editDetails: "",
-    editApprover: {},
+    editChangeApprover: [],
+    editImplementer: [],
     typeOptions: ["Database", "Geodatabase", "Web", "Directory"],
     items: [],
     itemHeaders: [
@@ -131,7 +144,6 @@ export default {
       { text: "Type", value: "type" },
       { text: "Details", value: "details" },
       { text: "Description", value: "description" },
-      { text: "Approver", value: "approver_name" },
     ],
     peopleOptions: [],
     search: "",
@@ -153,6 +165,14 @@ export default {
       .catch((error) => {
         console.error(error);
       });
+    axios
+      .get(`${ROLE_URL}`)
+      .then((result) => {
+        this.roleOptions = result.data.data;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   },
   methods: {
     createClick() {
@@ -163,7 +183,8 @@ export default {
       this.editDetails = "";
       this.isCreate = true;
       this.showForm = true;
-      this.editApprover = {};
+      this.editChangeApprover = [];
+      this.editImplementer = [];
     },
     updateLocation() {},
     removeLocation() {},
@@ -175,7 +196,8 @@ export default {
       this.editDescription = item.description;
       this.editDetails = item.details;
       this.showForm = true;
-      this.editApprover = item.approver_id;
+      this.editChangeApprover = item.change_approver;
+      this.editImplementer = item.implementer_role;
     },
     saveClick() {
       if (this.isCreate) {
@@ -185,7 +207,8 @@ export default {
             type: this.editType,
             description: this.editDescription,
             details: this.editDetails,
-            approver_id: this.editApprover,
+            change_approver: this.editChangeApprover,
+            implementer_role: this.editImplementer,
           })
           .then((result) => {
             if (result && result.data.data) {
@@ -203,7 +226,8 @@ export default {
             type: this.editType,
             description: this.editDescription,
             details: this.editDetails,
-            approver_id: this.editApprover,
+            change_approver: this.editChangeApprover,
+            implementer_role: this.editImplementer,
           })
           .then((result) => {
             if (result && result.data.data) {

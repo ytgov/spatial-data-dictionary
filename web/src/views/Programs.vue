@@ -3,19 +3,19 @@
     <v-breadcrumbs
       class="pl-0"
       divider="/"
-      :items="[
-        { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Programs' },
-      ]"
+      :items="[{ text: 'Dashboard', href: '/dashboard' }, { text: 'Programs' }]"
     ></v-breadcrumbs>
-    
+
     <v-btn color="primary" class="float-right mt-0" @click="createClick"
       ><v-icon>mdi-plus</v-icon> Create</v-btn
     >
     <h1>Programs</h1>
     <hr class="mb-3" />
 
-    <p>Programs represent business areas of management sectors. Entities are assigned to one or more programs. </p>
+    <p>
+      Programs represent business areas of management sectors. Entities are
+      assigned to one or more programs.
+    </p>
     <div class="row mt-5" style="clear: both">
       <div class="col-md-8">
         <v-text-field
@@ -52,11 +52,23 @@
               ></v-text-field>
 
               <v-select
-                label="Program Manager"
+                label="Program manager"
                 :items="peopleOptions"
                 v-model="editManager"
                 item-text="display_name"
                 item-value="_id"
+                dense
+                outlined
+                background-color="white"
+              ></v-select>
+
+              <v-select
+                label="Change approval role"
+                :items="roleOptions"
+                v-model="editChangeApprover"
+                item-text="name"
+                item-value="_id"
+                multiple
                 dense
                 outlined
                 background-color="white"
@@ -87,7 +99,7 @@
 
 <script>
 import axios from "axios";
-import { PERSON_URL, PROGRAM_URL } from "../urls";
+import { PERSON_URL, PROGRAM_URL, ROLE_URL } from "../urls";
 
 export default {
   name: "Programs",
@@ -97,12 +109,14 @@ export default {
     editId: "",
     editName: "",
     editManager: {},
+    editChangeApprover: [],
     peopleOptions: [],
     items: [],
     itemHeaders: [
       { text: "Name", value: "name" },
       { text: "Program Manager", value: "approver_name" },
     ],
+    roleOptions: [],
     search: "",
   }),
   created() {
@@ -122,12 +136,21 @@ export default {
       .catch((error) => {
         console.error(error);
       });
+    axios
+      .get(`${ROLE_URL}`)
+      .then((result) => {
+        this.roleOptions = result.data.data;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   },
   methods: {
     createClick() {
       this.editId = "";
       this.editName = "";
       this.editManager = {};
+      this.editChangeApprover = [];
       this.isCreate = true;
       this.showForm = true;
     },
@@ -137,13 +160,18 @@ export default {
       this.isCreate = false;
       this.editName = item.name;
       this.editManager = item.approver_id;
+      this.editChangeApprover = item.change_approver;
       this.editId = item._id;
       this.showForm = true;
     },
     saveClick() {
       if (this.isCreate) {
         axios
-          .post(PROGRAM_URL, { name: this.editName, approver_id: this.editManager })
+          .post(PROGRAM_URL, {
+            name: this.editName,
+            approver_id: this.editManager,
+            change_approver: this.editChangeApprover,
+          })
           .then((result) => {
             if (result && result.data.data) {
               this.items = result.data.data;
@@ -158,6 +186,7 @@ export default {
           .put(`${PROGRAM_URL}/${this.editId}`, {
             name: this.editName,
             approver_id: this.editManager,
+            change_approver: this.editChangeApprover,
           })
           .then((result) => {
             if (result && result.data.data) {

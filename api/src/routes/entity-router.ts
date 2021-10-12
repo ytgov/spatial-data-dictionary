@@ -7,6 +7,7 @@ import { v4 as uuidV4 } from "uuid";
 import { GraphBuilder } from "../utils/directed-graph";
 import moment from "moment";
 import _ from "lodash";
+import { ObjectId } from "mongodb";
 
 export const entityRouter = express.Router();
 
@@ -762,6 +763,7 @@ async function buildConnections(entity: Entity, req: Request) {
     const userDB = req.store.Persons as GenericService;
     const programDB = req.store.Programs as ProgramService;
     const locationDB = req.store.Locations as LocationService;
+    const roleDB = req.store.Roles as GenericService;
 
     const allLocations = await locationDB.getAll({});
 
@@ -774,12 +776,19 @@ async function buildConnections(entity: Entity, req: Request) {
             entity.location.name = location.name;
             entity.location.type = location.type;
             entity.location.description = location.description;
-            entity.location.approver_id = location.approver_id;
+            entity.location.change_approvers = new Array<any>();
 
-            let approver = await userDB.getById(location.approver_id);
+            if (location.change_approver) {
+                for (let r of location.change_approver) {
+                    let role = await roleDB.getById(location.change_approver.toString());
 
-            if (approver)
-                entity.location.approver_name = `${approver.first_name} ${approver.last_name}`;
+                    if (role) {
+                        let rpUsers = await userDB.getAll({ additional_roles: role._id.toString() })
+                        role.members = rpUsers;
+                        entity.location.change_approvers.push(role);
+                    }
+                }
+            }
         }
     }
 
@@ -849,12 +858,19 @@ async function buildConnections(entity: Entity, req: Request) {
 
                 if (program) {
                     item.name = program.name;
-                    item.approver_id = program.approver_id;
+                    item.change_approvers = new Array<any>();
 
-                    let approver = await userDB.getById(program.approver_id);
+                    if (program.change_approver) {
+                        for (let r of program.change_approver) {
+                            let role = await roleDB.getById(r.toString());
 
-                    if (approver)
-                        item.approver_name = `${approver.first_name} ${approver.last_name}`;
+                            if (role) {
+                                let rpUsers = await userDB.getAll({ additional_roles: role._id.toString() })
+                                role.members = rpUsers;
+                                item.change_approvers.push(role);
+                            }
+                        }
+                    }
                 }
                 else {
                     toRemove.push(item);

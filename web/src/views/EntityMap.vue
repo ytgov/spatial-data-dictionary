@@ -63,7 +63,6 @@
     <p class="lead" style="clear: both">
       {{ entity.description }}
     </p>
-    <hr class="mb-1" />
 
     <div id="graph"></div>
 

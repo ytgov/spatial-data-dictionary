@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
+import { AuthUser } from "src/data";
 import { RequiresData, RequiresAuthentication } from "../middleware";
-import { GenericService } from "../services";
+import { EmailService, GenericService } from "../services";
 
 export const personRouter = express.Router();
 
@@ -73,7 +74,21 @@ personRouter.put("/:id", RequiresData, RequiresAuthentication,
         let db = req.store.Persons as GenericService;
         let { id } = req.params;
 
+        let existing = await db.getById(id);
+        console.log("EXISTN", existing)
+        console.log("UPD", req.body);
+        // maybe only send email if something important changed
+
         await db.update(id, req.body);
+
+        try {
+            let em = new EmailService();
+            await em.sendPersonChangeNotification(req.user as AuthUser)
+        }
+        catch (e: any) {
+            console.log("ERROR EMAILING")
+        }
+
         return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location edited" }] });
     });
 

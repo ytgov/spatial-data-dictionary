@@ -35,7 +35,7 @@ export const sections = [
         icon: "mdi-select-group"
     },
     {
-        name: "People",
+        name: "People & Roles",
         url: "/people",
         icon: "mdi-account-group"
     },

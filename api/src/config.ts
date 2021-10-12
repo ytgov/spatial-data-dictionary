@@ -41,3 +41,21 @@ export const MONGO_DB = process.env.MONGO_DB || "SDD";
 export const MONGO_URL = `mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`
 
 export const USE_LOCAL_AUTH = process.env.USE_LOCAL_AUTH == "true";
+
+export const MAIL_FROM = process.env.MAIL_FROM || "test@yukon.ca";
+export const MAIL_HOST = process.env.MAIL_HOST || "smtp.gov.yk.ca";
+export const MAIL_PORT = process.env.MAIL_PORT || 587;
+export const MAIL_USER = process.env.MAIL_USER || "admin";
+export const MAIL_PASS = process.env.MAIL_PASS || "admin";
+
+export const MAIL_CONFIG = {
+  host: MAIL_HOST,
+  port: MAIL_PORT,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: MAIL_USER,
+    pass: MAIL_PASS,
+  }
+};
+
+export const APPLICATION_NAME = process.env.APPLICATION_NAME || "Spatial Data Dictionary";
