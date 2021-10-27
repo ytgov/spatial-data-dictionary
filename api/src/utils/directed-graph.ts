@@ -1,10 +1,11 @@
-import { EntityService, LocationService } from "../services";
+import { EntityService, GenericService, LocationService } from "../services";
 import { Entity } from "../data/entity";
 import { v4 as uuidv4 } from "uuid";
 
 export class GraphBuilder {
     db: EntityService;
     locationDb: LocationService;
+    graphDb: GenericService;
     searched: string[];
 
     nodes: any[];
@@ -13,9 +14,12 @@ export class GraphBuilder {
     gotParentsFor: string[];
     gotChildrenFor: string[];
 
-    constructor(db: EntityService, locationDb: LocationService) {
+    positionData = { children: [] };
+
+    constructor(db: EntityService, locationDb: LocationService, graphDb: GenericService) {
         this.db = db;
         this.locationDb = locationDb;
+        this.graphDb = graphDb;
 
         this.searched = new Array<string>();
         this.nodes = new Array<any>();
@@ -29,11 +33,29 @@ export class GraphBuilder {
         this.edges = new Array<any>();
         let entity = await this.loadEntity(id);
 
+        let positions = await this.graphDb.getAll({ parent_id: id });
+
+        if (positions.length > 0) {
+            this.positionData = positions[0];
+        }
+
         if (entity) {
             this.searched.push(`${entity._id}`);
 
-            this.nodes.push({ group: "nodes", data: { id: `${entity._id}`, label: entity.name, parent: `${entity.location.id}` }, classes: ["brown"] });
-            this.nodes.push({ group: "nodes", data: { id: `${entity.location.id}`, label: `${entity.location.name}` }, classes: ["red"] })
+            let ePos = this.positionData.children.filter((c: any) => c.child_id == entity?._id);
+            let lPos = this.positionData.children.filter((c: any) => c.child_id == entity?.location.id);
+
+            let eNode = { group: "nodes", data: { id: `${entity._id}`, label: entity.name, parent: `${entity.location.id}` }, classes: ["brown"] };
+            let lNode = { group: "nodes", data: { id: `${entity.location.id}`, label: `${entity.location.name}` }, classes: ["red"] };
+
+            if (ePos.length > 0)
+                (eNode as any).position = { x: (ePos[0] as any).x, y: (ePos[0] as any).y };
+
+            if (lPos.length > 0)
+                (lNode as any).position = { x: (lPos[0] as any).x, y: (lPos[0] as any).y };
+
+            this.nodes.push(eNode);
+            this.nodes.push(lNode);
 
             await this.getParents(entity);
             await this.getChildren(entity);
@@ -66,13 +88,25 @@ export class GraphBuilder {
         let exists = this.nodes.filter(n => n.data.id == nodeId)
 
         if (exists.length == 0) {
-            this.nodes.push({ group: "nodes", data: { id: nodeId, label: node.name, parent: locId }, classes: ["blue"] });
+            let newNode = { group: "nodes", data: { id: nodeId, label: node.name, parent: locId }, classes: [node.entity_type == "Domain table" ? "domain" : "blue"] };
+            let ePos = this.positionData.children.filter((c: any) => c.child_id == nodeId);
+
+            if (ePos.length > 0)
+                (newNode as any).position = { x: (ePos[0] as any).x, y: (ePos[0] as any).y };
+
+            this.nodes.push(newNode);
         }
 
         exists = this.nodes.filter(n => n.data.id == locId)
 
         if (exists.length == 0) {
-            this.nodes.push({ group: "nodes", data: { id: locId, label: node.location.name }, classes: ["red"] });
+            let newNode = { group: "nodes", data: { id: locId, label: node.location.name }, classes: ["red"] };
+            let ePos = this.positionData.children.filter((c: any) => c.child_id == locId);
+
+            if (ePos.length > 0)
+                (newNode as any).position = { x: (ePos[0] as any).x, y: (ePos[0] as any).y };
+
+            this.nodes.push(newNode);
         }
     }
 
@@ -92,7 +126,9 @@ export class GraphBuilder {
                 this.nodes.push({ group: "edges", data: { id: `${uuidv4()}`, target: eId, source: parent.id, arrow: "triangle-tee" } })
 
                 await this.getParents(parentObj);
-                await this.getChildren(parentObj);
+
+                //if (parentObj.entity_type != "Domain table")
+                //await this.getChildren(parentObj);
 
                 this.searched.push(`${parentObj._id}`)
             }
@@ -115,7 +151,9 @@ export class GraphBuilder {
                 this.addNode(parentObj)
                 this.nodes.push({ group: "edges", data: { id: `${uuidv4()}`, source: eId, target: `${parent._id}`, arrow: "vee" } })
 
-                await this.getParents(parentObj);
+                //await this.getParents(parentObj);
+                
+                //if (entity.entity_type != "Domain table")
                 await this.getChildren(parentObj);
             }
         }

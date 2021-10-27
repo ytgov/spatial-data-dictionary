@@ -20,6 +20,7 @@ export class Storage {
     LocalUsers!: AuthService;
     EntityWatch!: GenericService;
     Roles!: GenericService;
+    GraphData!: GenericService;
 
     constructor() {
     }
@@ -46,6 +47,7 @@ export class Storage {
                     this.LocalUsers = new AuthService(this.mongoConnection.db(MONGO_DB).collection("LocalUsers"));
                     this.EntityWatch = new GenericService(this.mongoConnection.db(MONGO_DB).collection("EntityWatch"));
                     this.Roles = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Roles"));
+                    this.GraphData = new GenericService(this.mongoConnection.db(MONGO_DB).collection("GraphData"));
                     this.isInitialized = true;
                     resolve("Connected");
                 })

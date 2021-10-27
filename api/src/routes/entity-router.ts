@@ -206,12 +206,42 @@ entityRouter.get("/:id/graph-data", [param("id").notEmpty().isMongoId()], Requir
 
         const db = req.store.Entities as EntityService;
         const locationDB = req.store.Locations as LocationService;
+        const graphDB = req.store.GraphData as GenericService;
+
         let { id } = req.params;
 
-        let builder = new GraphBuilder(db, locationDB);
-        let graph = await builder.BuildGraphForEntity(id)
+        let builder = new GraphBuilder(db, locationDB, graphDB);
+        let graph = await builder.BuildGraphForEntity(id);
+        let hasPositions = (await graphDB.getAll({ parent_id: id })).length > 0
 
-        return res.json({ data: graph });
+        return res.json({ data: graph, layout: hasPositions ? "preset" : "grid" });
+    });
+
+entityRouter.put("/:id/graph-positions",
+    [param("id").notEmpty().isMongoId(), body("child_id").notEmpty()], RequiresData, RequiresAuthentication,
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        let { id } = req.params;
+        let { child_id, x, y } = req.body;
+        const db = req.store.GraphData as GenericService;
+        let existing = await db.getAll({ parent_id: id });
+
+        if (existing.length == 0) {
+            await db.create({ parent_id: id, children: [{ child_id, x, y }] });
+        }
+        else {
+            let item = existing[0];
+            item.children = item.children.filter((c: any) => c.child_id != child_id);
+            item.children.push({ child_id, x, y });
+            await db.update(item._id, item);
+        }
+
+        return res.json({ messages: [{ variant: "success", text: "Position saved" }] });
     });
 
 entityRouter.get("/:id/request-change", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,

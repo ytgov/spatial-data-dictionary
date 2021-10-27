@@ -1,6 +1,5 @@
 <template>
   <div class="" :key="entity_id">
-
     <v-breadcrumbs
       class="pl-0"
       divider="/"
@@ -22,8 +21,11 @@
             style="margin: 4px 0 12px 8px"
             small
             @click="toggleWatched()"
-            ><v-icon v-if="isWatched" title="Remove from watchlist">mdi-star</v-icon
-            ><v-icon v-if="!isWatched" title="Add to watchlist">mdi-star-outline</v-icon></v-btn
+            ><v-icon v-if="isWatched" title="Remove from watchlist"
+              >mdi-star</v-icon
+            ><v-icon v-if="!isWatched" title="Add to watchlist"
+              >mdi-star-outline</v-icon
+            ></v-btn
           ><br />
           <status-chip :status="entity.status"></status-chip>
           <location-chip :location="entity.location.type"></location-chip>
@@ -42,7 +44,7 @@
         </h1>
       </div>
       <div style="float: right; text-align: right">
-         <h2 class="mb-1">
+        <h2 class="mb-1">
           <router-link :to="'/entity?location=' + entity.location.id">{{
             entity.location.name
           }}</router-link
@@ -67,6 +69,59 @@
     <div id="graph"></div>
 
     <notifications ref="notifier"></notifications>
+
+    <v-dialog v-model="showPopup" max-width="700px">
+      <v-container class="pb-3" style="background-color: white">
+        <h2>{{ selectedEntity.name }}</h2>
+        <p class="lead">{{ selectedEntity.description }}</p>
+        <v-card>
+          <v-card-text>
+            <status-chip :status="selectedEntity.status"></status-chip>
+            <location-chip
+              :location="selectedEntity.location.type"
+            ></location-chip>
+            <entity-type-chip
+              :type="selectedEntity.entity_type"
+            ></entity-type-chip>
+
+            <br />
+            <v-chip
+              class="mr-2 mt-4"
+              v-for="tag of selectedEntity.tags"
+              v-bind:key="tag"
+              link
+              :to="'/tags/' + tag"
+            >
+              <v-icon left> mdi-tag </v-icon>{{ tag }}
+            </v-chip>
+
+            <div
+              class="mt-5"
+              style="max-height: 200px; overflow-y: scroll"
+              v-if="selectedEntity.attributes"
+            >
+              <v-divider class="mb-4"></v-divider>
+              <h3>Attributes</h3>
+
+              <p
+                v-for="(attr, i) of selectedEntity.attributes"
+                :key="i"
+                class="mb-1"
+              >
+                {{ attr.name }} : {{ attr.type }}
+              </p>
+            </div>
+          </v-card-text>
+        </v-card>
+        <v-btn color="primary" class="mr-4" :to="`/entity/${selectedId}`">
+          <v-icon class="mr-2">mdi-link-variant</v-icon> View Entity Details
+        </v-btn>
+
+        <v-btn color="primary" :to="`/entity/${selectedId}/map`">
+          <v-icon class="mr-2">mdi-graph</v-icon> View Entity Graph
+        </v-btn>
+      </v-container>
+    </v-dialog>
   </div>
 </template>
 
@@ -76,7 +131,7 @@
   min-height: 500px;
   border: 1px #bbb solid;
   background-color: #eee;
-  padding: 10px 20px
+  padding: 10px 20px;
 }
 </style>
 <script>
@@ -86,8 +141,13 @@ import { ENTITY_URL } from "../urls";
 import store from "../store";
 
 import cytoscape from "cytoscape";
-import cola from 'cytoscape-cola';
+//import cola from "cytoscape-cola";
 
+//npm install cytoscape-sbgn-stylesheet
+//var sbgnStylesheet = require('cytoscape-sbgn-stylesheet');
+// https://github.com/PathwayCommons/cytoscape-sbgn-stylesheet
+
+let monkey = null;
 
 export default {
   name: "Form",
@@ -111,6 +171,13 @@ export default {
     changeDateMenu: null,
 
     isWatched: false,
+
+    showPopup: null,
+    selectedName: "",
+    selectedId: "",
+    selectedEntity: { location: {} },
+    graphObj: null,
+    testing: "htppy.om"
   }),
   computed: {},
   watch: {
@@ -122,8 +189,10 @@ export default {
     },
     "$route.params.id": {
       handler: function (id) {
-        this.entity_id = id;
-        this.loadEntity(this.entity_id);
+        this.loadEntity(id);
+        this.showPopup = null;
+        this.selectedName = "";
+        this.selectedId = "";
       },
       deep: true,
       immediate: true,
@@ -132,16 +201,20 @@ export default {
   created() {
     this.entity_id = this.$route.params.id;
     this.loadEntity(this.entity_id);
-    this.buildMap();
   },
   methods: {
     initialize() {},
     loadEntity(id) {
+      if (id == this.entity_id) return;
+
+      this.entity_id = id;
+
       axios
         .get(`${ENTITY_URL}/${id}`)
         .then(async (result) => {
           this.entity = result.data.data;
-          this.isWatched= await store.dispatch("profile/isWatched", id);
+          this.isWatched = await store.dispatch("profile/isWatched", id);
+          this.buildMap();
         })
         .catch((err) => {
           console.log(err);
@@ -152,11 +225,9 @@ export default {
         .get(`${ENTITY_URL}/${this.entity_id}/graph-data`)
         .then((result) => {
           let elements = result.data.data;
+          let dataLayout = result.data.layout;
 
-          cytoscape.use(cola);
-
-          //let cy = 
-          cytoscape({
+          let cy = cytoscape({
             container: document.getElementById("graph"), // container to render in
             style: [
               {
@@ -164,7 +235,15 @@ export default {
                 style: {
                   "background-color": "#2196f3",
                   label: "data(label)",
-                  shape: "round-rectangle"
+                  shape: "round-rectangle",
+                },
+              },
+              {
+                selector: "node.domain",
+                style: {
+                  "background-color": "#dc4405",
+                  label: "data(label)",
+                  shape: "octagon",
                 },
               },
               {
@@ -172,7 +251,7 @@ export default {
                 style: {
                   "background-color": "#fff2d5",
                   label: "data(label)",
-                  shape: "round-rectangle"
+                  shape: "triangle",
                 },
               },
               {
@@ -180,7 +259,7 @@ export default {
                 style: {
                   "background-color": "#4caf50",
                   label: "data(label)",
-                  shape: "star"
+                  shape: "star",
                 },
               },
               {
@@ -190,7 +269,7 @@ export default {
                   "curve-style": "straight",
                   "target-arrow-shape": "data(arrow)",
                   "target-arrow-color": "#323232",
-                  "line-color": "#323232"
+                  "line-color": "#323232",
                 },
               },
 
@@ -198,20 +277,57 @@ export default {
                 selector: "edge[arrow]",
                 style: {
                   "target-arrow-shape": "data(arrow)",
-                  "background-color": "#323232"
+                  "background-color": "#323232",
                 },
               },
             ],
             elements: elements,
-            userZoomingEnabled: false,
-            panningEnabled: false,
+            //userZoomingEnabled: false,
+            //panningEnabled: false,
             layout: {
-              name: "cola",
-              fit: true,
-              nodeDimensionsIncludeLabels: true, 
+              name: dataLayout,
+              //fit: true,
+               nodeDimensionsIncludeLabels: true,
             },
           });
-          //cy.fit();
+
+          let self = this;
+
+          cy.on("select", function (event) {
+            let node = event.target[0];
+
+            if (node.children().length > 0) return;
+            if (node.group() == "edges") return
+
+            let id = node.id();
+            let group = node.group();
+
+            self.selectedId = id;
+            self.loadEntityInfo(id, group);
+          });
+
+          cy.on("dragfreeon", async function (event) {
+            if (event.target[0].children().length > 0) {
+              for (let child of event.target[0].children()) {
+                console.log(child.position());
+
+                await self.savePosition(
+                  child.id(),
+                  child.position().x,
+                  child.position().y
+                );
+              }
+            } else {
+              await self.savePosition(
+                event.target[0].id(),
+                event.target[0].position().x,
+                event.target[0].position().y
+              );
+            }
+            cy.fit();
+          });
+
+         monkey = cy;
         })
         .catch((err) => {
           console.log(err);
@@ -231,6 +347,32 @@ export default {
       }
 
       this.isWatched = !this.isWatched;
+    },
+
+    loadEntityInfo(id) {
+      axios.get(`${ENTITY_URL}/${id}`).then((resp) => {
+        this.selectedEntity = resp.data.data;
+        this.selectedName = resp.data.data.name;
+
+        this.showPopup = true;
+      });
+    },
+
+    savePosition(id, x, y) {
+      axios
+        .put(`${ENTITY_URL}/${this.entity_id}/graph-positions`, {
+          child_id: id,
+          x,
+          y,
+        })
+        .then((resp) => {
+          this.$refs.notifier.showAPIMessages(resp.data);
+        });
+    },
+
+    doPrint() {
+      let t= monkey.png();
+      this.testing = t;
     },
   },
 };

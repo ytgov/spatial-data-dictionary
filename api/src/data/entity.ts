@@ -36,6 +36,7 @@ export interface Entity { // a table or layer or file
     search_reason?: string;
     create_date: Date;
     create_user: string;
+    entity_type?: string;
 }
 
 export enum EntityStatus {
