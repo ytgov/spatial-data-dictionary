@@ -21,6 +21,7 @@ export class Storage {
     EntityWatch!: GenericService;
     Roles!: GenericService;
     GraphData!: GenericService;
+    Subscriptions!: GenericService;
 
     constructor() {
     }
@@ -48,6 +49,7 @@ export class Storage {
                     this.EntityWatch = new GenericService(this.mongoConnection.db(MONGO_DB).collection("EntityWatch"));
                     this.Roles = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Roles"));
                     this.GraphData = new GenericService(this.mongoConnection.db(MONGO_DB).collection("GraphData"));
+                    this.Subscriptions = new GenericService(this.mongoConnection.db(MONGO_DB).collection("Subscriptions"));
                     this.isInitialized = true;
                     resolve("Connected");
                 })

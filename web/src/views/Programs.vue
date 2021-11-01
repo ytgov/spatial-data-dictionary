@@ -31,7 +31,24 @@
             :headers="itemHeaders"
             :items="items"
             @click:row="rowClick"
-          ></v-data-table>
+          >
+            <template v-slot:item.action="{ item }">
+              <v-btn
+                color="primary"
+                icon
+                small
+                class="mx-0 my-0"
+                @click.stop="toggleSubscribe(item)"
+              >
+                <v-icon v-if="!item.is_subscribed" title="Subscribe"
+                  >mdi-email-plus-outline</v-icon
+                >
+                <v-icon v-if="item.is_subscribed" title="Unsubscribe"
+                  >mdi-email-minus</v-icon
+                >
+              </v-btn>
+            </template>
+          </v-data-table>
         </v-card>
       </div>
       <div class="col-md-4">
@@ -94,12 +111,13 @@
         </v-card>
       </div>
     </div>
+    <notifications ref="notifier"></notifications>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { PERSON_URL, PROGRAM_URL, ROLE_URL } from "../urls";
+import { PERSON_URL, PROGRAM_URL, ROLE_URL, SUBSCRIPTION_URL } from "../urls";
 
 export default {
   name: "Programs",
@@ -113,6 +131,7 @@ export default {
     peopleOptions: [],
     items: [],
     itemHeaders: [
+      { text: "", value: "action" },
       { text: "Name", value: "name" },
       { text: "Program Manager", value: "approver_name" },
     ],
@@ -120,14 +139,8 @@ export default {
     search: "",
   }),
   created() {
-    axios
-      .get(PROGRAM_URL)
-      .then((result) => {
-        this.items = result.data.data;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    this.loadPrograms();
+
     axios
       .get(`${PERSON_URL}`)
       .then((result) => {
@@ -146,6 +159,17 @@ export default {
       });
   },
   methods: {
+    loadPrograms() {
+      axios
+        .get(PROGRAM_URL)
+        .then((result) => {
+          this.items = result.data.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
     createClick() {
       this.editId = "";
       this.editName = "";
@@ -154,8 +178,11 @@ export default {
       this.isCreate = true;
       this.showForm = true;
     },
+
     updateLocation() {},
+
     removeLocation() {},
+
     rowClick(item) {
       this.isCreate = false;
       this.editName = item.name;
@@ -164,6 +191,7 @@ export default {
       this.editId = item._id;
       this.showForm = true;
     },
+
     saveClick() {
       if (this.isCreate) {
         axios
@@ -199,6 +227,7 @@ export default {
           });
       }
     },
+
     removeClick() {
       if (this.editId && this.editId.length > 2) {
         axios
@@ -214,6 +243,18 @@ export default {
             console.error(error);
           });
       }
+    },
+
+    toggleSubscribe(item) {
+      let body = {
+        type: "Program",
+        id: item._id,
+      };
+
+      axios.put(`${SUBSCRIPTION_URL}`, body).then((resp) => {
+        this.$refs.notifier.showAPIMessages(resp.data);
+        this.loadPrograms();
+      });
     },
   },
 };

@@ -8,9 +8,16 @@ export const programRouter = express.Router();
 programRouter.get("/", RequiresData, RequiresAuthentication,
     async (req: Request, res: Response) => {
         let db = req.store.Programs as ProgramService;
+        let subDb = req.store.Subscriptions as GenericService;
         let list = await db.getAll();
+        let subscriptions = await subDb.getAll({ type: "Program", email: req.user.email });
 
         for (let item of list) {
+            let sub = subscriptions.filter(s => s.id == item._id);
+            if (sub.length > 0)
+                item.is_subscribed = true;
+
+
             await buildConnections(item, req);
         }
 

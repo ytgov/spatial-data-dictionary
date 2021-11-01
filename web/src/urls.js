@@ -13,3 +13,4 @@ export const PROGRAM_URL = `${config.apiBaseUrl}/api/program`;
 export const DOMAIN_URL = `${config.apiBaseUrl}/api/domain`;
 export const PERSON_URL = `${config.apiBaseUrl}/api/person`;
 export const ROLE_URL = `${config.apiBaseUrl}/api/role`;
+export const SUBSCRIPTION_URL= `${config.apiBaseUrl}/api/subscription`;

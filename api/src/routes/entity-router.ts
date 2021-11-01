@@ -7,7 +7,6 @@ import { v4 as uuidV4 } from "uuid";
 import { GraphBuilder } from "../utils/directed-graph";
 import moment from "moment";
 import _ from "lodash";
-import { ObjectId } from "mongodb";
 
 export const entityRouter = express.Router();
 
@@ -184,10 +183,17 @@ entityRouter.get("/:id", [param("id").notEmpty().isMongoId()], RequiresData, Req
         }
 
         const db = req.store.Entities as EntityService;
+        const subsDb = req.store.Subscriptions as GenericService;
         let { id } = req.params;
         let entity = await db.getById(id)
 
         if (entity) {
+            let subs = await subsDb.getAll({ email: req.user.email, type: "Entity", id });
+
+            if (subs.length > 0) {
+                (entity as any).is_subscribed = true;
+            }
+
             await buildConnections(entity, req);
 
             return res.json({ data: entity });

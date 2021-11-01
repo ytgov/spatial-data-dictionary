@@ -20,9 +20,29 @@
             style="margin: 4px 0 12px 8px"
             small
             @click="toggleWatched()"
-            ><v-icon v-if="isWatched" title="Remove from watchlist">mdi-star</v-icon
-            ><v-icon v-if="!isWatched" title="Add to watchlist">mdi-star-outline</v-icon></v-btn
-          ><br />
+            ><v-icon v-if="isWatched" title="Remove from watchlist"
+              >mdi-star</v-icon
+            ><v-icon v-if="!isWatched" title="Add to watchlist"
+              >mdi-star-outline</v-icon
+            ></v-btn
+          >
+
+          <v-btn
+            color="primary"
+            icon
+            small
+            style="margin: 4px 0 12px 8px"
+            @click.stop="toggleSubscribe(entity)"
+          >
+            <v-icon v-if="!entity.is_subscribed" title="Subscribe"
+              >mdi-email-plus-outline</v-icon
+            >
+            <v-icon v-if="entity.is_subscribed" title="Unsubscribe"
+              >mdi-email-minus</v-icon
+            >
+          </v-btn>
+
+          <br />
 
           <status-chip :status="entity.status"></status-chip>
           <location-chip :location="entity.location.type"></location-chip>
@@ -563,7 +583,7 @@
 </style>
 <script>
 import axios from "axios";
-import { ENTITY_URL } from "../urls";
+import { ENTITY_URL, SUBSCRIPTION_URL } from "../urls";
 import router from "../router";
 import store from "../store";
 
@@ -688,7 +708,7 @@ export default {
           if (!this.entity.values) this.entity.values = new Array();
           this.values = this.entity.values;
 
-          this.isWatched= await store.dispatch("profile/isWatched", id);
+          this.isWatched = await store.dispatch("profile/isWatched", id);
 
           this.loadChanges(id);
           this.loadChangeRequests(id);
@@ -953,6 +973,17 @@ export default {
       }
 
       this.isWatched = !this.isWatched;
+    },
+    toggleSubscribe() {
+      let body = {
+        type: "Entity",
+        id: this.entity_id
+      };
+
+      axios.put(`${SUBSCRIPTION_URL}`, body).then((resp) => {
+        this.$refs.notifier.showAPIMessages(resp.data);
+        this.loadEntity(this.entity_id);
+      });
     },
   },
 };
