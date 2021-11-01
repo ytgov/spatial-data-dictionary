@@ -14,9 +14,9 @@ programRouter.get("/", RequiresData, RequiresAuthentication,
 
         for (let item of list) {
             let sub = subscriptions.filter(s => s.id == item._id);
+
             if (sub.length > 0)
                 item.is_subscribed = true;
-
 
             await buildConnections(item, req);
         }
