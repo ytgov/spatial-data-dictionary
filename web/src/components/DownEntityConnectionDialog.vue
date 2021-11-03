@@ -20,6 +20,7 @@ export default {
   data: () => ({
     isOpen: null,
     connection: {},
+    canEdit: false,
   }),
   watch: {
     selectedEntity: function (val) {
@@ -27,8 +28,9 @@ export default {
     },
   },
   methods: {
-    openDialog() {
+    openDialog(canEdit) {
       this.isOpen = true;
+      this.canEdit = canEdit;
     },
     closeDialog() {
       this.isOpen = null;

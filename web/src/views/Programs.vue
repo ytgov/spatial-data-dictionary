@@ -6,7 +6,11 @@
       :items="[{ text: 'Dashboard', href: '/dashboard' }, { text: 'Programs' }]"
     ></v-breadcrumbs>
 
-    <v-btn color="primary" class="float-right mt-0" @click="createClick"
+    <v-btn
+      color="primary"
+      class="float-right mt-0"
+      @click="createClick"
+      v-if="canEdit"
       ><v-icon>mdi-plus</v-icon> Create</v-btn
     >
     <h1>Programs</h1>
@@ -117,10 +121,16 @@
 
 <script>
 import axios from "axios";
+import store from "../store";
 import { PERSON_URL, PROGRAM_URL, ROLE_URL, SUBSCRIPTION_URL } from "../urls";
 
 export default {
   name: "Programs",
+  computed: {
+    roles: function () {
+      return store.getters.roles;
+    },
+  },
   data: () => ({
     isCreate: true,
     showForm: false,
@@ -131,15 +141,18 @@ export default {
     peopleOptions: [],
     items: [],
     itemHeaders: [
-      { text: "", value: "action" },
+      { text: "Subscribe", value: "action" },
       { text: "Name", value: "name" },
       { text: "Program Manager", value: "approver_name" },
     ],
     roleOptions: [],
     search: "",
+
+    canEdit: false,
   }),
   created() {
     this.loadPrograms();
+    this.canEdit = this.roles.indexOf("Admin") >= 0;
 
     axios
       .get(`${PERSON_URL}`)
@@ -171,6 +184,8 @@ export default {
     },
 
     createClick() {
+      if (!this.canEdit) return;
+
       this.editId = "";
       this.editName = "";
       this.editManager = {};
@@ -184,6 +199,8 @@ export default {
     removeLocation() {},
 
     rowClick(item) {
+      if (!this.canEdit) return;
+
       this.isCreate = false;
       this.editName = item.name;
       this.editManager = item.approver_id;
@@ -193,6 +210,8 @@ export default {
     },
 
     saveClick() {
+      if (!this.canEdit) return;
+
       if (this.isCreate) {
         axios
           .post(PROGRAM_URL, {
@@ -202,7 +221,7 @@ export default {
           })
           .then((result) => {
             if (result && result.data.data) {
-              this.items = result.data.data;
+              this.loadPrograms();
               this.showForm = false;
             }
           })
@@ -218,7 +237,7 @@ export default {
           })
           .then((result) => {
             if (result && result.data.data) {
-              this.items = result.data.data;
+              this.loadPrograms();
               this.showForm = false;
             }
           })
@@ -229,6 +248,8 @@ export default {
     },
 
     removeClick() {
+      if (!this.canEdit) return;
+
       if (this.editId && this.editId.length > 2) {
         axios
           .delete(`${PROGRAM_URL}/${this.editId}`)

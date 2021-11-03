@@ -9,6 +9,7 @@ const state = {
     username: "",
     teams: [],
     watchlist: [],
+    roles: [],
 };
 const getters = {
     firstName: state => state.first_name,
@@ -18,6 +19,7 @@ const getters = {
     username: state => state.username,
     teams: state => state.teams,
     watchlist: state => state.watchlist,
+    roles: state => state.roles,
 };
 const actions = {
     async loadProfile({ commit }) {
@@ -55,6 +57,7 @@ const mutations = {
         state.id = profile.id;
         state.username = profile.username;
         state.teams = profile.teams;
+        state.roles = profile.roles;
     },
     setWatchlist(state, list) {
         state.watchlist = list;

@@ -21,12 +21,13 @@
           @click:append="doSearch"
         ></v-text-field>
         <v-divider class="mt-0 mb-2"></v-divider>
+
         <v-list-item
           link
           nav
           v-bind:title="section.name"
           v-bind:to="section.url"
-          v-for="section in sections"
+          v-for="section in mySections"
           v-bind:key="section.name"
         >
           <v-list-item-icon>
@@ -49,10 +50,12 @@
           :key="i"
           :to="'/entity/' + item.id"
         >
-          <v-list-item-icon><v-icon>mdi-database-marker</v-icon></v-list-item-icon>
+          <v-list-item-icon
+            ><v-icon>mdi-database-marker</v-icon></v-list-item-icon
+          >
           <v-list-item-content>
             <v-list-item-title>{{ item.name }}</v-list-item-title>
-            <v-list-item-subtitle>{{item.location}}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{ item.location }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -148,6 +151,14 @@ export default {
     watchlist() {
       return store.getters["profile/watchlist"];
     },
+    mySections: function () {
+      return config.sections.filter(
+        (s) => s.role == "" || this.roles.indexOf(s.role) >= 0
+      );
+    },
+    roles: function() {
+      return store.getters.roles;
+    }
   },
   data: () => ({
     dialog: false,
@@ -158,7 +169,6 @@ export default {
     loadingClass: "d-none",
     applicationName: config.applicationName,
     applicationIcon: config.applicationIcon,
-    sections: config.sections,
     hasSidebar: false, //config.hasSidebar,
     hasSidebarClosable: config.hasSidebarClosable,
     search: "",
@@ -171,7 +181,7 @@ export default {
 
     //this.hasSidebar = true;
 
-    store.dispatch('profile/loadWatchlist');
+    store.dispatch("profile/loadWatchlist");
   },
   watch: {
     isAuthenticated: function (val) {

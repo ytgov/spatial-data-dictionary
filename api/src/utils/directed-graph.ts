@@ -45,8 +45,11 @@ export class GraphBuilder {
             let ePos = this.positionData.children.filter((c: any) => c.child_id == entity?._id);
             let lPos = this.positionData.children.filter((c: any) => c.child_id == entity?.location.id);
 
-            let eNode = { group: "nodes", data: { id: `${entity._id}`, label: entity.name, parent: `${entity.location.id}` }, classes: ["brown"] };
-            let lNode = { group: "nodes", data: { id: `${entity.location.id}`, label: `${entity.location.name}` }, classes: ["red"] };
+            let eNode = { group: "nodes", data: { id: `${entity._id}`, label: entity.name, parent: `${entity.location.id}` }, classes: ["brown", "star"] };
+            let lNode = { group: "nodes", data: { id: `${entity.location.id}`, label: `${entity.location.name}` }, classes: ["location"] };
+
+            if (entity.location.type == "Web")
+                lNode.classes = ["web"];
 
             if (ePos.length > 0)
                 (eNode as any).position = { x: (ePos[0] as any).x, y: (ePos[0] as any).y };
@@ -91,6 +94,10 @@ export class GraphBuilder {
             let newNode = { group: "nodes", data: { id: nodeId, label: node.name, parent: locId }, classes: [node.entity_type == "Domain table" ? "domain" : "blue"] };
             let ePos = this.positionData.children.filter((c: any) => c.child_id == nodeId);
 
+            if (node.entity_type == "Web service")
+                newNode.classes = ["webservice"]
+
+
             if (ePos.length > 0)
                 (newNode as any).position = { x: (ePos[0] as any).x, y: (ePos[0] as any).y };
 
@@ -100,8 +107,12 @@ export class GraphBuilder {
         exists = this.nodes.filter(n => n.data.id == locId)
 
         if (exists.length == 0) {
-            let newNode = { group: "nodes", data: { id: locId, label: node.location.name }, classes: ["red"] };
+            let newNode = { group: "nodes", data: { id: locId, label: node.location.name }, classes: ["location"] };
             let ePos = this.positionData.children.filter((c: any) => c.child_id == locId);
+
+            if (node.location.type == "Web")
+                newNode.classes = ["web"];
+
 
             if (ePos.length > 0)
                 (newNode as any).position = { x: (ePos[0] as any).x, y: (ePos[0] as any).y };
@@ -152,7 +163,7 @@ export class GraphBuilder {
                 this.nodes.push({ group: "edges", data: { id: `${uuidv4()}`, source: eId, target: `${parent._id}`, arrow: "vee" } })
 
                 //await this.getParents(parentObj);
-                
+
                 //if (entity.entity_type != "Domain table")
                 await this.getChildren(parentObj);
             }

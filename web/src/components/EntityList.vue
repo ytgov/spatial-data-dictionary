@@ -6,7 +6,7 @@
       :items="[{ text: 'Dashboard', href: '/dashboard' }, { text: 'Entities' }]"
     ></v-breadcrumbs>
 
-    <v-btn color="primary" class="float-right mt-0" to="/entity/create"
+    <v-btn color="primary" class="float-right mt-0" to="/entity/create" v-if="canEdit"
       ><v-icon>mdi-plus</v-icon> Create</v-btn
     >
     <h1>Entities</h1>
@@ -74,7 +74,11 @@
       </div>
     </div>
 
-    <v-progress-linear :active="isLoading" indeterminate dark></v-progress-linear>
+    <v-progress-linear
+      :active="isLoading"
+      indeterminate
+      dark
+    ></v-progress-linear>
     <hr class="mb-3" />
 
     <div v-for="group of groupList" v-bind:key="group.id">
@@ -150,11 +154,17 @@
 
 <script>
 import axios from "axios";
+import store from "../store";
 import { ENTITY_URL, LOCATION_URL, PROGRAM_URL } from "../urls";
 import _ from "lodash";
 
 export default {
   name: "Grid",
+  computed: {
+    roles: function () {
+      return store.getters.roles;
+    },
+  },
   data: () => ({
     allEntities: [],
     filteredEntities: [],
@@ -169,8 +179,12 @@ export default {
     locationFilter: [],
     typeFilter: [],
     isLoading: false,
+    canEdit: false,
   }),
   created() {
+    this.canEdit =
+      this.roles.indexOf("Writer") >= 0 || this.roles.indexOf("Admin") >= 0;
+
     this.isLoading = true;
     axios
       .get(ENTITY_URL)

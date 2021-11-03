@@ -4,9 +4,8 @@ import path from "path";
 import helmet from "helmet";
 import * as config from './config';
 import { doHealthCheck } from "./utils/healthCheck";
-import { categoryRouter, userRouter, sessionRouter, entityRouter, locationRouter, programRouter, domainRouter, roleRouter, subscriptionRouter } from "./routes";
+import { categoryRouter, userRouter, sessionRouter, entityRouter, locationRouter, personRouter, programRouter, domainRouter, roleRouter, subscriptionRouter } from "./routes";
 import { RequiresData } from "./middleware";
-import { personRouter } from "./routes/person-router";
 
 import { configureAuthentication, configureLocalAuthentication } from "./routes";
 

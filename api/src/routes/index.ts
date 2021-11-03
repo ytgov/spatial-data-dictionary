@@ -5,6 +5,7 @@ export * from "./category-router";
 export * from "./domain-router";
 export * from "./entity-router";
 export * from "./location-router";
+export * from "./person-router";
 export * from "./program-router";
 export * from "./role-router";
 export * from "./session-router";

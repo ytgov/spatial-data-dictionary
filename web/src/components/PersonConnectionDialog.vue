@@ -9,11 +9,12 @@
         dense
         outlined
         required
+        :readonly="!canEdit"
       >
       </v-text-field>
 
-      <v-btn color="primary" @click="saveConnection()"> Save</v-btn>
-      <v-btn color="warning" class="float-right" @click="removeConnection()">
+      <v-btn color="primary" @click="saveConnection()" v-if="canEdit"> Save</v-btn>
+      <v-btn color="warning" class="float-right" @click="removeConnection()" v-if="canEdit">
         Remove
       </v-btn>
     </v-container>
@@ -27,11 +28,13 @@ export default {
     isOpen: null,
     connection: {},
     role: "",
+    canEdit: false,
   }),
   methods: {
-    openDialog(connection) {
+    openDialog(connection, canEdit) {
       this.connection = connection;
       this.role = this.connection.role;
+      this.canEdit = canEdit;
       this.isOpen = true;
     },
     closeDialog() {

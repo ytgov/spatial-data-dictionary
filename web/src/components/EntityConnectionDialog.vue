@@ -24,7 +24,7 @@
       >
       <v-btn
         color="warning"
-        v-if="attributes.length == 0"
+        v-if="attributes.length == 0 && canEdit"
         class="float-right"
         @click="removeConnection()"
       >
@@ -51,6 +51,7 @@ export default {
     allAttributes: [],
     attributes: [],
     timer: null,
+    canEdit: false,
   }),
   watch: {
     selectedEntity: function (val) {
@@ -73,8 +74,9 @@ export default {
     //this.isOpen = null;
   },
   methods: {
-    openDialog() {
+    openDialog(canEdit) {
       this.isOpen = true;
+      this.canEdit = canEdit;
     },
     closeDialog() {
       this.isOpen = null;
@@ -91,11 +93,7 @@ export default {
         this.attributes = [];
         let ids = this.connection.attributes.map((a) => a._id);
 
-        console.log("ids", ids);
-
         this.allAttributes.forEach((a) => {
-          console.log("checking ", a);
-
           if (a.source && a.source.id) {
             if (ids.indexOf(a.source.id) != -1) this.attributes.push(a);
           }

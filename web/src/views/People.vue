@@ -42,6 +42,7 @@
                 :headers="itemHeaders"
                 :items="items"
                 @click:row="rowClick"
+                :footer-props="{ 'items-per-page-options': items_per_page }"
               ></v-data-table>
             </v-card>
           </div>
@@ -92,7 +93,7 @@
                     v-model="editRoles"
                     clearable
                     multiple
-                    :items="['Implementer', 'Admin']"
+                    :items="['Writer', 'Admin']"
                     outlined
                     dense
                     background-color="white"
@@ -200,10 +201,16 @@
 
 <script>
 import axios from "axios";
+import store from "../store";
 import { PERSON_URL, ROLE_URL } from "../urls";
 
 export default {
   name: "People",
+  computed: {
+    roles: function() {
+      return store.getters.roles;
+    }
+  },
   data: () => ({
     isCreate: true,
     showPeopleForm: false,
@@ -225,12 +232,18 @@ export default {
       { text: "Status", value: "status" },
       { text: "Roles", value: "roles" },
     ],
+    items_per_page: [20, 50, 100, -1],
     roleHeaders: [{ text: "Name", value: "name" }],
     search: "",
 
     tab: 0,
   }),
   created() {
+    if (this.roles.indexOf("Admin") == -1) {
+      this.$router.push("/dashboard");
+      return;
+    }
+
     axios
       .get(PERSON_URL)
       .then((result) => {

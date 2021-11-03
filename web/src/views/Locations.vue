@@ -9,7 +9,11 @@
       ]"
     ></v-breadcrumbs>
 
-    <v-btn color="primary" class="float-right mt-0" @click="createClick"
+    <v-btn
+      color="primary"
+      class="float-right mt-0"
+      @click="createClick"
+      v-if="canEdit"
       ><v-icon>mdi-plus</v-icon> Create</v-btn
     >
     <h1>Locations</h1>
@@ -123,10 +127,16 @@
 
 <script>
 import axios from "axios";
+import store from "../store";
 import { LOCATION_URL, PERSON_URL, ROLE_URL } from "../urls";
 
 export default {
   name: "Locations",
+  computed: {
+    roles: function () {
+      return store.getters.roles;
+    },
+  },
   data: () => ({
     isCreate: true,
     showForm: false,
@@ -147,8 +157,10 @@ export default {
     ],
     peopleOptions: [],
     search: "",
+    canEdit: false,
   }),
   created() {
+    this.canEdit = this.roles.indexOf("Admin") >= 0;
     axios
       .get(LOCATION_URL)
       .then((result) => {
@@ -176,6 +188,8 @@ export default {
   },
   methods: {
     createClick() {
+      if (!this.canEdit) return;
+
       this.editName = "";
       this.editId = "";
       this.editType = "Database";
@@ -189,6 +203,7 @@ export default {
     updateLocation() {},
     removeLocation() {},
     rowClick(item) {
+      if (!this.canEdit) return;
       this.isCreate = false;
       this.editName = item.name;
       this.editType = item.type;
@@ -200,6 +215,7 @@ export default {
       this.editImplementer = item.implementer_role;
     },
     saveClick() {
+      if (!this.canEdit) return;
       if (this.isCreate) {
         axios
           .post(LOCATION_URL, {
@@ -241,6 +257,7 @@ export default {
       }
     },
     removeClick() {
+      if (!this.canEdit) return;
       if (this.editId && this.editId.length > 2) {
         axios
           .delete(`${LOCATION_URL}/${this.editId}`)

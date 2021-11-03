@@ -99,26 +99,26 @@
               >
               <v-list-item-title>Request Change</v-list-item-title>
             </v-list-item>
-            <v-list-item :to="'/entity/' + entity._id + '/edit'">
+            <v-list-item :to="'/entity/' + entity._id + '/edit'" v-if="canEdit">
               <v-list-item-icon><v-icon>mdi-pencil</v-icon></v-list-item-icon>
               <v-list-item-title>Edit</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="showDuplicateDialog()">
+            <v-list-item @click="showDuplicateDialog()" v-if="canEdit">
               <v-list-item-icon>
                 <v-icon>mdi-content-copy</v-icon>
               </v-list-item-icon>
               <v-list-item-title>Duplicate</v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="addConnection()">
+            <v-list-item @click="addConnection()" v-if="canEdit">
               <v-list-item-icon>
                 <v-icon>mdi-link-variant-plus</v-icon>
               </v-list-item-icon>
               <v-list-item-title>Add Connection</v-list-item-title>
             </v-list-item>
 
-            <v-divider></v-divider>
-            <v-list-item @click="showEntityDelete()">
+            <v-divider v-if="canEdit"></v-divider>
+            <v-list-item @click="showEntityDelete()" v-if="canEdit">
               <v-list-item-icon
                 ><v-icon color="error">mdi-delete</v-icon></v-list-item-icon
               >
@@ -664,6 +664,7 @@ export default {
     duplicateRequiredRule: [(v) => !!v || "New entity name is required"],
 
     isWatched: false,
+    canEdit: false,
   }),
   computed: {
     formTitle() {
@@ -671,6 +672,9 @@ export default {
     },
     valFormTitle() {
       return this.editedIndex === -1 ? "Add Domain Value" : "Edit Domain Value";
+    },
+    roles: function () {
+      return store.getters.roles;
     },
   },
   watch: {
@@ -692,9 +696,10 @@ export default {
   created() {
     this.entity_id = this.$route.params.id;
     //this.loadEntity(this.entity_id);
+    this.canEdit =
+      this.roles.indexOf("Writer") >= 0 || this.roles.indexOf("Admin") >= 0;
   },
   methods: {
-    initialize() {},
     loadEntity(id) {
       axios
         .get(`${ENTITY_URL}/${id}`)
@@ -878,12 +883,12 @@ export default {
 
     openConnectionDialog(connection) {
       this.connectionEntity = connection;
-      this.$refs.upConn.openDialog();
+      this.$refs.upConn.openDialog(this.canEdit);
     },
 
     openDownConnectionDialog(connection) {
       this.downEntity = connection;
-      this.$refs.downConn.openDialog();
+      this.$refs.downConn.openDialog(this.canEdit);
     },
 
     removeConnection(item) {
@@ -901,12 +906,12 @@ export default {
     },
 
     openDomainLink(item) {
-      this.$refs.domainDialog.openDialog(item.domain);
+      this.$refs.domainDialog.openDialog(item.domain, this.canEdit);
     },
 
     openPersonConnectionDialog(index) {
       this.personIndex = index;
-      this.$refs.personDialog.openDialog(this.entity.links.people[index]);
+      this.$refs.personDialog.openDialog(this.entity.links.people[index], this.canEdit);
     },
     updatePersonConnection(role) {
       this.entity.links.people[this.personIndex].role = role;
@@ -977,7 +982,7 @@ export default {
     toggleSubscribe() {
       let body = {
         type: "Entity",
-        id: this.entity_id
+        id: this.entity_id,
       };
 
       axios.put(`${SUBSCRIPTION_URL}`, body).then((resp) => {

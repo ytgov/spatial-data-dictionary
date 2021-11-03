@@ -62,6 +62,9 @@ export function configureAuthentication(app: Express) {
 
     app.get("/api/auth/isAuthenticated", (req: Request, res: Response) => {
         if (req.oidc.isAuthenticated()) {
+            req.user.roles = ["Admin"];
+
+
             return res.send({ data: req.user });
         }
 

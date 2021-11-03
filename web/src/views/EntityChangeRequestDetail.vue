@@ -148,6 +148,13 @@
               @click="approve"
               >Approve</v-btn
             >
+            <v-btn
+              class="float-right mr-5"
+              color="green"
+              v-if="isAdmin"
+              @click="approveFully"
+              >Admin Approve</v-btn
+            >
           </v-card-text>
         </v-card>
       </div>
@@ -306,6 +313,8 @@ export default {
     approvedNames: [],
     missingText: "",
     currentUser: "",
+
+    isAdmin: false,
   }),
   computed: {},
   watch: {
@@ -328,6 +337,7 @@ export default {
     this.entity_id = this.$route.params.id;
     this.changeRequestId = this.$route.params.changeRequestId;
     this.currentUser = store.getters.fullName;
+    this.isAdmin = store.getters.roles.indexOf("Admin") >= 0;
   },
   methods: {
     loadEntity(id) {
@@ -452,6 +462,19 @@ export default {
         date: moment().format("YYYY-MM-DD @ h:mm a"),
         user: this.currentUser,
         action: "Approved:",
+        description: this.commentText,
+      };
+
+      this.changeRequest.comments.push(comment);
+      this.save();
+    },
+
+    approveFully() {
+      // this needs to make sure it's the right person and right time
+      let comment = {
+        date: moment().format("YYYY-MM-DD @ h:mm a"),
+        user: this.currentUser,
+        action: "Admin Approved:",
         description: this.commentText,
       };
 

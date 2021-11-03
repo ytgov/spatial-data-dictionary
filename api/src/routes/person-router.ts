@@ -11,7 +11,7 @@ personRouter.get("/", RequiresData, RequiresAuthentication,
         let db = req.store.Persons as GenericService;
 
         let list = await db.getAll();
-        list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}` + (person.status == "Inactive" ? " (Inactive)" : ""))
+        list.forEach(person => person.display_name = `${person.first_name} ${person.last_name}` + (person.status == "Inactive" ? " (Inactive)" : ""));
 
         return res.json({ data: list });
     });
@@ -74,9 +74,7 @@ personRouter.put("/:id", RequiresData, RequiresAuthentication,
         let db = req.store.Persons as GenericService;
         let { id } = req.params;
 
-        let existing = await db.getById(id);
-        console.log("EXISTN", existing)
-        console.log("UPD", req.body);
+        //let existing = await db.getById(id);
         // maybe only send email if something important changed
 
         await db.update(id, req.body);

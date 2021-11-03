@@ -409,6 +409,7 @@ Attribute 1,NVARCHAR(255),true,This field is important,,Attr1</pre
 
 <script>
 import axios from "axios";
+import store from "../store";
 import { ENTITY_URL, LOCATION_URL, PROGRAM_URL, DOMAIN_URL } from "../urls";
 
 export default {
@@ -460,9 +461,19 @@ export default {
     importHint: "",
     importError: "",
   }),
+  computed: {
+    roles: function () {
+      return store.getters.roles;
+    },
+  },
 
   created() {
     let id = this.$route.params.id;
+
+    let canEdit =
+      this.roles.indexOf("Writer") >= 0 || this.roles.indexOf("Admin") >= 0;
+
+    if (!canEdit) return this.$router.push("/dashboard");
 
     axios
       .get(`${ENTITY_URL}/${id}`)

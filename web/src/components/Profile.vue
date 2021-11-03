@@ -32,15 +32,30 @@
           hide-details
         ></v-text-field>
       </div>
+      <div class="col-md-6 mb-3">
+        <v-text-field
+          v-model="roles"
+          outlined
+          label="Roles"
+          readonly
+          hide-details
+        ></v-text-field>
+      </div>
       <div class="col-md-12 mb-3">
         <h3>Subscriptions</h3>
 
         <ul>
           <li v-for="(item, i) of subscriptions" :key="i">
-            <router-link v-if="item.type == 'Program'" :to="`/entity?program=${item.id}`">
+            <router-link
+              v-if="item.type == 'Program'"
+              :to="`/entity?program=${item.id}`"
+            >
               {{ item.type }}: {{ item.name }}</router-link
             >
-            <router-link v-if="item.type == 'Entity'" :to="`/entity/${item.id}`">
+            <router-link
+              v-if="item.type == 'Entity'"
+              :to="`/entity/${item.id}`"
+            >
               {{ item.type }}: {{ item.name }}</router-link
             >
           </li>
@@ -55,7 +70,6 @@ import axios from "axios";
 import { mapState } from "vuex";
 import store from "../store";
 import { SUBSCRIPTION_URL } from "../urls";
-//import router from "../router";
 
 export default {
   name: "Profile",
@@ -66,6 +80,7 @@ export default {
       "username",
       "email",
       "teams",
+      "roles",
     ]),
   },
   data: () => ({

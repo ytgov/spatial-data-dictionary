@@ -247,11 +247,36 @@ export default {
                 },
               },
               {
-                selector: "node.red",
+                selector: "node.webservice",
+                style: {
+                  "background-color": "#f3b228",
+                  label: "data(label)",
+                  shape: "tag",
+                },
+              },
+              {
+                selector: "node.location",
                 style: {
                   "background-color": "#fff2d5",
+                  "font-weight": "bold",
                   label: "data(label)",
-                  shape: "triangle",
+                  shape: "rectangle",
+                },
+              },
+              {
+                selector: "node.web",
+                style: {
+                  "background-color": "#A6D5FA",
+                  "font-weight": "bold",
+                  label: "data(label)",
+                  shape: "rectangle",
+                },
+              },
+              {
+                selector: "node.star.brown",
+                style: {
+                  label: "data(label)",
+                  shape: "star",
                 },
               },
               {
