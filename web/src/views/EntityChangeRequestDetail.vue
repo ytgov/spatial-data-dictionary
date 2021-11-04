@@ -137,16 +137,9 @@
             <v-btn
               class="float-right"
               color="warning"
-              v-if="userCanApprove"
+              v-if="userCanApprove || isAdmin"
               @click="reject"
               >Reject</v-btn
-            >
-            <v-btn
-              class="float-right mr-5"
-              color="green"
-              v-if="userCanApprove"
-              @click="approve"
-              >Approve</v-btn
             >
             <v-btn
               class="float-right mr-5"
@@ -155,6 +148,15 @@
               @click="approveFully"
               >Admin Approve</v-btn
             >
+            <v-btn
+              class="float-right mr-5"
+              color="green"
+              v-if="userCanApprove && !isAdmin"
+              @click="approve"
+              >Approve</v-btn
+            >
+
+            <div style="clear: both"></div>
           </v-card-text>
         </v-card>
       </div>
@@ -372,18 +374,46 @@ export default {
             .map((f) => f.user);
 
           let requiredNames = [];
+          let allPeople = [];
 
           if (this.entity.location && this.entity.location.change_approvers) {
+            let foundOne = false;
+
             for (let ca of this.entity.location.change_approvers) {
-              for (let mem of ca.members)
-                requiredNames.push(`${mem.first_name} ${mem.last_name}`);
+              for (let mem of ca.members) {
+                if (
+                  approveNames.indexOf(`${mem.first_name} ${mem.last_name}`) >=
+                  0
+                )
+                  foundOne = true;
+                else allPeople.push(`${mem.first_name} ${mem.last_name}`);
+              }
+            }
+
+            if (!foundOne) {
+              this.entity.location.change_approvers.forEach((ca) => {
+                requiredNames.push(ca.name);
+              });
             }
           }
 
           this.entity.links.programs.forEach((p) => {
             for (let ca of p.change_approvers) {
-              for (let mem of ca.members)
-                requiredNames.push(`${mem.first_name} ${mem.last_name}`);
+              let foundOne = false;
+              for (let mem of ca.members) {
+                if (
+                  approveNames.indexOf(`${mem.first_name} ${mem.last_name}`) >=
+                  0
+                )
+                  foundOne = true;
+                else allPeople.push(`${mem.first_name} ${mem.last_name}`);
+              }
+
+              if (!foundOne) {
+                p.change_approvers.forEach((ca) => {
+                  requiredNames.push(ca.name);
+                });
+              }
             }
           });
 
@@ -396,7 +426,7 @@ export default {
           this.userCanApprove = false;
 
           if (missingApprovals.length > 0) {
-            if (missingApprovals.indexOf(this.currentUser) > -1)
+            if (allPeople.indexOf(this.currentUser) > -1)
               this.userCanApprove = true;
 
             this.missingText = `Awaiting approval from ${_.uniq(

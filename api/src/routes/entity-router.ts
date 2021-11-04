@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
 import { RequiresData, RequiresAuthentication } from "../middleware";
 import { Attribute, AuthUser, Entity, SearchResult } from "../data";
-import { EntityService, GenericService, LocationService, ProgramService } from "../services";
+import { EmailService, EntityService, GenericService, LocationService, ProgramService } from "../services";
 import { v4 as uuidV4 } from "uuid";
 import { GraphBuilder } from "../utils/directed-graph";
 import moment from "moment";
@@ -57,26 +57,41 @@ entityRouter.get("/changes/open", RequiresData, RequiresAuthentication, async (r
 
     let currentUser = req.user as AuthUser;
     let results = await changeDb.getAll({ assigned_user: currentUser.display_name });
+    let relevant = new Array<any>();
 
     for (let item of results) {
+        //ignore things that are done or not doing
+        if (item.status == "Won't fix" || item.status == "Complete")
+            continue;
+
         let entity = await db.getById(item.entity_id);
 
         if (entity) {
             item.entity = entity;
             await buildConnections(item.entity, req);
         }
+
+        relevant.push(item);
     }
 
-    return res.json({ data: results });
+    return res.json({ data: relevant });
 });
 
 entityRouter.get("/request-change/open", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const db = req.store.Entities as EntityService;
     const requestDb = req.store.ChangeRequests as GenericService;
+    const personDb = req.store.Persons as GenericService;
 
     let currentUser = req.user as AuthUser;
     let results = await requestDb.getAll({ status: "Open" });
     let awaiting = new Array();
+
+    let p = await personDb.getAll({ email: currentUser.email });
+    let userRoles = new Array<string>();
+
+    if (p && p.length > 0) {
+        userRoles = p[0].additional_roles;
+    }
 
     for (let item of results) {
         let entity = await db.getById(item.entity_id);
@@ -84,23 +99,30 @@ entityRouter.get("/request-change/open", RequiresData, RequiresAuthentication, a
         if (entity) {
             await buildConnections(entity, req);
 
-            let approveNames = item.comments
-                .filter((f: any) => f.action.indexOf("Approve") >= 0)
-                .map((f: any) => f.user);
+            let allGroups = new Array<string>();
 
-            let requiredNames = [entity.location.approver_name];
+            if (entity.location.change_approvers) {
+                for (let ca of entity.location.change_approvers)
+                    allGroups.push(ca);
+            }
 
             entity.links.programs.forEach((p: any) => {
-                requiredNames.push(p.approver_name);
+                if (p.change_approvers) {
+                    for (let ca of p.change_approvers)
+                        allGroups.push(ca);
+                }
             });
 
-            let missingApprovals = new Array<any>();
+            let isApproveMember = false;
 
-            requiredNames.forEach((n) => {
-                if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
-            });
+            for (let role of userRoles) {
+                for (let grp of allGroups) {
+                    if ((grp as any)._id.toString() == role)
+                        isApproveMember = true;
+                }
+            }
 
-            if (missingApprovals.indexOf(currentUser.display_name) >= 0) {
+            if (isApproveMember) {
                 item.entity = entity;
                 awaiting.push(item);
             }
@@ -134,6 +156,9 @@ entityRouter.put("/:id/changes/:changeId", RequiresData, RequiresAuthentication,
     if (change) {
         let { complete_date, newStatus, assigned_user, description, comments } = req.body;
 
+        let newlyComplete = change.status != "Complete" && newStatus == "Complete";
+        let newlyAssigned = change.assigned_user != assigned_user;
+
         change.complete_date = complete_date;
         change.status = newStatus || change.status;
         change.assigned_user = assigned_user;
@@ -141,6 +166,56 @@ entityRouter.put("/:id/changes/:changeId", RequiresData, RequiresAuthentication,
         change.comments = comments;
 
         await changeDb.update(change._id, change);
+
+        let em = new EmailService();
+        let userDb = req.store.Persons as GenericService;
+
+        let entity = await db.getById(id);
+
+        if (entity) {
+            await buildConnections(entity, req);
+
+            // send email to subscribers
+            if (newlyComplete) {
+
+                let subscriptionDb = req.store.Subscriptions as GenericService;
+                let entitySubscribes = await subscriptionDb.getAll({ type: "Entity", id: id });
+
+                console.log("ESUBS", entitySubscribes)
+
+                for (let p of entity.links.programs) {
+                    let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p._id });
+                    pSubscribes.forEach(p => entitySubscribes.push(p));
+                }
+
+                let sendUsers = new Array<string>();
+
+                for (let sub of entitySubscribes) {
+                    if (sendUsers.indexOf(sub.email) > 0)
+                        continue;
+
+                    let subUser = await userDb.getAll({ email: sub.email });
+
+                    if (subUser.length == 1) {
+                        let usr = subUser[0];
+                        await em.sendChangeCompleteNotification(usr, change.title, entity.name, entity._id);
+                        sendUsers.push(usr.email);
+                    }
+                }
+
+            }
+            else if (newlyAssigned) {
+                let subUsers = await userDb.getAll({ status: "Active" });
+
+                for (let usr of subUsers) {
+                    if (assigned_user == `${usr.first_name} ${usr.last_name}`) {
+                        console.log("SEND EMAIL TO ", usr)
+                        await em.sendChangeAssignedNotification(usr, change.title, entity.name, entity._id, changeId);
+                        break;
+                    }
+                }
+            }
+        }
 
         return res.json({ data: change });
     }
@@ -286,6 +361,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
         let currentUser = (req.session as any).user;
 
         if (entity) {
+            await buildConnections(entity, req);
             let { change_type } = req.body;
 
             if (change_type == "Standard") {
@@ -312,7 +388,33 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                     description: ""
                 })
 
-                let result = await changeDb.create(change)
+                let result = await changeDb.create(change);
+                let subscriptionDb = req.store.Subscriptions as GenericService;
+                let entitySubscribes = await subscriptionDb.getAll({ type: "Entity", id: entity.id });
+
+                console.log("ESUBS", entitySubscribes)
+
+                for (let p of entity.links.programs) {
+                    let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p._id });
+                    pSubscribes.forEach(p => entitySubscribes.push(p));
+                }
+
+                let em = new EmailService();
+                let userDb = req.store.Persons as GenericService;
+                let sendUsers = new Array<string>();
+
+                for (let sub of entitySubscribes) {
+                    if (sendUsers.indexOf(sub.email) > 0)
+                        continue;
+
+                    let subUser = await userDb.getAll({ email: sub.email });
+
+                    if (subUser.length == 1) {
+                        let usr = subUser[0];
+                        await em.sendChangeCreateNotification(usr, change.title, entity.name, entity._id, result.insertedId);
+                        sendUsers.push(usr.email);
+                    }
+                }
 
                 return res.json({
                     data: result, messages: [{ text: "Change added", variant: "success" }]
@@ -392,15 +494,52 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
             await buildConnections(entity, req);
 
             if (status == "Open") {
-
                 let approveNames = change.comments
                     .filter((f: any) => f.action.indexOf("Approve") >= 0)
                     .map((f: any) => f.user);
 
-                let requiredNames = [entity.location.approver_name];
+                let requiredNames = new Array<string>();
+                let allPeople = [];
+
+                if (entity.location && entity.location.change_approvers) {
+                    let foundOne = false;
+
+                    for (let ca of entity.location.change_approvers) {
+                        for (let mem of ca.members) {
+                            if (
+                                approveNames.indexOf(`${mem.first_name} ${mem.last_name}`) >=
+                                0
+                            )
+                                foundOne = true;
+                            else allPeople.push(`${mem.first_name} ${mem.last_name}`);
+                        }
+                    }
+
+                    if (!foundOne) {
+                        entity.location.change_approvers.forEach((ca: any) => {
+                            requiredNames.push(ca.name);
+                        });
+                    }
+                }
 
                 entity.links.programs.forEach((p: any) => {
-                    requiredNames.push(p.approver_name);
+                    for (let ca of p.change_approvers) {
+                        let foundOne = false;
+                        for (let mem of ca.members) {
+                            if (
+                                approveNames.indexOf(`${mem.first_name} ${mem.last_name}`) >=
+                                0
+                            )
+                                foundOne = true;
+                            else allPeople.push(`${mem.first_name} ${mem.last_name}`);
+                        }
+
+                        if (!foundOne) {
+                            p.change_approvers.forEach((ca: any) => {
+                                requiredNames.push(ca.name);
+                            });
+                        }
+                    }
                 });
 
                 let missingApprovals = new Array<any>();
@@ -408,6 +547,12 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
                 requiredNames.forEach((n) => {
                     if (approveNames.indexOf(n) == -1) missingApprovals.push(n);
                 });
+
+                let approveComment = change.comments.filter((c: any) => c.action == "Admin Approved:")
+
+                if (approveComment.length > 0) {
+                    missingApprovals = [];
+                }
 
                 if (missingApprovals.length == 0) {
                     change.status = "Approved";
@@ -419,7 +564,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
                         description,
                         reason,
                         request_id: changeId,
-                        assigned_user: currentUser.display_name, // TODO: This should be current user 
+                        assigned_user: currentUser.display_name,
                         complete_date: change.date,
                         location: entity.location,
                         programs: entity.links.programs,
@@ -436,6 +581,33 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
 
                     await requestDb.update(changeId, change);
                     let result = await changeDb.create(c1)
+
+                    let subscriptionDb = req.store.Subscriptions as GenericService;
+                    let entitySubscribes = await subscriptionDb.getAll({ type: "Entity", id: entity.id });
+
+                    console.log("ESUBS", entitySubscribes)
+
+                    for (let p of entity.links.programs) {
+                        let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p._id });
+                        pSubscribes.forEach(p => entitySubscribes.push(p));
+                    }
+
+                    let em = new EmailService();
+                    let userDb = req.store.Persons as GenericService;
+                    let sendUsers = new Array<string>();
+
+                    for (let sub of entitySubscribes) {
+                        if (sendUsers.indexOf(sub.email) > 0)
+                            continue;
+
+                        let subUser = await userDb.getAll({ email: sub.email });
+
+                        if (subUser.length == 1) {
+                            let usr = subUser[0];
+                            await em.sendChangeCreateNotification(usr, change.title, entity.name, entity._id, result.insertedId);
+                            sendUsers.push(usr.email);
+                        }
+                    }
 
                     return res.json({
                         data: result, messages: [{ text: "Change added", variant: "success" }]

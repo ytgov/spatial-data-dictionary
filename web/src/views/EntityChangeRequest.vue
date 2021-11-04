@@ -303,7 +303,7 @@ export default {
     ],
 
     changeDateMin: moment().format("YYYY-MM-DD"),
-    changeDate: moment().add(7, "days").format("YYYY-MM-DD"),
+    changeDate: moment().format("YYYY-MM-DD"),
     changeDateMenu: null,
     changeDate1Menu: null,
 
