@@ -4,7 +4,7 @@
       class="pl-0"
       divider="/"
       :items="[
-        { text: 'Dashboard', href: '/dashboard' },
+        { text: 'Dashboard', to: '/dashboard', exact: true },
         { text: 'Query Builder' },
       ]"
     ></v-breadcrumbs>

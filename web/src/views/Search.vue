@@ -3,7 +3,7 @@
     <v-breadcrumbs
       class="pl-0"
       divider="/"
-      :items="[{ text: 'Dashboard', href: '/dashboard' }, { text: 'Search' }]"
+      :items="[{ text: 'Dashboard', to: '/dashboard', exact: true }, { text: 'Search' }]"
     ></v-breadcrumbs>
 
     <h1>Search</h1>

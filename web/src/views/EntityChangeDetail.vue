@@ -4,10 +4,10 @@
       class="pl-0"
       divider="/"
       :items="[
-        { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Entities', href: '/entity' },
-        { text: entity.name, href: '/entity/' + entity._id },
-        { text: 'Changes', href: '/entity/' + entity._id + '/changes' },
+        { text: 'Dashboard', to: '/dashboard' , exact: true},
+        { text: 'Entities', to: '/entity', exact: true },
+        { text: entity.name, to: '/entity/' + entity._id, exact: true },
+        { text: 'Changes', to: '/entity/' + entity._id + '/changes', exact: true },
         { text: change.title },
       ]"
     ></v-breadcrumbs>

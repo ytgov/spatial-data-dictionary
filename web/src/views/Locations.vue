@@ -4,7 +4,7 @@
       class="pl-0"
       divider="/"
       :items="[
-        { text: 'Dashboard', href: '/dashboard' },
+        { text: 'Dashboard', to: '/dashboard' },
         { text: 'Locations' },
       ]"
     ></v-breadcrumbs>

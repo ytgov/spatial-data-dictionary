@@ -4,7 +4,7 @@
     <hr class="mb-3" />
 
     <h2 class="mb-1">
-      <div style="float:right; font-size: 14px; line-height: 36px"><v-btn small color="primary" link text href="/categories/12">view all</v-btn></div>
+      <div style="float:right; font-size: 14px; line-height: 36px"><v-btn small color="primary" link text to="/categories/12">view all</v-btn></div>
       <v-icon class="mr-3" color="#323232">mdi-file-cabinet</v-icon> Surface
       Management <small>(12)</small> 
       <v-spacer></v-spacer>

@@ -4,8 +4,8 @@
       class="pl-0"
       divider="/"
       :items="[
-        { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Entities', href: '/entity' },
+        { text: 'Dashboard', to: '/dashboard' },
+        { text: 'Entities', to: '/entity', exact: true },
         { text: 'Create Entity' },
       ]"
     ></v-breadcrumbs>

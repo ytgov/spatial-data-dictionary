@@ -4,9 +4,9 @@
       class="pl-0"
       divider="/"
       :items="[
-        { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Entities', href: '/entity' },
-        { text: entity.name, href: '/entity/' + entity._id },
+        { text: 'Dashboard', to: '/dashboard' },
+        { text: 'Entities', to: '/entity', exact: true },
+        { text: entity.name, to: '/entity/' + entity._id, exact: true },
         { text: 'Change Requests' },
       ]"
     ></v-breadcrumbs>

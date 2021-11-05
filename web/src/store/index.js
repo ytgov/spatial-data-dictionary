@@ -7,8 +7,21 @@ import profile from "./profile";
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {},
-  mutations: {},
-  actions: {},
+  state: {
+    entityPreferences: { cardView: false },
+  },
+  mutations: {
+    setEntityPreferences(state, value) {
+      state.entityPreferences = value;
+    },
+  },
+  actions: {
+    setEntityPreferences({ commit }, value) {
+      commit("setEntityPreferences", value);
+    },
+  },
+  getters: {
+    entityPreferences: state => state.entityPreferences,
+  },
   modules: { auth, profile }
 });
