@@ -45,8 +45,8 @@ export const USE_LOCAL_AUTH = process.env.USE_LOCAL_AUTH == "true";
 export const MAIL_FROM = process.env.MAIL_FROM || "test@yukon.ca";
 export const MAIL_HOST = process.env.MAIL_HOST || "smtp.gov.yk.ca";
 export const MAIL_PORT = process.env.MAIL_PORT || 587;
-export const MAIL_USER = process.env.MAIL_USER || "admin";
-export const MAIL_PASS = process.env.MAIL_PASS || "admin";
+export const MAIL_USER = process.env.MAIL_USER || "";
+export const MAIL_PASS = process.env.MAIL_PASS || "";
 
 export const MAIL_CONFIG = {
   host: MAIL_HOST,
