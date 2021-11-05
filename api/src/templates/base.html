@@ -1,46 +1,86 @@
-<table cellspacing="0" cellpadding="0" border="0" width:"800px"
-    style=" margin: 0px; background-color: white; width: 100%; font-family: Montserrat, Helvetica, Arial, sans-serif;">
-    <tr>
-        <td colspan="3" height="30px"></td>
-    </tr>
-    <tr>
-        <td style="min-width: 50px"></td>
-        <td style="width: 50%; min-width: 700px; color: #323232;">
-            <h2 style="margin: 0; margin-bottom: 12px">``APPLICATION_NAME``</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
-            <table cellspacing="0" cellpadding="0" border="0"
-                style="background-color: #fff2d5; border: 1px #e0d5bb solid; border-radius: 4px; width: 100%;">
-                <tr>
-                    <td style="padding: 15px;">
-                        <p style="margin: 12px; line-height: 24px; font-size: 16px; background-color: #fff2d5; ">Hello
-                            ``TO_NAME``,
-                        </p>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="telephone=no" name="format-detection">
+    <title></title>
+    <!--[if (mso 16)]>
+    <style type="text/css">
+    a {text-decoration: none;}
+    </style>
+    <![endif]-->
+    <!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]-->
+    <!--[if gte mso 9]>
+<xml>
+    <o:OfficeDocumentSettings>
+    <o:AllowPNG></o:AllowPNG>
+    <o:PixelsPerInch>96</o:PixelsPerInch>
+    </o:OfficeDocumentSettings>
+</xml>
+<![endif]-->
+</head>
 
-                        ``CUSTOM_CONTENT``
-                        <hr style="margin-top: 25px">
+<body>
 
-                        <p style="margin: 0; margin-bottom: 12px; line-height: 20px; font-size: 14px;">
-                            Please visit the application at <strong>``APPLICATION_URL``</strong> or click the button
-                            below.
-                        </p>
-                        <p style="margin-top: 28px; margin-bottom: 22px; line-height: 38px; text-align: center;">
-                            <a href="``APPLICATION_URL``"
-                                style="background-color: #0097a9; color: #fff; border-radius: 4px; padding: 10px 20px; text-decoration: none;">
-                                Click here to sign in
-                            </a>
-                        </p>
-                    </td>
-                </tr>
-            </table>
 
-            <hr style="margin-top: 25px;">
-            <p style="margin: 0; margin-bottom: 12px; line-height: 18px; font-size: 12px; color: rgba(0,0,0,.6)">
-                This email was sent to ``TO_EMAIL`` by a Yukon Government application - <a
-                    href="``APPLICATION_URL``">``APPLICATION_NAME``</a>.</p>
-        </td>
-        <td style="min-width: 50px"></td>
-    </tr>
-    <tr>
-        <td colspan="3" height="50px"></td>
-    </tr>
-</table>
+    <table cellspacing="0" cellpadding="0" border="0" width:"800px"
+        style=" margin: 0px; background-color: white; width: 100%; font-family: Montserrat, Helvetica, Arial, sans-serif;">
+        <tr>
+            <td colspan="3" height="30px"></td>
+        </tr>
+        <tr>
+            <td style="min-width: 50px"></td>
+            <td style="width: 50%; min-width: 700px; color: #323232;">
+                <h2 style="margin: 0; margin-bottom: 12px">``APPLICATION_NAME``</h2>
+
+                <table cellspacing="0" cellpadding="0" border="0"
+                    style="background-color: #fff2d5; border: 1px #e0d5bb solid; border-radius: 4px; width: 100%;">
+                    <tr>
+                        <td style="padding: 15px;">
+                            <p
+                                style="margin: 0; margin-bottom: 12px; line-height: 24px; font-size: 16px;">
+                                Hello ``TO_NAME``,</p>
+
+                            ``CUSTOM_CONTENT``
+                            <hr style="margin-top: 20px">
+
+                            <p style="margin: 0; margin-bottom: 12px; line-height: 24px; font-size: 16px;">
+                                Please visit the application at <strong>``APPLICATION_URL``</strong> or click the button
+                                below.
+                            </p>
+                            <p style="margin-top: 28px; margin-bottom: 15px; line-height: 38px; text-align: center;">
+                                <table cellspacing="0" cellpadding="0" border="0">
+                                    <tr>
+                                        <td></td>
+                                    </tr>
+                                </table>
+
+
+                                <a href="``APPLICATION_URL``"
+                                    style="background-color: #0097a9; color: #fff; border-radius: 4px; padding: 10px 20px; text-decoration: none;">
+                                    Click here to sign in
+                                </a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+                <p
+                    style="margin: 0; margin-top: 10px; margin-bottom: 12px; line-height: 18px; font-size: 12px; color: rgba(0,0,0,.6)">
+                    This email was sent to ``TO_EMAIL`` by a Yukon Government application - <a
+                        href="``APPLICATION_URL``">``APPLICATION_NAME``</a>.</p>
+            </td>
+            <td style="min-width: 50px"></td>
+        </tr>
+        <tr>
+            <td colspan="3" height="50px"></td>
+        </tr>
+    </table>
+</body>
+
+</html>
