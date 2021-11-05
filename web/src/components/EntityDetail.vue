@@ -93,6 +93,11 @@
           </template>
 
           <v-list dense>
+            <v-list-item :to="`/entity/${entity._id}/print`">
+              <v-list-item-icon><v-icon>mdi-printer</v-icon></v-list-item-icon>
+              <v-list-item-title>Print</v-list-item-title>
+            </v-list-item>
+
             <v-list-item :to="'/entity/' + entity._id + '/change-request'">
               <v-list-item-icon
                 ><v-icon>mdi-hammer-wrench</v-icon></v-list-item-icon
@@ -912,7 +917,10 @@ export default {
 
     openPersonConnectionDialog(index) {
       this.personIndex = index;
-      this.$refs.personDialog.openDialog(this.entity.links.people[index], this.canEdit);
+      this.$refs.personDialog.openDialog(
+        this.entity.links.people[index],
+        this.canEdit
+      );
     },
     updatePersonConnection(role) {
       this.entity.links.people[this.personIndex].role = role;

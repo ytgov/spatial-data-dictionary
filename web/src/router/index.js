@@ -9,6 +9,7 @@ import Profile from "../components/Profile";
 import CategoryList from "../components/CategoryList";
 import EntityList from "../components/EntityList";
 import EntityDetail from "../components/EntityDetail";
+import EntityPrint from "../components/EntityPrint";
 import EntityCreate from "../components/EntityCreate";
 import EntityEdit from "../components/EntityEdit";
 import Locations from "../views/Locations";
@@ -86,6 +87,14 @@ const routes = [
     path: "/entity/:id/map",
     name: "Entity map",
     component: EntityMap,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/entity/:id/print",
+    name: "Entity print",
+    component: EntityPrint,
     meta: {
       requiresAuth: true
     }

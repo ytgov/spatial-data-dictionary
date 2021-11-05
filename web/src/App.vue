@@ -7,6 +7,7 @@
       clipped
       color="#f1f1f1"
       v-bind:class="{ 'd-none': !hasSidebar }"
+      v-if="showPrint"
     >
       <v-list dense nav style="" class="mt-4">
         <v-text-field
@@ -62,6 +63,7 @@
     </v-navigation-drawer>
 
     <v-app-bar
+      v-if="showPrint"
       app
       color="#fff"
       flat
@@ -156,9 +158,9 @@ export default {
         (s) => s.role == "" || this.roles.indexOf(s.role) >= 0
       );
     },
-    roles: function() {
+    roles: function () {
       return store.getters.roles;
-    }
+    },
   },
   data: () => ({
     dialog: false,
@@ -172,6 +174,7 @@ export default {
     hasSidebar: false, //config.hasSidebar,
     hasSidebarClosable: config.hasSidebarClosable,
     search: "",
+    showPrint: false,
   }),
   created: async function () {
     //await store.dispatch("checkAuthentication");
@@ -189,6 +192,10 @@ export default {
       else this.hasSidebar = config.hasSidebar;
 
       //this.hasSidebar = true;
+    },
+    $route: function (val) {
+      if (val.path.indexOf("/print") > 0) this.showPrint = false;
+      else this.showPrint = true;
     },
   },
   methods: {
