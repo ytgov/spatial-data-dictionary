@@ -1,11 +1,11 @@
-import nodemailer, { TransportOptions } from "nodemailer";
+import nodemailer, { Transporter, TransportOptions } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/json-transport";
 import { AuthUser } from "../data";
-import { MAIL_CONFIG, MAIL_FROM, FRONTEND_URL, APPLICATION_NAME } from "../config";
+import { MAIL_CONFIG, MAIL_FROM, NODE_ENV, FRONTEND_URL, APPLICATION_NAME, MAIL_CONFIG_DEV } from "../config";
 import fs from "fs";
 import path from "path";
 
-const TRANSPORT = nodemailer.createTransport(MAIL_CONFIG as TransportOptions);
+
 
 const BASE_TEMPLATE = "../templates/base.html";
 const USER_CHANGE_TEMPLATE = "../templates/user-changed.html";
@@ -15,6 +15,14 @@ const CHANGE_ASSIGNED_TEMPLATE = "../templates/change-assigned.html";
 const CHANGE_APPROVER_TEMPLATE = "../templates/change-request-approver.html";
 
 export class EmailService {
+    TRANSPORT: Transporter;
+
+    constructor() {
+        if (NODE_ENV != "development")
+            this.TRANSPORT = nodemailer.createTransport(MAIL_CONFIG as TransportOptions);
+        else
+            this.TRANSPORT = nodemailer.createTransport(MAIL_CONFIG_DEV as TransportOptions);
+    }
 
     async sendPersonChangeNotification(user: AuthUser): Promise<any> {
         let templatePath = path.join(__dirname, USER_CHANGE_TEMPLATE);
@@ -89,6 +97,6 @@ export class EmailService {
             html: baseContent
         };
 
-        return TRANSPORT.sendMail(message);
+        return this.TRANSPORT.sendMail(message);
     }
 }
