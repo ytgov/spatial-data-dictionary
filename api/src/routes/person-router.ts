@@ -84,7 +84,7 @@ personRouter.put("/:id", RequiresData, RequiresAuthentication,
             await em.sendPersonChangeNotification(req.user as AuthUser)
         }
         catch (e: any) {
-            console.log("ERROR EMAILING")
+            console.log("ERROR EMAILING", e)
         }
 
         return res.json({ data: await db.getAll(), messages: [{ variant: "success", text: "Location edited" }] });
