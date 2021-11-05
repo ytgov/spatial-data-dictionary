@@ -665,7 +665,7 @@ export default {
         body.links.programs = pList;
       }
 
-      body.attribtes = this.attributes;
+      body.attributes = this.attributes;
 
       axios.put(`${ENTITY_URL}/${this.entity._id}`, body).then((result) => {
         this.entity = result.data.data.value;

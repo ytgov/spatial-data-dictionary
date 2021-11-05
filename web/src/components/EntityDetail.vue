@@ -496,6 +496,7 @@
     <downentityconnection-dialog
       ref="downConn"
       :selectedEntity="downEntity"
+      :entity="entity"
     ></downentityconnection-dialog>
 
     <personconnection-dialog
