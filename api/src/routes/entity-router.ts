@@ -181,10 +181,8 @@ entityRouter.put("/:id/changes/:changeId", RequiresData, RequiresAuthentication,
                 let subscriptionDb = req.store.Subscriptions as GenericService;
                 let entitySubscribes = await subscriptionDb.getAll({ type: "Entity", id: id });
 
-                console.log("ESUBS", entitySubscribes)
-
                 for (let p of entity.links.programs) {
-                    let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p._id });
+                    let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p.id });
                     pSubscribes.forEach(p => entitySubscribes.push(p));
                 }
 
@@ -392,10 +390,8 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                 let subscriptionDb = req.store.Subscriptions as GenericService;
                 let entitySubscribes = await subscriptionDb.getAll({ type: "Entity", id: entity.id });
 
-                console.log("ESUBS", entitySubscribes)
-
                 for (let p of entity.links.programs) {
-                    let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p._id });
+                    let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p.id });
                     pSubscribes.forEach(p => entitySubscribes.push(p));
                 }
 
@@ -436,6 +432,40 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                 })
 
                 let results = await requestDb.create(change);
+
+                let em = new EmailService();
+                let userDb = req.store.Persons as GenericService;
+
+                // find people in the location approver and 
+                let sendList = new Array<string>();
+
+                if (entity.location && entity.location.change_approvers) {
+                    for (let ca of entity.location.change_approvers) {
+                        for (let mem of ca.members) {
+                            let memUser = await userDb.getById(mem._id);
+
+                            if (memUser && sendList.indexOf(memUser.email) == -1) {
+                                await em.sendChangeApproverNotification(memUser, change.title, entity.name, id, results.insertedId);
+                                sendList.push(memUser.email);
+                            }
+                        }
+                    }
+                }
+
+                for (let p of entity.links.programs) {
+                    for (let ca of p.change_approvers) {
+                        for (let mem of ca.members) {
+                            let memUser = await userDb.getById(mem._id);
+
+                            if (memUser && sendList.indexOf(memUser.email) == -1) {
+                                await em.sendChangeApproverNotification(memUser, change.title, entity.name, id, results.insertedId);
+                                sendList.push(memUser.email);
+                            }
+                        }
+                    }
+                };
+
+                console.log("sEND ", sendList)
 
                 return res.json({
                     data: results, messages: [{ text: "Change request added", variant: "success" }]
@@ -580,15 +610,13 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
                     })
 
                     await requestDb.update(changeId, change);
-                    let result = await changeDb.create(c1)
+                    let result = await changeDb.create(c1);
 
                     let subscriptionDb = req.store.Subscriptions as GenericService;
                     let entitySubscribes = await subscriptionDb.getAll({ type: "Entity", id: entity.id });
 
-                    console.log("ESUBS", entitySubscribes)
-
                     for (let p of entity.links.programs) {
-                        let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p._id });
+                        let pSubscribes = await subscriptionDb.getAll({ type: "Program", id: p.id });
                         pSubscribes.forEach(p => entitySubscribes.push(p));
                     }
 

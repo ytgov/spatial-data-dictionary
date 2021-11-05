@@ -12,6 +12,7 @@ const USER_CHANGE_TEMPLATE = "../templates/user-changed.html";
 const ENTITY_CHANGING_TEMPLATE = "../templates/entity-changing.html";
 const ENTITY_CHANGED_TEMPLATE = "../templates/entity-changed.html";
 const CHANGE_ASSIGNED_TEMPLATE = "../templates/change-assigned.html";
+const CHANGE_APPROVER_TEMPLATE = "../templates/change-request-approver.html";
 
 export class EmailService {
 
@@ -57,6 +58,18 @@ export class EmailService {
         content = content.replace(/``CHANGE_TITLE``/g, changeTitle);
 
         return this.sendEmail(fullName, user.email, "Entity Change Assigned to You", content)
+    }
+
+    async sendChangeApproverNotification(user: AuthUser, changeTitle: string, entityName: string, entityId: string, changeId: string) {
+        let templatePath = path.join(__dirname, CHANGE_APPROVER_TEMPLATE);
+        let content = fs.readFileSync(templatePath).toString();
+        let fullName = `${user.first_name} ${user.last_name}`;
+
+        content = content.replace(/``ENTITY_NAME``/g, entityName);
+        content = content.replace(/``ENTITY_URL``/g, `${FRONTEND_URL}/entity/${entityId}/change-request/${changeId}`);
+        content = content.replace(/``CHANGE_TITLE``/g, changeTitle);
+
+        return this.sendEmail(fullName, user.email, "Entity Change Assigned to You", content);
     }
 
     async sendEmail(toName: string, toEmail: string, subject: string, customContent: string): Promise<any> {
