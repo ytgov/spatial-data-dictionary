@@ -26,6 +26,8 @@ entityRouter.get("/", RequiresData, RequiresAuthentication, async (req: Request,
 entityRouter.post("/", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     let db = req.store.Entities as EntityService;
     req.body.entity_type = "Table";
+    let currentUser = (req.session as any).user;
+    req.body.properties = [{ name: "Create date", value: moment().format("YYYY-MM-DD") }, { name: "Created by", value: currentUser.display_name }];
 
     let results = await db.create(req.user, req.body);
 
@@ -207,7 +209,6 @@ entityRouter.put("/:id/changes/:changeId", RequiresData, RequiresAuthentication,
 
                 for (let usr of subUsers) {
                     if (assigned_user == `${usr.first_name} ${usr.last_name}`) {
-                        console.log("SEND EMAIL TO ", usr)
                         await em.sendChangeAssignedNotification(usr, change.title, entity.name, entity._id, changeId);
                         break;
                     }
@@ -373,6 +374,7 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                     reason,
                     assigned_user: currentUser.display_name,
                     complete_date: date,
+                    request_date: new Date(),
                     location: entity.location,
                     programs: entity.links.programs,
                     entity_id: entity._id,
@@ -465,13 +467,10 @@ entityRouter.post("/:id/request-change", [param("id").notEmpty().isMongoId()], R
                     }
                 };
 
-                console.log("sEND ", sendList)
-
                 return res.json({
                     data: results, messages: [{ text: "Change request added", variant: "success" }]
                 });
             }
-
         }
 
         res.status(404).send();
@@ -509,7 +508,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
         const requestDb = req.store.ChangeRequests as GenericService;
         const changeDb = req.store.Changes as GenericService;
         let { id, changeId } = req.params;
-        let { description, reason, status, title, comments } = req.body;
+        let { description, reason, status, title, comments, implementation_date } = req.body;
         let entity = await db.getById(id)
         let currentUser = (req.session as any).user;
 
@@ -520,6 +519,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
             change.title = title;
             change.description = description;
             change.comments = comments;
+            change.implementation_date = implementation_date;
 
             await buildConnections(entity, req);
 
@@ -595,10 +595,13 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
                         reason,
                         request_id: changeId,
                         assigned_user: currentUser.display_name,
-                        complete_date: change.date,
+                        create_user: change.create_user,
+                        date: change.date,
+                        complete_date: change.implementation_date,
                         location: entity.location,
                         programs: entity.links.programs,
                         entity_id: entity._id,
+
                         comments: new Array<any>()
                     }
 
@@ -652,7 +655,7 @@ entityRouter.put("/:id/request-change/:changeId", [param("id").notEmpty().isMong
 
         res.status(404).send();
     });
-
+/* 
 entityRouter.post("/:id/request-change/:changeId/approve",
     [param("id").notEmpty().isMongoId(),
     param("changeId").notEmpty().isMongoId()], RequiresData, RequiresAuthentication,
@@ -703,7 +706,7 @@ entityRouter.post("/:id/request-change/:changeId/approve",
         }
 
         res.status(404).send();
-    });
+    }); */
 
 entityRouter.get("/:id/changes", [param("id").notEmpty().isMongoId()], RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -908,8 +911,6 @@ entityRouter.post("/:id/connection", RequiresData, RequiresAuthentication,
         let personDb = req.store.Persons as GenericService;
         let { id } = req.params;
         let { connectionType, selectedEntity, selectedPerson, personRole, newPersonEmail, newPersonFirstName, newPersonLastName } = req.body;
-        console.log("ADDING CONNECTION TO ", req.body)
-
         let entity = await db.getById(id);
 
         if (entity) {
