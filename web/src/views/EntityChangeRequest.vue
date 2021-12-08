@@ -75,34 +75,15 @@
             >
             </v-select>
 
-            <v-menu
-              v-model="changeDateMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              left
-              nudge-top="26"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="changeDate"
-                  label="Change date"
-                  append-icon="mdi-calendar"
-                  readonly
-                  outlined
-                  dense
-                  background-color="white"
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="changeDate"
-                :min="changeDateMin"
-                @input="changeDateMenu = false"
-              ></v-date-picker>
-            </v-menu>
+            <v-text-field
+              v-model="changeDate"
+              label="Request date"
+              append-icon="mdi-lock"
+              readonly
+              outlined
+              dense
+              background-color="white"
+            ></v-text-field>
 
             <v-select
               :items="reasonOptions"
@@ -137,7 +118,10 @@
         <v-card color="#fff2d5" class="mb-5">
           <v-card-title>Required Approvals</v-card-title>
           <v-card-text v-if="showApprovals">
-            <h3 class="mb-0">Location:  <span style="font-weight: 400">{{ entity.location.name }}</span></h3>
+            <h3 class="mb-0">
+              Location:
+              <span style="font-weight: 400">{{ entity.location.name }}</span>
+            </h3>
 
             <ul class="mb-3">
               <li
@@ -157,17 +141,21 @@
               v-for="program of entity.links.programs"
               v-bind:key="program.id"
             >
-              <h3 class="mb-0">Program: <span style="font-weight: 400">{{ program.name }}</span></h3>
+              <h3 class="mb-0">
+                Program:
+                <span style="font-weight: 400">{{ program.name }}</span>
+              </h3>
 
               <ul class="mb-3">
-                <li
-                  
-                  v-for="(ca, idx) of program.change_approvers"
-                  :key="idx"
-                >
+                <li v-for="(ca, idx) of program.change_approvers" :key="idx">
                   {{ ca.name }} (
-                  <span v-for="mem of ca.members" :key="mem._id" class="person-list">
-                    {{ mem.first_name }} {{ mem.last_name }}<span class="person-sep"> or</span>
+                  <span
+                    v-for="mem of ca.members"
+                    :key="mem._id"
+                    class="person-list"
+                  >
+                    {{ mem.first_name }} {{ mem.last_name
+                    }}<span class="person-sep"> or</span>
                   </span>
                   )
                 </li>
@@ -302,10 +290,10 @@ export default {
       "Duplicate or replicate",
     ],
 
-    changeDateMin: moment().format("YYYY-MM-DD"),
+    //changeDateMin: moment().format("YYYY-MM-DD"),
     changeDate: moment().format("YYYY-MM-DD"),
-    changeDateMenu: null,
-    changeDate1Menu: null,
+    //changeDateMenu: null,
+    //changeDate1Menu: null,
 
     changeType: "Normal",
     changeReason: "",
@@ -363,6 +351,7 @@ export default {
         title: this.changeTitle,
         description: this.changeDescription,
         date: this.changeDate,
+        implementation_date: moment().add(7, 'days').format("YYYY-MM-DD"),
         reason: this.changeReason,
         change_type: this.changeType,
       };

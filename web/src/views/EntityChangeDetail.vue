@@ -4,10 +4,14 @@
       class="pl-0"
       divider="/"
       :items="[
-        { text: 'Dashboard', to: '/dashboard' , exact: true},
+        { text: 'Dashboard', to: '/dashboard', exact: true },
         { text: 'Entities', to: '/entity', exact: true },
         { text: entity.name, to: '/entity/' + entity._id, exact: true },
-        { text: 'Changes', to: '/entity/' + entity._id + '/changes', exact: true },
+        {
+          text: 'Changes',
+          to: '/entity/' + entity._id + '/changes',
+          exact: true,
+        },
         { text: change.title },
       ]"
     ></v-breadcrumbs>
@@ -97,6 +101,16 @@
               background-color="white"
             ></v-text-field>
 
+            <v-text-field
+              v-model="changeDate"
+              label="Request date"
+              append-icon="mdi-lock"
+              readonly
+              outlined
+              dense
+              background-color="white"
+            ></v-text-field>
+
             <v-menu
               v-model="changeDateMenu"
               :close-on-content-click="false"
@@ -108,8 +122,8 @@
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  v-model="changeDate"
-                  label="Change date"
+                  v-model="implementDate"
+                  label="Implementation date"
                   append-icon="mdi-calendar"
                   readonly
                   outlined
@@ -120,7 +134,7 @@
                 ></v-text-field>
               </template>
               <v-date-picker
-                v-model="changeDate"
+                v-model="implementDate"
                 :min="changeDateMin"
                 @input="changeDateMenu = false"
               ></v-date-picker>
@@ -242,6 +256,7 @@ export default {
     changeDateMin: moment().format("YYYY-MM-DD"),
     changeDate: "",
     changeDateMenu: null,
+    implementDate: null,
 
     changeDialogOpen: null,
     changeItem: {},
@@ -277,7 +292,8 @@ export default {
         .get(`${ENTITY_URL}/changes/${id}`)
         .then((result) => {
           this.change = result.data.data;
-          this.changeDate = this.change.complete_date;
+          this.changeDate = this.change.date;
+          this.implementDate = this.change.complete_date;
 
           this.newComment = "";
           this.newStatus = this.change.status;
@@ -306,7 +322,7 @@ export default {
     },
     save() {
       let body = _.clone(this.change);
-      body.complete_date = this.changeDate;
+      body.complete_date = this.implementDate;
 
       axios
         .put(`${ENTITY_URL}/${this.entity._id}/changes/${body._id}`, body)

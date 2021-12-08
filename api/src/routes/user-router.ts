@@ -4,10 +4,14 @@ import { RequiresData, RequiresAuthentication } from "../middleware";
 import { AuthUser, Storage } from "../data";
 
 export const userRouter = express.Router();
+userRouter.use(RequiresData);
 
 userRouter.get("/me", RequiresAuthentication, async (req: Request, res: Response) => {
     let currentUser = req.user;
-    currentUser.roles = ["Admin"];
+    let userMatch = await req.store.Persons.getAll({ email: currentUser.email });
+
+    if (userMatch.length == 1)
+        currentUser.roles = userMatch[0].roles;
 
     return res.json({ data: currentUser });
 });
@@ -19,7 +23,7 @@ userRouter.get("/me/watchlist", RequiresData, RequiresAuthentication, async (req
     let watchlistObj = await db.EntityWatch.getAll({ email: currentUser.email });
 
     if (watchlistObj && watchlistObj.length > 0)
-    return res.json({ data: watchlistObj[0].watchlist });
+        return res.json({ data: watchlistObj[0].watchlist });
 });
 
 userRouter.post("/me/watchlist", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {

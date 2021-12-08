@@ -3,7 +3,10 @@
     <v-breadcrumbs
       class="pl-0"
       divider="/"
-      :items="[{ text: 'Dashboard', to: '/dashboard', exact: true }, { text: 'Entities', exact: true }]"
+      :items="[
+        { text: 'Dashboard', to: '/dashboard', exact: true },
+        { text: 'Entities', exact: true },
+      ]"
     ></v-breadcrumbs>
 
     <v-btn
@@ -26,38 +29,48 @@
           @keyup="changeFilter"
         ></v-text-field>
 
-        <v-select
-          :items="typeOptions"
-          label="Entity type"
-          multiple
-          outlined
-          clearable
-          dense
-          @change="changeFilter"
-          v-model="typeFilter"
-          hide-details
-        >
-          <template v-slot:prepend-item>
-            <v-list-item ripple @click="toggleTypeFilters">
-              <v-list-item-action>
-                <v-icon :color="typeFilter.length > 0 ? 'primary' : ''">
-                  {{ typeFilterIcon }}
-                </v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title> Select All </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider class="mt-2"></v-divider>
-          </template>
-        </v-select>
-
-        <!--  <v-switch
-          label="Show Only Domain Tables"
-          dense
-          v-model="domainFilter"
-          @change="changeFilter"
-        ></v-switch> -->
+        <v-row>
+          <v-col class="py-0">
+            <v-select
+              :items="typeOptions"
+              label="Entity type"
+              multiple
+              outlined
+              clearable
+              dense
+              @change="changeFilter"
+              v-model="typeFilter"
+              hide-details
+            >
+              <template v-slot:prepend-item>
+                <v-list-item ripple @click="toggleTypeFilters">
+                  <v-list-item-action>
+                    <v-icon :color="typeFilter.length > 0 ? 'primary' : ''">
+                      {{ typeFilterIcon }}
+                    </v-icon>
+                  </v-list-item-action>
+                  <v-list-item-content>
+                    <v-list-item-title> Select All </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-divider class="mt-2"></v-divider>
+              </template> </v-select
+          ></v-col>
+          <v-col class="py-0">
+            <v-select
+              dense
+              outlined
+              hide-details
+              label="Status"
+              :items="['Draft', 'Complete', 'Archived']"
+              v-model="statusFilter"
+              @change="changeFilter"
+              multiple
+              clearable
+            >
+            </v-select
+          ></v-col>
+        </v-row>
       </div>
       <div class="col-md-6">
         <v-select
@@ -99,7 +112,6 @@
           v-model="locationFilter"
           hide-details
         >
-        
           <template v-slot:prepend-item>
             <v-list-item ripple @click="toggleLocationFilters">
               <v-list-item-action>
@@ -113,7 +125,6 @@
             </v-list-item>
             <v-divider class="mt-2"></v-divider>
           </template>
-        
         </v-select>
       </div>
     </div>
@@ -279,6 +290,7 @@ export default {
     programFilter: [],
     locationFilter: [],
     typeFilter: [],
+    statusFilter: [],
     isLoading: false,
     canEdit: false,
     cardView: true,
@@ -295,6 +307,7 @@ export default {
     this.programFilter = prefs.programFilter || [];
     this.locationFilter = prefs.locationFilter || [];
     this.typeFilter = prefs.typeFilter || [];
+    this.statusFilter = prefs.statusFilter || [];
 
     axios
       .get(ENTITY_URL)
@@ -382,9 +395,25 @@ export default {
         typeFilter: this.typeFilter,
         searchFilter: this.searchFilter,
         cardView: this.cardView,
+        statusFilter: this.statusFilter,
       });
 
       let filteredList = _.cloneDeep(this.allEntities);
+
+      if (this.statusFilter.length > 0) {
+        let toRemove = [];
+
+        for (let entity of filteredList) {
+          if (this.statusFilter.indexOf(entity.status) == -1) {
+            toRemove.push(entity);
+          }
+        }
+
+        for (let remove of toRemove) {
+          let remIdx = filteredList.indexOf(remove);
+          filteredList.splice(remIdx, 1);
+        }
+      }
 
       if (this.locationFilter.length > 0) {
         let toRemove = [];

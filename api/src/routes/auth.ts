@@ -60,10 +60,14 @@ export function configureAuthentication(app: Express) {
         }
     });
 
-    app.get("/api/auth/isAuthenticated", (req: Request, res: Response) => {
+    app.get("/api/auth/isAuthenticated", RequiresData, async (req: Request, res: Response) => {
         if (req.oidc.isAuthenticated()) {
-            req.user.roles = ["Admin"];
+            req.user.roles = req.user.roles || [];
 
+            let userMatch = await req.store.Persons.getAll({ email: req.user.email });
+
+            if (userMatch.length == 1)
+                req.user.roles = userMatch[0].roles;
 
             return res.send({ data: req.user });
         }

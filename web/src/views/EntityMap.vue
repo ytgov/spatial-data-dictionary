@@ -177,7 +177,7 @@ export default {
     selectedId: "",
     selectedEntity: { location: {} },
     graphObj: null,
-    testing: "htppy.om"
+    testing: "htppy.om",
   }),
   computed: {},
   watch: {
@@ -269,6 +269,7 @@ export default {
                   "background-color": "#A6D5FA",
                   "font-weight": "bold",
                   label: "data(label)",
+                  //"background-image": "url('/yukon.svg')",
                   shape: "rectangle",
                 },
               },
@@ -307,12 +308,12 @@ export default {
               },
             ],
             elements: elements,
-            //userZoomingEnabled: false,
+            userZoomingEnabled: false,
             //panningEnabled: false,
             layout: {
               name: dataLayout,
-              //fit: true,
-               nodeDimensionsIncludeLabels: true,
+              fit: true,
+              nodeDimensionsIncludeLabels: true,
             },
           });
 
@@ -322,7 +323,7 @@ export default {
             let node = event.target[0];
 
             if (node.children().length > 0) return;
-            if (node.group() == "edges") return
+            if (node.group() == "edges") return;
 
             let id = node.id();
             let group = node.group();
@@ -334,8 +335,6 @@ export default {
           cy.on("dragfreeon", async function (event) {
             if (event.target[0].children().length > 0) {
               for (let child of event.target[0].children()) {
-                console.log(child.position());
-
                 await self.savePosition(
                   child.id(),
                   child.position().x,
@@ -352,7 +351,7 @@ export default {
             cy.fit();
           });
 
-         monkey = cy;
+          monkey = cy;
         })
         .catch((err) => {
           console.log(err);
@@ -396,7 +395,7 @@ export default {
     },
 
     doPrint() {
-      let t= monkey.png();
+      let t = monkey.png();
       this.testing = t;
     },
   },

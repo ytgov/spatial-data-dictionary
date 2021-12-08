@@ -164,7 +164,6 @@ export default {
   methods: {
     saveForm() {
       this.showError = false;
-      console.log("SAVING");
 
       let body = {
         name: this.name,
@@ -202,8 +201,6 @@ export default {
       axios
         .post(ENTITY_URL, body)
         .then((result) => {
-          console.log(result);
-
           let res = result.data.data;
           let id = res.insertedId;
           this.snackbar = true;

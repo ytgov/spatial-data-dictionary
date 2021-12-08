@@ -5,9 +5,9 @@
       <hr class="mb-4" />
       <p><strong>Role:</strong> Destination</p>
 
-      <strong>Connected Attributes:</strong>
+      <strong v-if="attributes && attributes.length > 0">Connected Attributes:</strong>
 
-      <ul>
+      <ul v-if="attributes && attributes.length > 0">
         <li v-for="attribute in attributes" v-bind:key="attribute.id">
           {{ attribute.name }}
         </li>

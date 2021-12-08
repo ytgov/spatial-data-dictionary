@@ -96,6 +96,11 @@ export class EmailService {
             subject: `${subject} : ${APPLICATION_NAME}`,
             html: baseContent
         };
+        
+        if (toEmail.length == 0) {
+            console.log("Not sending email to " + toName + " without an email address");
+            return null;
+        }
 
         return this.TRANSPORT.sendMail(message);
     }

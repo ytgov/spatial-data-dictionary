@@ -252,10 +252,24 @@
                   </v-toolbar>
                 </template>
                 <template v-slot:item.actions="{ item }">
-                  <v-icon small class="mr-2" @click="editItem(item)">
+                  <v-icon
+                    small
+                    class="mr-2"
+                    @click="editItem(item)"
+                    v-if="lockedProperties.indexOf(item.name) == -1"
+                  >
                     mdi-pencil
                   </v-icon>
-                  <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+                  <v-icon
+                    small
+                    @click="deleteItem(item)"
+                    v-if="lockedProperties.indexOf(item.name) == -1"
+                  >
+                    mdi-delete
+                  </v-icon>
+                  <v-icon small v-if="lockedProperties.indexOf(item.name) > -1">
+                    mdi-lock
+                  </v-icon>
                 </template>
               </v-data-table>
             </v-tab-item>
@@ -638,6 +652,7 @@ export default {
       { text: "Title", value: "title" },
       { text: "Assigned to", value: "assigned_user" },
     ],
+    lockedProperties: ["Create date", "Created by"],
 
     dialog: false,
     dialogDelete: false,

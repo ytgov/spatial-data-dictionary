@@ -69,9 +69,7 @@
       <v-btn @click="saveEntity()" color="primary" class="mr-5 my-0"
         >Save</v-btn
       >
-      <v-btn :to="'/entity/' + entity._id" color="secondary" class="my-0"
-        >Done</v-btn
-      >
+      <v-btn @click="doneClick" color="secondary" class="my-0">Done</v-btn>
     </div>
     <h3
       class="error-text"
@@ -404,6 +402,8 @@ Attribute 1,NVARCHAR(255),true,This field is important,,Attr1</pre
       <v-icon class="mr-3">mdi-thumb-up-outline</v-icon>
       {{ apiSuccess }}
     </v-snackbar>
+
+    <confirm-dialog ref="confirm"></confirm-dialog>
   </div>
 </template>
 
@@ -411,8 +411,10 @@ Attribute 1,NVARCHAR(255),true,This field is important,,Attr1</pre
 import axios from "axios";
 import store from "../store";
 import { ENTITY_URL, LOCATION_URL, PROGRAM_URL, DOMAIN_URL } from "../urls";
+import ConfirmDialog from "./ConfirmDialog.vue";
 
 export default {
+  components: { ConfirmDialog },
   name: "Form",
   data: () => ({
     tab: 0,
@@ -736,6 +738,21 @@ export default {
         this.fixAttributeOrder();
         this.showImporter = false;
       }
+    },
+
+    doneClick() {
+      console.log("DONE");
+
+      this.$refs.confirm.show(
+        "Leave without saving?",
+        "You may have unsaved changes. Do you want to leave without saving?",
+        () => {
+          this.$router.push(`/entity/${this.entity._id}`);
+        },
+        () => {
+          //this.saveEntity();
+        }
+      );
     },
   },
 };

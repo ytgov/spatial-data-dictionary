@@ -65,6 +65,16 @@
             >
             </v-text-field>
 
+            <v-text-field
+              v-model="changeDate"
+              label="Request date"
+              append-icon="mdi-lock"
+              readonly
+              outlined
+              dense
+              background-color="white"
+            ></v-text-field>
+
             <v-menu
               v-model="changeDateMenu"
               :close-on-content-click="false"
@@ -76,8 +86,8 @@
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  v-model="changeDate"
-                  label="Change date"
+                  v-model="implementDate"
+                  label="Target implementation date"
                   append-icon="mdi-calendar"
                   readonly
                   outlined
@@ -88,7 +98,7 @@
                 ></v-text-field>
               </template>
               <v-date-picker
-                v-model="changeDate"
+                v-model="implementDate"
                 :min="changeDateMin"
                 @input="changeDateMenu = false"
               ></v-date-picker>
@@ -300,6 +310,8 @@ export default {
     changeDateMenu: null,
     changeDate1Menu: null,
 
+    implementDate: null,
+
     changeReason: "",
     changeTitle: "",
     changeDescription: "",
@@ -364,6 +376,7 @@ export default {
           this.changeTitle = this.changeRequest.title;
           this.changeType = this.changeRequest.change_type;
           this.changeDate = this.changeRequest.date;
+          this.implementDate = this.changeRequest.implementation_date;
           this.changeReason = this.changeRequest.reason;
           this.changeDescription = this.changeRequest.description;
           this.commentText = "";
@@ -448,7 +461,7 @@ export default {
     save() {
       let body = _.clone(this.changeRequest);
       body.description = this.changeDescription;
-      body.date = this.changeDate;
+      body.implementation_date = this.implementDate;
       body.reason = this.changeReason;
 
       axios
@@ -526,34 +539,6 @@ export default {
 
       this.save();
     },
-    /*
-    formatDate(date) {
-      return moment(date).format("YYYY-MM-DD");
-    },
-
-     changeClick(item) {
-      this.changeItem = _.clone(item);
-      this.changeDialogOpen = true;
-    },
-    approve() {
-      let body = this.changeItem;
-      axios
-        .post(
-          `${ENTITY_URL}/${this.entity._id}/request-change/${body._id}/approve`,
-          body
-        )
-        .then((result) => {
-          console.log(result.data.data.ops[0]);
-          //this.loadChangeRequests(this.entity_id);
-
-          router.push(
-            `/entity/${this.entity_id}/changes/${result.data.data.ops[0]._id}`
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }, */
   },
 };
 </script>
