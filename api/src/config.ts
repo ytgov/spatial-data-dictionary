@@ -15,22 +15,13 @@ dotenv.config({ path: path });
 
 console.log("LOADING CONFIG:", path)
 
+export const CLIENT_SECRET = process.env.CLIENT_SECRET || "";
+
 export const API_PORT = process.env.API_PORT || "3000";
 export const FRONTEND_URL = process.env.FRONTEND_URL || "";
 export const NODE_ENV = process.env.NODE_ENV;
 
 export const AUTH_REDIRECT = process.env.AUTH_REDIRECT || "";
-
-/* export const VIVVO_CONFIG = {
-  issuer: 'https://c1dev.vivvocloud.com.com/',
-  authorizationURL: 'https://c1dev.vivvocloud.com/oauth2/auth',
-  tokenURL: 'https://c1dev.vivvocloud.com/oauth2/token',
-  userInfoURL: 'https://c1dev.vivvocloud.com/userinfo',
-  clientID: process.env.VIVVO_CLIENT_ID || "",
-  clientSecret: process.env.VIVVO_CLIENT_SECRET || "",
-  callbackURL: process.env.VIVVO_CALLBACK_URL || "",
-  scope: 'profile email phone address'
-} */
 
 export const MONGO_USER = process.env.MONGO_USER || "admin";
 export const MONGO_PASS = process.env.MONGO_PASS || "password";

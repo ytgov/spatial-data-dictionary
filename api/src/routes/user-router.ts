@@ -34,7 +34,7 @@ userRouter.post("/me/watchlist", RequiresData, RequiresAuthentication, async (re
     await db.EntityWatch.deleteWhere({ email: currentUser.email });
     await db.EntityWatch.create({ email: currentUser.email, watchlist });
 
-    return res.json({ data: [{ name: "Poop", id: "1234" }] });
+    return res.json({ data: [] });
 });
 
 userRouter.get("/", RequiresData, RequiresAuthentication, async (req: Request, res: Response) => {

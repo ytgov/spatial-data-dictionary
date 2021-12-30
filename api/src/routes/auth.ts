@@ -1,7 +1,7 @@
 import { Express, NextFunction, Request, Response } from "express"
 import * as ExpressSession from "express-session";
 import { AuthUser, Storage } from "../data";
-import { AUTH_REDIRECT, FRONTEND_URL } from "../config";
+import { AUTH_REDIRECT, CLIENT_SECRET, FRONTEND_URL } from "../config";
 import { RequiresData } from "../middleware";
 
 import { auth } from "express-openid-connect";
@@ -81,4 +81,31 @@ export function configureAuthentication(app: Express) {
         req.session.destroy();
         (res as any).oidc.logout({ returnTo: "/" });
     });
+
+    app.post('/api/auth/makeAdmin/:email', RequiresData,
+        async (req: Request, res: Response) => {
+            let { email } = req.params;
+            let { key } = req.body;
+
+            let userMatch = await req.store.Persons.getAll({ email });
+
+            if (key != CLIENT_SECRET) {
+                return res.status(403).send("Not Authorized");
+            }
+
+            if (userMatch.length == 0) {
+                res.send("User not found")
+            }
+            else if (userMatch.length == 1) {
+                let user = userMatch[0];
+                user.roles = ["Admin"];
+
+                await req.store.Persons.update(user._id, user);
+
+                res.send("User updated to Admin")
+            }
+            else {
+                res.send("Multiple matches")
+            }
+        })
 }
